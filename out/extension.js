@@ -10,7 +10,7 @@ let myStatusBarItem;
 function activate(context) {
     let autogit = new AutoGit();
     let cmdversion = vscode.commands.registerCommand('autogit.version', () => {
-        vscode.window.showInformationMessage('Version 1.1.3 by Eray Sönmez <dev@ray-works.de>');
+        vscode.window.showInformationMessage('Version 1.1.4 by Eray Sönmez <dev@ray-works.de>');
     });
     let cmdinit = vscode.commands.registerCommand('autogit.init', () => {
         if (autogit.checkWorkspace() && autogit.checkGit()) {
@@ -288,6 +288,7 @@ class AutoGit {
             if (vscode.workspace.workspaceFolders !== undefined) {
                 fs.statSync(vscode.workspace.workspaceFolders[0].uri.fsPath);
                 console.log('[Auto-Git] [OK]: Workspace found: ' + vscode.workspace.workspaceFolders[0].uri.fsPath);
+                console.log(vscode.workspace.workspaceFolders[0].uri);
                 this.workspace = vscode.workspace.workspaceFolders[0].uri;
                 this.homedir = this.workspace.fsPath.concat(path.sep + '.autogit');
                 this.logsdir = this.workspace.fsPath.concat(path.sep + '.autogit/logs');

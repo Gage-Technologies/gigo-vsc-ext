@@ -319,6 +319,7 @@ class AutoGit implements vscode.Disposable {
 			if(vscode.workspace.workspaceFolders !== undefined){
 				fs.statSync(vscode.workspace.workspaceFolders[0].uri.fsPath );
 				console.log('[Auto-Git] [OK]: Workspace found: ' + vscode.workspace.workspaceFolders[0].uri.fsPath);
+                console.log(vscode.workspace.workspaceFolders[0].uri);
 				this.workspace = vscode.workspace.workspaceFolders[0].uri;
 				
 				this.homedir = this.workspace.fsPath.concat(path.sep + '.autogit');

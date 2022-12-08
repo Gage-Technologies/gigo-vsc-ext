@@ -14,7 +14,6 @@ class AutoGit {
         this.checkWorkspace();
         this.checkGit();
         try {
-            console.log("start of try");
             fs.statSync(this.cfg);
             this.isInitialized = true;
             var userCfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
@@ -26,7 +25,6 @@ class AutoGit {
                 });
                 fs.writeFileSync(this.cfg, JSON.stringify(userCfg, null, 2));
             }
-            console.log("end of try");
         }
         catch (err) {
             console.log(err);
@@ -143,12 +141,10 @@ class AutoGit {
         myStatusBarItem.text = text;
     }
     start() {
-        console.log("inside start");
         var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
         this.running = true;
         this.counter = cfg.updateInterval;
         this.intervalId = setInterval(() => {
-            console.log("updating interval: ", this.counter);
             this.counter--;
             try {
                 this.updateStatusBarItem("Next Auto-Git in... " + this.counter);
@@ -157,7 +153,6 @@ class AutoGit {
                 console.log("failed to update status bar: ", e);
             }
             if (this.counter === 0) {
-                console.log("executing: ", this.counter);
                 this.updateStatusBarItem("Auto-Git: Checking files...");
                 this.counter = cfg.updateInterval;
                 const git = (0, simple_git_1.default)(this.workspace.fsPath);
@@ -166,7 +161,6 @@ class AutoGit {
                 git.status().then(async (status) => {
                     let changes = status.modified.length + status.created.length + status.deleted.length + status.renamed.length;
                     if (changes > 0) {
-                        console.log("changes detected");
                         this.updateStatusBarItem("Auto-Git: Pushing files...");
                         let options = {
                             weekday: 'long',
@@ -194,7 +188,6 @@ class AutoGit {
                             // eslint-disable-next-line @typescript-eslint/naming-convention
                             "{ts.locale.long}": new Date().toLocaleString(cfg.locale ?? 'en-US', options)
                         };
-                        console.log("committing changes");
                         cfg.commitMessage = cfg.commitMessage.replace(/\{.+?\}/g, (key) => replacements[key]);
                         await git.commit(cfg.commitMessage ?? "--- Auto-Git Commit ---");
                         var remote = status.tracking.split('/')[0] ?? "origin";

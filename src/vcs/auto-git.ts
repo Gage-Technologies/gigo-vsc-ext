@@ -25,7 +25,6 @@ class AutoGit implements vscode.Disposable {
 		this.checkGit();
 
 		try {
-            console.log("start of try");
             fs.statSync(this.cfg);
 			this.isInitialized = true;
             var userCfg: any = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
@@ -39,7 +38,6 @@ class AutoGit implements vscode.Disposable {
                 
                 fs.writeFileSync(this.cfg, JSON.stringify(userCfg, null, 2));
             }
-            console.log("end of try");
         } catch (err) {
             console.log(err);
         }
@@ -158,12 +156,10 @@ class AutoGit implements vscode.Disposable {
     }
 
     public start(): void {
-        console.log("inside start");
         var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
         this.running = true;
         this.counter = cfg.updateInterval;
         this.intervalId = setInterval(() => {
-            console.log("updating interval: ", this.counter);
             this.counter--;
             try {
                 this.updateStatusBarItem("Next Auto-Git in... " + this.counter);
@@ -171,7 +167,6 @@ class AutoGit implements vscode.Disposable {
                 console.log("failed to update status bar: ", e);
             }
             if(this.counter === 0){
-                console.log("executing: ", this.counter);
                 this.updateStatusBarItem("Auto-Git: Checking files...");
                 this.counter = cfg.updateInterval;
                 const git: SimpleGit = simpleGit(this.workspace.fsPath);
@@ -180,7 +175,6 @@ class AutoGit implements vscode.Disposable {
                 git.status().then(async (status: any) => { 
                     let changes = status.modified.length + status.created.length + status.deleted.length + status.renamed.length;
                     if(changes > 0){
-                        console.log("changes detected");
                         this.updateStatusBarItem("Auto-Git: Pushing files...");
 
                         let options = { 
@@ -211,7 +205,6 @@ class AutoGit implements vscode.Disposable {
                             "{ts.locale.long}": new Date().toLocaleString(cfg.locale ?? 'en-US', options)
                         };
 
-                        console.log("committing changes");
                         cfg.commitMessage = cfg.commitMessage.replace(/\{.+?\}/g, (key: string): string => replacements[key]);
 
                         await git.commit(cfg.commitMessage ?? "--- Auto-Git Commit ---");

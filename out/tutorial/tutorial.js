@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
 class Tutorial {
-    constructor() {
+    constructor(context) {
         this.themeConfigSection = 'markdown-preview-github-styles';
         this.themeConfigKey = 'colorTheme';
         this.defaultThemeConfiguration = 'auto';
@@ -14,27 +14,12 @@ class Tutorial {
             'dark': true
         };
         this.currentPage = 0;
-    }
-    dispose() {
-    }
-    getColorTheme() {
-        const settings = vscode.workspace.getConfiguration(this.themeConfigSection, null);
-        return this.validThemeConfigurationValue(settings.get(this.themeConfigKey, this.defaultThemeConfiguration));
-    }
-    validThemeConfigurationValue(theme) {
-        return !this.themeConfigValues[theme]
-            ? this.defaultThemeConfiguration
-            : theme;
-    }
-    getUri(webview, extensionUri, pathList) {
-        return webview.asWebviewUri(vscode_1.Uri.joinPath(extensionUri, ...pathList));
-    }
-    activate(context) {
-        // console.log(this.getColorTheme());
-        context.subscriptions.push(vscode.commands.registerCommand("controls.start", () => {
+        vscode.commands.registerCommand("controls.start", () => {
             let currentPanel = vscode.window.createWebviewPanel("controls", "Page Controls", vscode.ViewColumn.Active, {
                 enableScripts: true,
             });
+            this.tuitorialPanel = currentPanel;
+            this._setWebviewMessageListener(currentPanel.webview);
             const fs = require('fs');
             const markdown = require('markdown-it');
             const shiki = require('shiki');
@@ -56,14 +41,83 @@ class Tutorial {
                     "dist",
                     "toolkit.js", // A toolkit.min.js file is also available
                 ]);
-                const html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tutitorial-1.md", 'utf-8'));
+                const html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-1.md", 'utf-8'));
+                const html2 = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-2.md", 'utf-8'));
+                console.log(html2);
+                const out = `
+                <title>Shiki</title>
+                <link rel="stylesheet" href="style.css">
+                <a id="big" ${html}></a>
+                <script id="test" type="module" src="${html2}"></script>
+                <script type="module" src="${mainUri}"></script>
+                <script type="module" src="${toolkitUri}"></script>
+                <script type="module" src="fs.js"></script>
+                <script src="https://unpkg.com/shiki"></script>
+                <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.2.0/markdown-it.js"></script>
+                <script src="index.js"></script>
+                </head>
+                <body>
+                    <vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>
+                </body>
+            
+            `;
+                this.tuitorialPanel.webview.html = out;
+                // vscode.window.activeTextEditor?.hide;
+                // vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+                console.log(mainUri);
+                console.log('done');
+            });
+        });
+    }
+    dispose() {
+    }
+    getColorTheme() {
+        const settings = vscode.workspace.getConfiguration(this.themeConfigSection, null);
+        return this.validThemeConfigurationValue(settings.get(this.themeConfigKey, this.defaultThemeConfiguration));
+    }
+    validThemeConfigurationValue(theme) {
+        return !this.themeConfigValues[theme]
+            ? this.defaultThemeConfiguration
+            : theme;
+    }
+    getUri(webview, extensionUri, pathList) {
+        return webview.asWebviewUri(vscode_1.Uri.joinPath(extensionUri, ...pathList));
+    }
+    activate(context) {
+        // console.log(this.getColorTheme());
+        context.subscriptions.push(vscode.commands.registerCommand("controls.start", () => {
+            let currentPanel = vscode.window.createWebviewPanel("controls", "Page Controls", vscode.ViewColumn.Active, {
+                enableScripts: true,
+            });
+            this._setWebviewMessageListener(currentPanel.webview);
+            const fs = require('fs');
+            const markdown = require('markdown-it');
+            const shiki = require('shiki');
+            //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
+            shiki.getHighlighter({
+                theme: 'github-dark'
+            }).then((highlighter) => {
+                const md = markdown({
+                    html: true,
+                    highlight: (code, lang) => {
+                        return highlighter.codeToHtml(code, { lang });
+                    }
+                });
+                const mainUri = this.getUri(currentPanel.webview, context.extensionUri, ["src", "main.js"]);
+                const toolkitUri = this.getUri(currentPanel.webview, context.extensionUri, [
+                    "node_modules",
+                    "@vscode",
+                    "webview-ui-toolkit",
+                    "dist",
+                    "toolkit.js", // A toolkit.min.js file is also available
+                ]);
+                const html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-1.md", 'utf-8'));
                 const out = `
                     <title>Shiki</title>
                     <link rel="stylesheet" href="style.css">
                     ${html}
                     <script type="module" src="${mainUri}"></script>
                     <script type="module" src="${toolkitUri}"></script>
-                    <script src="index.js"></script>
                     </head>
                     <body>
                         <vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>
@@ -71,6 +125,7 @@ class Tutorial {
                 
                 `;
                 currentPanel.webview.html = out;
+                console.log(mainUri);
                 console.log('done');
             });
             // var hljs = require('highlight.js'); // https://highlightjs.org/
@@ -140,6 +195,17 @@ class Tutorial {
                 return md.use(plugin);
             }
         };
+    }
+    _setWebviewMessageListener(webview) {
+        webview.onDidReceiveMessage((message) => {
+            const command = message.command;
+            const text = message.text;
+            switch (command) {
+                case "hello":
+                    vscode.window.showInformationMessage(text);
+                    return;
+            }
+        }, undefined);
     }
     plugin(md) {
         const render = md.renderer.render;

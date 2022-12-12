@@ -7,6 +7,7 @@ class Tutorial implements vscode.Disposable {
     private themeConfigSection: string = 'markdown-preview-github-styles';
     private themeConfigKey: string = 'colorTheme';
     private defaultThemeConfiguration: string = 'auto';
+    public tuitorialPanel!: vscode.WebviewPanel;
     private themeConfigValues: {[key: string]: boolean} = {
         'auto': true,
         'system': true,
@@ -15,7 +16,77 @@ class Tutorial implements vscode.Disposable {
     };
     private currentPage = 0;
 
-    constructor() {
+    constructor(context: any) {
+        vscode.commands.registerCommand("controls.start", () => {
+            let currentPanel = vscode.window.createWebviewPanel("controls","Page Controls",
+                vscode.ViewColumn.Active,
+                {
+                    enableScripts: true,
+                }
+            );
+
+
+            this.tuitorialPanel = currentPanel;
+            
+
+            this._setWebviewMessageListener(currentPanel.webview);
+
+            const fs = require('fs');
+            const markdown = require('markdown-it');
+            const shiki = require('shiki');
+            //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
+
+            shiki.getHighlighter({
+            theme: 'github-dark'
+            }).then((highlighter: { codeToHtml: (arg0: any, arg1: { lang: any; }) => any; }) => {
+            const md = markdown({
+                html: true,
+                highlight: (code: any, lang: any) => {
+                return highlighter.codeToHtml(code, { lang });
+                }
+            });
+
+            const mainUri = this.getUri(currentPanel.webview, context.extensionUri, ["src", "main.js"]);
+            const toolkitUri = this.getUri(currentPanel.webview, context.extensionUri, [
+                "node_modules",
+                "@vscode",
+                "webview-ui-toolkit",
+                "dist",
+                "toolkit.js", // A toolkit.min.js file is also available
+              ]);
+
+            const html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-1.md", 'utf-8'));
+            const html2 = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-2.md", 'utf-8'));
+
+            console.log(html2)
+    
+            const out = `
+                <title>Shiki</title>
+                <link rel="stylesheet" href="style.css">
+                <a id="big" ${html}></a>
+                <script id="test" type="module" src="${html2}"></script>
+                <script type="module" src="${mainUri}"></script>
+                <script type="module" src="${toolkitUri}"></script>
+                <script type="module" src="fs.js"></script>
+                <script src="https://unpkg.com/shiki"></script>
+                <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.2.0/markdown-it.js"></script>
+                <script src="index.js"></script>
+                </head>
+                <body>
+                    <vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>
+                </body>
+            
+            `;
+            this.tuitorialPanel.webview.html = out;
+            // vscode.window.activeTextEditor?.hide;
+            // vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+
+            console.log(mainUri);
+
+            console.log('done');
+            });
+        });
+        
     }
 
     dispose(): void {
@@ -49,6 +120,8 @@ class Tutorial implements vscode.Disposable {
                     }
                 );
 
+                this._setWebviewMessageListener(currentPanel.webview);
+
                 const fs = require('fs');
                 const markdown = require('markdown-it');
                 const shiki = require('shiki');
@@ -73,7 +146,7 @@ class Tutorial implements vscode.Disposable {
                     "toolkit.js", // A toolkit.min.js file is also available
                   ]);
 
-                const html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tutitorial-1.md", 'utf-8'));
+                const html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-1.md", 'utf-8'));
         
                 const out = `
                     <title>Shiki</title>
@@ -81,7 +154,6 @@ class Tutorial implements vscode.Disposable {
                     ${html}
                     <script type="module" src="${mainUri}"></script>
                     <script type="module" src="${toolkitUri}"></script>
-                    <script src="index.js"></script>
                     </head>
                     <body>
                         <vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>
@@ -89,6 +161,8 @@ class Tutorial implements vscode.Disposable {
                 
                 `;
                 currentPanel.webview.html = out;
+
+                console.log(mainUri);
 
                 console.log('done');
                 });
@@ -185,6 +259,23 @@ class Tutorial implements vscode.Disposable {
                 return md.use(plugin);
             }
         };
+    }
+
+
+    private _setWebviewMessageListener(webview: vscode.Webview) {
+        webview.onDidReceiveMessage(
+          (message: any) => {
+            const command = message.command;
+            const text = message.text;
+    
+            switch (command) {
+              case "hello":
+                vscode.window.showInformationMessage(text);
+                return;
+            }
+          },
+          undefined,
+        );
     }
 
 

@@ -15,8 +15,8 @@ function activate(context) {
     context.subscriptions.push(helloCommand);
     autoGit = new auto_git_1.default();
     autoGit.activate(context);
-    tutorial = new tutorial_1.default();
-    tutorial.activate(context);
+    tutorial = new tutorial_1.default(context);
+    //tutorial.activate(context);
 }
 exports.activate = activate;
 function deactivate() {

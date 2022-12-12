@@ -21,8 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
     autoGit = new AutoGit();
     autoGit.activate(context);
 
-    tutorial = new Tutorial();
-    tutorial.activate(context);
+    tutorial = new Tutorial(context);
+    //tutorial.activate(context);
 
     
 

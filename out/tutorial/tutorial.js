@@ -22,79 +22,16 @@ class Tutorial {
             this.tuitorialPanel = currentPanel;
             this._getCurrentPage(currentPanel.webview);
             this._setWebviewMessageListener(currentPanel.webview);
-            const fs = require('fs');
-            const markdown = require('markdown-it');
-            const shiki = require('shiki');
-            //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
-            shiki.getHighlighter({
-                theme: 'github-dark'
-            }).then((highlighter) => {
-                const md = markdown({
-                    html: true,
-                    highlight: (code, lang) => {
-                        return highlighter.codeToHtml(code, { lang });
-                    }
-                });
-                const mainUri = this.getUri(currentPanel.webview, context.extensionUri, ["src", "main.js"]);
-                this.mainUri = mainUri;
-                const toolkitUri = this.getUri(currentPanel.webview, context.extensionUri, [
-                    "node_modules",
-                    "@vscode",
-                    "webview-ui-toolkit",
-                    "dist",
-                    "toolkit.js", // A toolkit.min.js file is also available
-                ]);
-                this.toolkitUri = toolkitUri;
-                let html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-1.md", 'utf-8'));
-                let html2 = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-2.md", 'utf-8'));
-                console.log(html2);
-                var currentPgNum;
-                try {
-                    if (fs.existsSync("/home/user/Development/Fun/hopeThisWorks/config.json")) {
-                        let obj = JSON.parse(fs.readFileSync('/home/user/Development/Fun/hopeThisWorks/config.json', 'utf8'));
-                        currentPgNum = obj.currentPageNum;
-                    }
-                    else {
-                        let yamlContent = "{\"currentPageNum\": 1}";
-                        fs.writeFileSync("/home/user/Development/Fun/hopeThisWorks/config.json", yamlContent);
-                        currentPgNum = 1;
-                    }
-                    console.log(currentPgNum);
-                    if (currentPgNum > 1) {
-                        html = html2;
-                    }
-                }
-                catch (err) {
-                    console.log(err);
-                }
-                //window.showTextDocument(fileUri, { preview: false });
-                const out = `
-                <title>Shiki</title>
-                <link rel="stylesheet" href="style.css">
-                <div id="big">
-                ${html}
-                </div>
-                <script id="test" type="module">${html2}</script>
-                <script type="module" src="${mainUri}"></script>
-                <script type="module" src="${toolkitUri}"></script>
-                <script type="module" src="fs.js"></script>
-                <script src="https://unpkg.com/shiki"></script>
-                <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.2.0/markdown-it.js"></script>
-                <script src="index.js"></script>
-                </head>
-                <body>
-                    <vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>
-                </body>
-            
-            `;
-                this.tuitorialPanel.webview.html = out;
-                // vscode.window.activeTextEditor?.hide;
-                // vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-                console.log(mainUri);
-                console.log('done');
-                this.tuitorialPanel.onDidChangeViewState((e) => {
-                    this.reRender(e.webviewPanel, context);
-                });
+            if (!vscode.workspace.workspaceFolders) {
+                vscode.window.showInformationMessage("Open a folder/workspace first");
+                return;
+            }
+            this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+            this.render(this.tuitorialPanel, context);
+            //console.log(mainUri);
+            console.log('done');
+            this.tuitorialPanel.onDidChangeViewState((e) => {
+                this.render(e.webviewPanel, context);
             });
         });
     }
@@ -116,7 +53,44 @@ class Tutorial {
             }
         }, undefined);
     }
-    reRender(panel, context) {
+    findMDFiles() {
+        var mdArr = [];
+        try {
+            const fs = require('fs');
+            const markdown = require('markdown-it');
+            const shiki = require('shiki');
+            //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
+            shiki.getHighlighter({
+                theme: 'github-dark'
+            }).then((highlighter) => {
+                const md = markdown({
+                    html: true,
+                    highlight: (code, lang) => {
+                        return highlighter.codeToHtml(code, { lang });
+                    }
+                });
+                let tuitotialPaths = this.baseWorkspaceUri + "/.tuitorials/";
+                console.log(tuitotialPaths);
+                fs.readdir(tuitotialPaths, (err, files) => {
+                    console.log(`heres: ${err}`);
+                    files.forEach((f) => {
+                        console.log(`here: ${f}`);
+                        mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                    });
+                });
+            });
+            return mdArr;
+        }
+        catch (err) {
+            console.log(err);
+        }
+        return mdArr;
+    }
+    render(panel, context) {
+        //console.log(panel.workspace)
+        console.log("before find");
+        console.log(this.findMDFiles()[0]);
+        //this.findMDFiles(context);
         console.log("re render");
         const fs = require('fs');
         const markdown = require('markdown-it');
@@ -131,9 +105,9 @@ class Tutorial {
                     return highlighter.codeToHtml(code, { lang });
                 }
             });
-            let html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-1.md", 'utf-8'));
-            let html2 = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-2.md", 'utf-8'));
-            console.log(html2);
+            let html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/.tuitorials/tuitorial-1.md", 'utf-8'));
+            let html2 = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/.tuitorials/tuitorial-2.md", 'utf-8'));
+            //console.log(html2);
             var currentPgNum;
             try {
                 if (fs.existsSync("/home/user/Development/Fun/hopeThisWorks/config.json")) {

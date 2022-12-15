@@ -37,43 +37,20 @@ class Tutorial implements vscode.Disposable {
                     enableScripts: true,
                 }
             );
-
-
             this.tuitorialPanel = currentPanel;
             this._getCurrentPage(currentPanel.webview);
-            
-
             this._setWebviewMessageListener(currentPanel.webview);
-
             if (!vscode.workspace.workspaceFolders) {
                 vscode.window.showInformationMessage("Open a folder/workspace first");
                 return;
             }
-
             this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
             this.baseWorkspaceUri.fsPath.replace("file://", "");
-
-            
-
-            
-
             this.render(this.tuitorialPanel, context);
-
-            //console.log(mainUri);
-
-            console.log('done');
-            
             this.tuitorialPanel.onDidChangeViewState((e) => {
                 this.render(e.webviewPanel, context);
             });
-            
-          
-            
         });
-
-        
-        
-        
     }
 
     private _getCurrentPage(webview: vscode.Webview) {
@@ -85,10 +62,9 @@ class Tutorial implements vscode.Disposable {
             switch (command) {
               case "currentPage":
                 try{
-                    console.log(`currentPageNum: ${text}`)
                     const fs = require('fs');
                     let yamlContent = `{\"currentPageNum\": ${text}}`;
-                    fs.writeFileSync("/home/user/Development/Fun/hopeThisWorks/config.json", yamlContent);
+                    fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", yamlContent);
                     this.render(this.tuitorialPanel, this.context);
                 }catch(err){
                     console.log(err);
@@ -108,7 +84,6 @@ class Tutorial implements vscode.Disposable {
             const fs = require('fs');
             const markdown = require('markdown-it');
             const shiki = require('shiki');
-            //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
             var md: any;
             await shiki.getHighlighter({
             theme: 'github-dark'
@@ -119,41 +94,27 @@ class Tutorial implements vscode.Disposable {
                     return highlighter.codeToHtml(code, { lang });
                     }
                 });
-                let tuitotialPaths = this.baseWorkspaceUri.fsPath + "/.tuitorials/";
-                console.log()
+                let tuitotialPaths = this.baseWorkspaceUri.fsPath + "/.tutorials/";
                 fs.readdir(tuitotialPaths, (err: any, files: any) => {
-                    //console.log(`error: ${err}`);
                     files.forEach((f: any) =>{
-                        //console.log(`file: ${f}`);
                         mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
-                        console.log(`here: ${mdArr.length}`)
-                        // console.log(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')))
                     });
                 });
-                console.log("internal length: ", mdArr.length)
-                //return mdArr;
             });
             
         }catch(err){
             console.log(err);
         }
-        console.log("md length: ", mdArr.length)
         return mdArr;
     }
 
     
 
     public async render(panel: any, context: any) {
-            //console.log(panel.workspace)
-            console.log("before find")
             let mds = await this.findMDFiles();
-            //this.findMDFiles(context);
-            console.log("re render");
             const fs = require('fs');
             const markdown = require('markdown-it');
             const shiki = require('shiki');
-            //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
-
             shiki.getHighlighter({
             theme: 'github-dark'
             }).then((highlighter: { codeToHtml: (arg0: any, arg1: { lang: any; }) => any; }) => {
@@ -163,43 +124,22 @@ class Tutorial implements vscode.Disposable {
                 return highlighter.codeToHtml(code, { lang });
                 }
             });
-
-            let html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/.tuitorials/tuitorial-1.md", 'utf-8'));
-            let html2 = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/.tuitorials/tuitorial-2.md", 'utf-8'));
-
-            //console.log(html2);
-
             var currentPgNum: any;
-            var htmlList: string = "";
         
 
             try{
                 
-                if (fs.existsSync("/home/user/Development/Fun/hopeThisWorks/config.json")){
-                    let obj = JSON.parse(fs.readFileSync('/home/user/Development/Fun/hopeThisWorks/config.json', 'utf8'));
+                if (fs.existsSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json")){
+                    let obj = JSON.parse(fs.readFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", 'utf8'));
                      currentPgNum = obj.currentPageNum;
-                     console.log(`current#1: ${currentPgNum}`);
                      
                  }else{
+                    
                      let yamlContent = "{\"currentPageNum\": 1}";
-                     fs.writeFileSync("/home/user/Development/Fun/hopeThisWorks/config.json", yamlContent);
+                     fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", yamlContent);
                      currentPgNum = 1;
-                     console.log(`current#2: ${currentPgNum}`);
-                 }
-                 console.log(`current#3: ${currentPgNum}`);
-                 //let sortedmds = mds.sort();
-                 console.log(`mds: ${mds}`)
-                
-                 let i = 1;
-                 for (var mdrs in mds){
-                   
-                    htmlList +=  `<script id="t-${mdrs}" type="module">${mds[mdrs]}</script>`;
-                    i += 1;
-                 }
-                 console.log("#############################################################################################################################################")
-                 console.log(htmlList)
-                 console.log("#############################################################################################################################################")
-                
+                     
+                 }                
             }catch(err){
                 console.log(err);
                 return;
@@ -212,37 +152,33 @@ class Tutorial implements vscode.Disposable {
                 "webview-ui-toolkit",
                 "dist",
                 "toolkit.js", // A toolkit.min.js file is also available
-              ]);
+            ]);
 
-          
+
+            var previousButton = ` <vscode-button id="previousTutorial">Previous Tutorial</vscode-button>`;
             
-            //window.showTextDocument(fileUri, { preview: false });
-
-            var previousButton = ` <vscode-button id="previousTuitorial">Previous Tuitorial</vscode-button>`;
-            console.log(`current page num: ${currentPgNum}`);
             if (currentPgNum === 1){
-                previousButton = ` <vscode-button id="previousTuitorial" disabled>Previous Tuitorial</vscode-button>`;
+                previousButton = ` <vscode-button id="previousTutorial" disabled>Previous Tutorial</vscode-button>`;
             }
 
-            var nextButton = `<vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>`;
+            var nextButton = `<vscode-button id="nextTutorial">Next Tutorial</vscode-button>`;
             if (currentPgNum >= mds.length){
-                nextButton = `<vscode-button id="nextTuitorial" disabled>Next Tuitorial</vscode-button>`;
+                nextButton = `<vscode-button id="nextTutorial" disabled>Next Tutorial</vscode-button>`;
             }
 
             let index = currentPgNum - 1;
-         
+
+        
     
             const out = `
                 <title>Shiki</title>
                 <link rel="stylesheet" href="style.css">
-                <script id="currentPgNum" type="module" src="${currentPgNum}"></script>
-                <script id="maxPageNum" type="module" src="${mds.length + 1}"></script>
+                <input name="currentPgNum" type="hidden" value="${currentPgNum}"></input>
+                <input name="maxPageNum" type="hidden" value="${mds.length}"></input>
+                
                 <div id="big">
                 ${mds[index]}
                 </div>
-                ${htmlList}
-                <script type="module" src="${mainUri}"></script>
-                <script type="module" src="${toolkitUri}"></script>
                 <script type="module" src="fs.js"></script>
                 <script src="https://unpkg.com/shiki"></script>
                 <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.2.0/markdown-it.js"></script>
@@ -253,13 +189,19 @@ class Tutorial implements vscode.Disposable {
                     ${nextButton}
                    
                 </body>
-            
+                <script type="module" src="${mainUri}"></script>
+                <script type="module" src="${toolkitUri}"></script>
+        
             `;
-           
+
             panel.webview.html = out;
         });
     }
     
+
+    private async loadHtml(webview: any, html: any) {
+        webview = html;
+    }
     
     dispose(): void {
     }
@@ -279,87 +221,7 @@ class Tutorial implements vscode.Disposable {
         return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList));
       }
 
-    public activate(context: vscode.ExtensionContext): object {
 
-        // console.log(this.getColorTheme());
-        
-        context.subscriptions.push(
-            vscode.commands.registerCommand("controls.start", () => {
-                let currentPanel = vscode.window.createWebviewPanel("controls","Page Controls",
-                    vscode.ViewColumn.Active,
-                    {
-                        enableScripts: true,
-                    }
-                );
-
-                this._setWebviewMessageListener(currentPanel.webview);
-
-                const fs = require('fs');
-                const markdown = require('markdown-it');
-                const shiki = require('shiki');
-                //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
-
-                shiki.getHighlighter({
-                theme: 'github-dark'
-                }).then((highlighter: { codeToHtml: (arg0: any, arg1: { lang: any; }) => any; }) => {
-                const md = markdown({
-                    html: true,
-                    highlight: (code: any, lang: any) => {
-                    return highlighter.codeToHtml(code, { lang });
-                    }
-                });
-
-                const mainUri = this.getUri(currentPanel.webview, context.extensionUri, ["src", "main.js"]);
-                const toolkitUri = this.getUri(currentPanel.webview, context.extensionUri, [
-                    "node_modules",
-                    "@vscode",
-                    "webview-ui-toolkit",
-                    "dist",
-                    "toolkit.js", // A toolkit.min.js file is also available
-                  ]);
-
-                const html = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/tuitorial-1.md", 'utf-8'));
-        
-                const out = `
-                    <title>Shiki</title>
-                    <link rel="stylesheet" href="style.css">
-                    ${html}
-                    <script type="module" src="${mainUri}"></script>
-                    <script type="module" src="${toolkitUri}"></script>
-                    </head>
-                    <body>
-                        <vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>
-                    </body>
-                
-                `;
-                currentPanel.webview.html = out;
-
-              
-
-                console.log('done');
-                });
-
-                
-
-               
-            }),
-           
-            vscode.workspace.onDidChangeConfiguration(e  => {
-            if (e.affectsConfiguration(this.themeConfigSection)) {
-                vscode.commands.executeCommand('markdown.preview.refresh');
-            }
-        }));
-
-        let plugin = this.plugin;
-
-
-    
-        return {
-            extendMarkdownIt(md: any) {
-                return md.use(plugin);
-            }
-        };
-    }
 
 
     private _setWebviewMessageListener(webview: vscode.Webview) {

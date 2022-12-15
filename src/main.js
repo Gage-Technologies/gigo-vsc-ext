@@ -11,73 +11,33 @@ window.addEventListener("load", main);
 
 function main() {
 
-  
-  
-  
-  // console.log("executiong main function");
-  // const howdyButton = document.getElementById("howdy");
- 
-  // howdyButton.addEventListener("click", handleHowdyClick);
-
   vscode.postMessage({
     command: "hello",
     text: "in main 🤠",
   });
-  
-
-  
+    
   try{
-    const previous = document.getElementById("previousTuitorial");
+    const previous = document.getElementById("previousTutorial");
   
     previous.addEventListener("click", previousMarkdown);
   }catch{}
 
-  const next = document.getElementById("nextTuitorial");
+  const next = document.getElementById("nextTutorial");
   
   next.addEventListener("click", nextMarkdown);
 
-  
-  
-
 }
 
-function handleHowdyClick() {
-  console.log("executing button click");
-  // const uri = vscode.Uri.file("README.md");
-  // commands.executeCommand("markdown.showPreview", uri);
-  vscode.postMessage({
-    command: "hello",
-    text: "Hey there partner! 🤠",
-  });
-
- 
-}
 
 function nextMarkdown() {
+  
   try{
 
-    let currentNum = document.getElementById("currentPgNum");
-
-    vscode.postMessage({
-      command: "hello",
-      text: `${currentNum.innerText}`,
-    });
-
-
-    var currentNumNum = +currentNum.innerText;
-    vscode.postMessage({
-      command: "hello",
-      text: `${currentNumNum}`,
-    });
-    ++currentNumNum;
+    let currentNum = document.getElementsByName("currentPgNum");
     
-    let tuitorial2 = document.getElementById(`t-${currentNumNum}`);
-    // document.getElementById("big").outerHTML="<div/>";
-    document.getElementById("big").outerHTML=tuitorial2.innerText;
-
     vscode.postMessage({
       command: "currentPage",
-      text: `${currentNumNum + 1}`,
+      text: `${parseInt(currentNum[0].value) + 1}`,
     });
 
    
@@ -98,28 +58,11 @@ function nextMarkdown() {
 function previousMarkdown() {
   try{
 
-    let currentNum = document.getElementById("currentPgNum");
-
-    vscode.postMessage({
-      command: "hello",
-      text: `${currentNum.innerText}`,
-    });
-
-
-    var currentNumNum = +currentNum.innerText;
-    vscode.postMessage({
-      command: "hello",
-      text: `${currentNumNum}`,
-    });
-    --currentNumNum;
+    let currentNum = document.getElementsByName("currentPgNum");
     
-    let tuitorial2 = document.getElementById(`t-${currentNumNum}`);
-    // document.getElementById("big").outerHTML="<div/>";
-    document.getElementById("big").outerHTML=tuitorial2.innerText;
-
     vscode.postMessage({
       command: "currentPage",
-      text: `${currentNumNum + 1}`,
+      text: `${parseInt(currentNum[0].value) - 1}`,
     });
 
    

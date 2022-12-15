@@ -29,6 +29,10 @@ function main() {
   
   next.addEventListener("click", nextMarkdown);
 
+  const previous = document.getElementById("previousTuitorial");
+  
+  previous.addEventListener("click", previousMarkdown);
+
   
   
 
@@ -48,15 +52,70 @@ function handleHowdyClick() {
 
 function nextMarkdown() {
   try{
+
+    let currentNum = document.getElementById("currentPgNum");
+
+    vscode.postMessage({
+      command: "hello",
+      text: `${currentNum.innerText}`,
+    });
+
+
+    var currentNumNum = +currentNum.innerText;
+    vscode.postMessage({
+      command: "hello",
+      text: `${currentNumNum}`,
+    });
+    ++currentNumNum;
     
-    let tuitorial2 = document.getElementById("test");
+    let tuitorial2 = document.getElementById(`t-${currentNumNum}`);
     // document.getElementById("big").outerHTML="<div/>";
     document.getElementById("big").outerHTML=tuitorial2.innerText;
 
     vscode.postMessage({
-      command: "currenPage",
-      text: `${2}`,
+      command: "currentPage",
+      text: `${currentNumNum + 1}`,
     });
+
+   
+  }catch(e){
+    vscode.postMessage({
+          command: "hello",
+          text: `${e}`,
+        });
+  }
+
+  vscode.postMessage({
+    command: "hello",
+    text: "worked",
+  });
+}
+
+
+function previousMarkdown() {
+  try{
+
+    let currentNum = document.getElementById("currentPgNum");
+
+    vscode.postMessage({
+      command: "hello",
+      text: `${currentNum.innerText}`,
+    });
+
+
+    var currentNumNum = +currentNum.innerText;
+    --currentNumNum;
+    
+    let tuitorial2 = document.getElementById(`t-${currentNumNum}`);
+    // document.getElementById("big").outerHTML="<div/>";
+    document.getElementById("big").outerHTML=tuitorial2.innerText;
+
+    vscode.postMessage({
+      command: "currentPage",
+      text: `${currentNumNum + 1}`,
+    });
+
+   
   }catch(e){
     vscode.postMessage({
           command: "hello",

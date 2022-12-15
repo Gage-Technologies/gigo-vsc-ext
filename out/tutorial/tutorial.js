@@ -27,6 +27,7 @@ class Tutorial {
                 return;
             }
             this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+            this.baseWorkspaceUri.fsPath.replace("file://", "");
             this.render(this.tuitorialPanel, context);
             //console.log(mainUri);
             console.log('done');
@@ -40,11 +41,13 @@ class Tutorial {
             const command = message.command;
             const text = message.text;
             switch (command) {
-                case "currenPage":
+                case "currentPage":
                     try {
+                        console.log(`currentPageNum: ${text}`);
                         const fs = require('fs');
                         let yamlContent = `{\"currentPageNum\": ${text}}`;
                         fs.writeFileSync("/home/user/Development/Fun/hopeThisWorks/config.json", yamlContent);
+                        this.render(this.tuitorialPanel, this.context);
                     }
                     catch (err) {
                         console.log(err);
@@ -53,14 +56,15 @@ class Tutorial {
             }
         }, undefined);
     }
-    findMDFiles() {
+    async findMDFiles() {
         var mdArr = [];
         try {
             const fs = require('fs');
             const markdown = require('markdown-it');
             const shiki = require('shiki');
             //const t = shiki.loadTheme(join(process.cwd(), 'vscode.theme-kimbie-dark'));
-            shiki.getHighlighter({
+            var md;
+            await shiki.getHighlighter({
                 theme: 'github-dark'
             }).then((highlighter) => {
                 const md = markdown({
@@ -69,27 +73,31 @@ class Tutorial {
                         return highlighter.codeToHtml(code, { lang });
                     }
                 });
-                let tuitotialPaths = this.baseWorkspaceUri + "/.tuitorials/";
-                console.log(tuitotialPaths);
+                let tuitotialPaths = this.baseWorkspaceUri.fsPath + "/.tuitorials/";
+                console.log();
                 fs.readdir(tuitotialPaths, (err, files) => {
-                    console.log(`heres: ${err}`);
+                    //console.log(`error: ${err}`);
                     files.forEach((f) => {
-                        console.log(`here: ${f}`);
+                        //console.log(`file: ${f}`);
                         mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                        console.log(`here: ${mdArr.length}`);
+                        // console.log(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')))
                     });
                 });
+                console.log("internal length: ", mdArr.length);
+                //return mdArr;
             });
-            return mdArr;
         }
         catch (err) {
             console.log(err);
         }
+        console.log("md length: ", mdArr.length);
         return mdArr;
     }
-    render(panel, context) {
+    async render(panel, context) {
         //console.log(panel.workspace)
         console.log("before find");
-        console.log(this.findMDFiles()[0]);
+        let mds = await this.findMDFiles();
         //this.findMDFiles(context);
         console.log("re render");
         const fs = require('fs');
@@ -109,23 +117,34 @@ class Tutorial {
             let html2 = md.render(fs.readFileSync("/home/user/Development/Fun/hopeThisWorks/.tuitorials/tuitorial-2.md", 'utf-8'));
             //console.log(html2);
             var currentPgNum;
+            var htmlList = "";
             try {
                 if (fs.existsSync("/home/user/Development/Fun/hopeThisWorks/config.json")) {
                     let obj = JSON.parse(fs.readFileSync('/home/user/Development/Fun/hopeThisWorks/config.json', 'utf8'));
                     currentPgNum = obj.currentPageNum;
+                    console.log(`current#1: ${currentPgNum}`);
                 }
                 else {
                     let yamlContent = "{\"currentPageNum\": 1}";
                     fs.writeFileSync("/home/user/Development/Fun/hopeThisWorks/config.json", yamlContent);
                     currentPgNum = 1;
+                    console.log(`current#2: ${currentPgNum}`);
                 }
-                console.log(currentPgNum);
-                if (currentPgNum > 1) {
-                    html = html2;
+                console.log(`current#3: ${currentPgNum}`);
+                //let sortedmds = mds.sort();
+                console.log(`mds: ${mds}`);
+                let i = 1;
+                for (var mdrs in mds) {
+                    htmlList += `<script id="t-${mdrs}" type="module">${mds[mdrs]}</script>`;
+                    i += 1;
                 }
+                console.log("#############################################################################################################################################");
+                console.log(htmlList);
+                console.log("#############################################################################################################################################");
             }
             catch (err) {
                 console.log(err);
+                return;
             }
             const mainUri = this.getUri(panel.webview, context.extensionUri, ["src", "main.js"]);
             const toolkitUri = this.getUri(panel.webview, context.extensionUri, [
@@ -136,15 +155,23 @@ class Tutorial {
                 "toolkit.js", // A toolkit.min.js file is also available
             ]);
             //window.showTextDocument(fileUri, { preview: false });
-            console.log("before render out");
-            console.log(this.mainUri);
+            var previousButton = ` <vscode-button id="previousTuitorial">Previous Tuitorial</vscode-button>`;
+            if (currentPgNum === 1) {
+                previousButton = "";
+            }
+            var nextButton = `<vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>`;
+            if (currentPgNum >= mds.length) {
+                nextButton = "";
+            }
             const out = `
                 <title>Shiki</title>
                 <link rel="stylesheet" href="style.css">
+                <script id="currentPgNum" type="module" src="${currentPgNum}"></script>
+                <script id="maxPageNum" type="module" src="${mds.length + 1}"></script>
                 <div id="big">
-                ${html}
+                ${mds[currentPgNum - 1]}
                 </div>
-                <script id="test" type="module">${html2}</script>
+                ${htmlList}
                 <script type="module" src="${mainUri}"></script>
                 <script type="module" src="${toolkitUri}"></script>
                 <script type="module" src="fs.js"></script>
@@ -153,7 +180,9 @@ class Tutorial {
                 <script src="index.js"></script>
                 </head>
                 <body>
-                    <vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>
+                    ${previousButton}   
+                    ${nextButton}
+                   
                 </body>
             
             `;
@@ -216,7 +245,6 @@ class Tutorial {
                 
                 `;
                 currentPanel.webview.html = out;
-                console.log(mainUri);
                 console.log('done');
             });
         }), vscode.workspace.onDidChangeConfiguration(e => {

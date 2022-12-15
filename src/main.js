@@ -25,13 +25,16 @@ function main() {
   });
   
 
+  
+  try{
+    const previous = document.getElementById("previousTuitorial");
+  
+    previous.addEventListener("click", previousMarkdown);
+  }catch{}
+
   const next = document.getElementById("nextTuitorial");
   
   next.addEventListener("click", nextMarkdown);
-
-  const previous = document.getElementById("previousTuitorial");
-  
-  previous.addEventListener("click", previousMarkdown);
 
   
   
@@ -104,6 +107,10 @@ function previousMarkdown() {
 
 
     var currentNumNum = +currentNum.innerText;
+    vscode.postMessage({
+      command: "hello",
+      text: `${currentNumNum}`,
+    });
     --currentNumNum;
     
     let tuitorial2 = document.getElementById(`t-${currentNumNum}`);

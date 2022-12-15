@@ -156,20 +156,22 @@ class Tutorial {
             ]);
             //window.showTextDocument(fileUri, { preview: false });
             var previousButton = ` <vscode-button id="previousTuitorial">Previous Tuitorial</vscode-button>`;
+            console.log(`current page num: ${currentPgNum}`);
             if (currentPgNum === 1) {
-                previousButton = "";
+                previousButton = ` <vscode-button id="previousTuitorial" disabled>Previous Tuitorial</vscode-button>`;
             }
             var nextButton = `<vscode-button id="nextTuitorial">Next Tuitorial</vscode-button>`;
             if (currentPgNum >= mds.length) {
-                nextButton = "";
+                nextButton = `<vscode-button id="nextTuitorial" disabled>Next Tuitorial</vscode-button>`;
             }
+            let index = currentPgNum - 1;
             const out = `
                 <title>Shiki</title>
                 <link rel="stylesheet" href="style.css">
                 <script id="currentPgNum" type="module" src="${currentPgNum}"></script>
                 <script id="maxPageNum" type="module" src="${mds.length + 1}"></script>
                 <div id="big">
-                ${mds[currentPgNum - 1]}
+                ${mds[index]}
                 </div>
                 ${htmlList}
                 <script type="module" src="${mainUri}"></script>

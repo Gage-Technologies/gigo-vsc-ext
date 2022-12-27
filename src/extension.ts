@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { HelloWorldPanel } from './helloWorld';
 import Tutorial from './tutorial/tutorial';
 import AutoGit from './vcs/auto-git';
+import {activateTimeout} from './callback/timeout';
 
 let autoGit: AutoGit;
 let tutorial: Tutorial;
@@ -23,6 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     tutorial = new Tutorial(context);
     //tutorial.activate(context);
+    activateTimeout(context);
 
     
 

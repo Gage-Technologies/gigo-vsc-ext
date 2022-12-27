@@ -5,6 +5,7 @@ const vscode = require("vscode");
 const helloWorld_1 = require("./helloWorld");
 const tutorial_1 = require("./tutorial/tutorial");
 const auto_git_1 = require("./vcs/auto-git");
+const timeout_1 = require("./callback/timeout");
 let autoGit;
 let tutorial;
 function activate(context) {
@@ -17,6 +18,7 @@ function activate(context) {
     autoGit.activate(context);
     tutorial = new tutorial_1.default(context);
     //tutorial.activate(context);
+    (0, timeout_1.activateTimeout)(context);
 }
 exports.activate = activate;
 function deactivate() {

@@ -15,8 +15,8 @@ class Tutorial {
         };
         this.currentPage = 0;
         this.context = context;
-        vscode.commands.registerCommand("controls.start", () => {
-            let currentPanel = vscode.window.createWebviewPanel("controls", "Page Controls", vscode.ViewColumn.Active, {
+        vscode.commands.registerCommand("tutorial.start", () => {
+            let currentPanel = vscode.window.createWebviewPanel("tutorial", "GIGO Tutorial", vscode.ViewColumn.Active, {
                 enableScripts: true,
             });
             this.tuitorialPanel = currentPanel;

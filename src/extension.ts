@@ -4,7 +4,9 @@ import * as vscode from 'vscode';
 import { HelloWorldPanel } from './helloWorld';
 import Tutorial from './tutorial/tutorial';
 import AutoGit from './vcs/auto-git';
-import {activateTimeout} from './callback/timeout';
+// import {activateTimeout} from './callback/timeout';
+import { activateAfkWebView } from './afk/webview';
+import { activateTimeout } from './session/sessionUpdate';
 
 let autoGit: AutoGit;
 let tutorial: Tutorial;
@@ -27,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     activateTimeout(context);
 
     
-
+    activateAfkWebView(context);
     
 }
 

@@ -1,0 +1,19 @@
+body {
+	background-color: transparent;
+}
+
+.enable-gigo-afk-button {
+	display: block;
+	border: none;
+	margin: 0 auto;
+}
+
+.disable-gigo-afk-button {
+	display: block;
+	border: none;
+	margin: 0 auto;
+}
+
+.expiration-countdown-title {
+	display: inline-flexbox;
+}

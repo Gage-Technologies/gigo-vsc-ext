@@ -1,25 +1,21 @@
 {
-  "name": "auto-git",
-  "displayName": "auto-git",
-  "description": "Auto-Git is an extention to push project files to git in a predefined interval without taking any action by the developer.",
+  "name": "gigo-developer",
+  "displayName": "GIGO Developer Extension",
+  "description": "GIGO developer extension integrates a remote VSCode program into the GIGO ecosystem and provides convienence features for GIGO developers.",
   "publisher": "gage",
-  "version": "1.1.4",
+  "version": "0.0.1",
   "engines": {
     "vscode": "^1.67.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ZeitnerGmbH/auto-git.git"
+    "url": "https://github.com/gage-technologies/gigo-vsc-ext.git"
   },
   "categories": [
     "Other"
   ],
   "keywords": [
-    "automation",
-    "git",
-    "log",
-    "commit",
-    "push"
+    "gigo"
   ],
   "activationEvents": [
     "*"
@@ -52,16 +48,18 @@
         "title": "Sam is smart"
       },
       {
-        "command": "controls.start",
-        "title": "Page Controls"
+        "command": "tutorial.start",
+        "title": "GIGO Tutorial"
       },
       {
-        "command": "afk.on",
-        "title": "AFK On"
+        "command": "gigo.enableAFK",
+        "category": "GIGO AFK",
+        "title": "Enable AFK Session"
       },
       {
-        "command": "afk.off",
-        "title": "AFK Off"
+        "command": "gigo.disableAFK",
+        "category": "GIGO AFK",
+        "title": "Disable AFK Session"
       }
     ],
     "viewsContainers": {
@@ -76,23 +74,12 @@
     "views": {
       "afk": [
         {
-          "id": "afk-panel",
-          "name": ""
+          "id": "gigo.afkView",
+          "type": "webview",
+          "name": "GIGO AFK Session"
         }
       ]
     },
-    "viewsWelcome": [
-      {
-        "view": "afk-panel",
-        "contents": "Suspends session for as long as the user keeps this setting on.\n[On](command:afk.on)",
-        "when": "onCommand:afk.on"
-      },
-      {
-        "view": "afk-panel",
-        "contents": "current time is: .\n[Off](command:afk.off)",
-        "when": "onCommand:afk.off"
-      }
-    ],
     "markdown.markdownItPlugins": true,
     "markdown.previewStyles": [
       "./dist/base.css",
@@ -100,6 +87,16 @@
       "./dist/highlight-js.css"
     ],
     "configuration": [
+      {
+        "title": "Gigo",
+        "properties": {
+          "gigo.afk.on": {
+            "type": "boolean",
+            "description": "Toggles the AFK (Away From Keyboard) feature of the GIGO workspace.",
+            "default": false
+          }
+        }
+      },
       {
         "title": "Markdown Preview Github Styling",
         "properties": {
@@ -134,7 +131,6 @@
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
-    "@types/isomorphic-fetch": "^0.0.36",
     "@types/mocha": "^9.1.1",
     "@types/node": "14.x",
     "@types/vscode": "^1.67.0",
@@ -149,9 +145,9 @@
   },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.2.0",
+    "axios": "^1.2.1",
     "fetch": "^1.1.0",
     "highlight.js": "^11.7.0",
-    "isomorphic-fetch": "^3.0.0",
     "markdown-it": "^13.0.1",
     "path": "^0.12.7",
     "shiki": "^0.11.1",

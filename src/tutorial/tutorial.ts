@@ -1,11 +1,6 @@
 'use strict';
 import * as vscode from 'vscode';
-import {join} from 'path';
 import { Uri, Webview } from "vscode";
-import { TextEncoder } from 'util';
-import { vsCodeButton } from '@vscode/webview-ui-toolkit';
-import { fstat } from 'fs';
-import { listenerCount } from 'process';
 
 
 
@@ -30,8 +25,8 @@ class Tutorial implements vscode.Disposable {
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         
-        vscode.commands.registerCommand("controls.start", () => {
-            let currentPanel = vscode.window.createWebviewPanel("controls","Page Controls",
+        vscode.commands.registerCommand("tutorial.start", () => {
+            let currentPanel = vscode.window.createWebviewPanel("tutorial","GIGO Tutorial",
                 vscode.ViewColumn.Active,
                 {
                     enableScripts: true,

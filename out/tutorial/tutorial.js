@@ -2,11 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
+//Tutotial class contorls all pre-defined README.md
+//READMEs will automatically render with markdown syntax highlighting
 class Tutorial {
+    //constructor acts as activate function in lieu of main function
     constructor(context) {
+        //defining local variables
         this.themeConfigSection = 'markdown-preview-github-styles';
         this.themeConfigKey = 'colorTheme';
         this.defaultThemeConfiguration = 'auto';
+        //defining base color pallettes
         this.themeConfigValues = {
             'auto': true,
             'system': true,
@@ -15,35 +20,51 @@ class Tutorial {
         };
         this.currentPage = 0;
         this.context = context;
+        //register tuitorial start commad for user to start at desired time
         vscode.commands.registerCommand("tutorial.start", () => {
-            let currentPanel = vscode.window.createWebviewPanel("tutorial", "GIGO Tutorial", vscode.ViewColumn.Active, {
+            //create a new webview panel to hold content of first README
+            let currentPanel = vscode.window.createWebviewPanel("tutorial", "GIGO Tutorial", 
+            //render webview in active view column to the right of editor
+            vscode.ViewColumn.Active, {
                 enableScripts: true,
             });
             this.tuitorialPanel = currentPanel;
+            //determine first README to start on
             this._getCurrentPage(currentPanel.webview);
+            //start message listener for pop-ups ands debug messages to be displayed in editor
             this._setWebviewMessageListener(currentPanel.webview);
+            //ensure that user has opened a project before continuing
             if (!vscode.workspace.workspaceFolders) {
                 vscode.window.showInformationMessage("Open a folder/workspace first");
                 return;
             }
+            //set base path of workspace for future file handling 
             this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
             this.baseWorkspaceUri.fsPath.replace("file://", "");
+            //call render for first page
             this.render(this.tuitorialPanel, context);
+            //rerender whenever page changes
             this.tuitorialPanel.onDidChangeViewState((e) => {
                 this.render(e.webviewPanel, context);
             });
         });
     }
+    //_getCurrentPage retrieves the number of the current page from the configfile
     _getCurrentPage(webview) {
+        //get message from message hander of current page number
         webview.onDidReceiveMessage((message) => {
             const command = message.command;
             const text = message.text;
+            //verify command received is currentPage and write to config file
             switch (command) {
                 case "currentPage":
                     try {
                         const fs = require('fs');
+                        //create json formatted string
                         let yamlContent = `{\"currentPageNum\": ${text}}`;
+                        //write json formatted string to config file
                         fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", yamlContent);
+                        //render page with current page number as main page
                         this.render(this.tuitorialPanel, this.context);
                     }
                     catch (err) {
@@ -53,6 +74,7 @@ class Tutorial {
             }
         }, undefined);
     }
+    //findMDFiles finds all markdown files in the workspace folder
     async findMDFiles() {
         var mdArr = [];
         try {
@@ -60,16 +82,20 @@ class Tutorial {
             const markdown = require('markdown-it');
             const shiki = require('shiki');
             var md;
+            //use shikit to render markdown syntax and get all markdown files
             await shiki.getHighlighter({
                 theme: 'github-dark'
             }).then((highlighter) => {
+                //render markdown with shiki highlighter
                 const md = markdown({
                     html: true,
                     highlight: (code, lang) => {
                         return highlighter.codeToHtml(code, { lang });
                     }
                 });
+                //get path to tutorial
                 let tuitotialPaths = this.baseWorkspaceUri.fsPath + "/.tutorials/";
+                //get all README files from file path and push to markdown array
                 fs.readdir(tuitotialPaths, (err, files) => {
                     files.forEach((f) => {
                         mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
@@ -80,13 +106,18 @@ class Tutorial {
         catch (err) {
             console.log(err);
         }
+        //return markdown array
         return mdArr;
     }
+    //render function dislpays markdown files and page controls in HTML
     async render(panel, context) {
+        //get markdown files
         let mds = await this.findMDFiles();
+        //init packages
         const fs = require('fs');
         const markdown = require('markdown-it');
         const shiki = require('shiki');
+        //get shiki highlighter
         shiki.getHighlighter({
             theme: 'github-dark'
         }).then((highlighter) => {
@@ -97,12 +128,15 @@ class Tutorial {
                 }
             });
             var currentPgNum;
+            //check if tutorial config exists and get current page number
             try {
+                //if tutorial config exists get current page number from it
                 if (fs.existsSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json")) {
                     let obj = JSON.parse(fs.readFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", 'utf8'));
                     currentPgNum = obj.currentPageNum;
                 }
                 else {
+                    //if tutorial config does not exist create it and set current page number to 1
                     let yamlContent = "{\"currentPageNum\": 1}";
                     fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", yamlContent);
                     currentPgNum = 1;
@@ -112,6 +146,7 @@ class Tutorial {
                 console.log(err);
                 return;
             }
+            //get uri of main.js and toolkit uri
             const mainUri = this.getUri(panel.webview, context.extensionUri, ["src", "main.js"]);
             const toolkitUri = this.getUri(panel.webview, context.extensionUri, [
                 "node_modules",
@@ -120,15 +155,21 @@ class Tutorial {
                 "dist",
                 "toolkit.js", // A toolkit.min.js file is also available
             ]);
+            //html of previous button
             var previousButton = ` <vscode-button id="previousTutorial">Previous Tutorial</vscode-button>`;
+            //if current page number is 1 disable previoous button
             if (currentPgNum === 1) {
                 previousButton = ` <vscode-button id="previousTutorial" disabled>Previous Tutorial</vscode-button>`;
             }
+            //html of next button
             var nextButton = `<vscode-button id="nextTutorial">Next Tutorial</vscode-button>`;
+            //if current page number is last page disable next button
             if (currentPgNum >= mds.length) {
                 nextButton = `<vscode-button id="nextTutorial" disabled>Next Tutorial</vscode-button>`;
             }
+            //set current index to bed 1 less than current page
             let index = currentPgNum - 1;
+            //render html
             const out = `
                 <title>Shiki</title>
                 <link rel="stylesheet" href="style.css">
@@ -152,6 +193,7 @@ class Tutorial {
                 <script type="module" src="${toolkitUri}"></script>
         
             `;
+            //set page html to render html
             panel.webview.html = out;
         });
     }
@@ -164,18 +206,23 @@ class Tutorial {
         const settings = vscode.workspace.getConfiguration(this.themeConfigSection, null);
         return this.validThemeConfigurationValue(settings.get(this.themeConfigKey, this.defaultThemeConfiguration));
     }
+    //check if config value is valid
     validThemeConfigurationValue(theme) {
         return !this.themeConfigValues[theme]
             ? this.defaultThemeConfiguration
             : theme;
     }
+    //get uri of specified file
     getUri(webview, extensionUri, pathList) {
         return webview.asWebviewUri(vscode_1.Uri.joinPath(extensionUri, ...pathList));
     }
+    //_setWebviewMessageListener callback function for pop-up and debug messages in editor
     _setWebviewMessageListener(webview) {
+        //when message is received check if command is hello
         webview.onDidReceiveMessage((message) => {
             const command = message.command;
             const text = message.text;
+            //display message as pop-up if command is hello
             switch (command) {
                 case "hello":
                     vscode.window.showInformationMessage(text);

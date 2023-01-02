@@ -3,8 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activateAfkWebView = void 0;
 const vscode = require("vscode");
 const sessionUpdate_1 = require("../session/sessionUpdate");
+//activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 function activateAfkWebView(context) {
+    //register afk provider by calling class constructor
     const provider = new AFKWebViewprovider(context.extensionUri);
+    //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(AFKWebViewprovider.viewType, provider));
     context.subscriptions.push(vscode.commands.registerCommand('gigo.enableAFK', () => {
         provider.enableAFK();
@@ -14,6 +17,7 @@ function activateAfkWebView(context) {
     }));
 }
 exports.activateAfkWebView = activateAfkWebView;
+//afk webview provider has basic functions for handling afk system
 class AFKWebViewprovider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;
@@ -23,8 +27,10 @@ class AFKWebViewprovider {
         this.afkActive = gigoConfig.get("afk.on");
         //this.disableAFK();
     }
+    //resolveWebviewView handles editor callback functions and basic html render
     resolveWebviewView(webviewView, context, _token) {
         this._view = webviewView;
+        //setup webview
         webviewView.webview.options = {
             // Allow scripts in the webview
             enableScripts: true,
@@ -32,72 +38,94 @@ class AFKWebViewprovider {
                 this._extensionUri
             ]
         };
+        //render html from getHtmlForWebview function
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+        //callback for registered commands
         webviewView.webview.onDidReceiveMessage(data => {
             switch (data.type) {
                 case 'enableAFK':
+                    //call enable afk function when enableAFK command is called
                     this.enableAFK();
                     break;
                 case 'disableAFK':
+                    //call disable afk function when disableAFK command is called
                     this.disableAFK();
                     break;
                 case "hello":
+                    //display message when hello command is called
                     vscode.window.showInformationMessage(data.text);
                     return;
             }
         });
     }
+    //addColor sends color message to messsage handler
     addColor() {
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
             this._view.webview.postMessage({ type: 'addColor' });
         }
     }
+    //clearColors sends color message to clear colors to message handler
     clearColors() {
         if (this._view) {
             this._view.webview.postMessage({ type: 'clearColors' });
         }
     }
+    //enableAFK calls executeAfkCheck and rerenders the page accordingly
     enableAFK() {
+        //setup afk variables
         let afkActiveStart = this.afkActive;
         this.afkActive = true;
+        //retrieve gigo config
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         gigoConfig.update("afk.on", true);
+        //ensure that webview exists and render html
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
             this._view.webview.html = this._getHtmlForWebview(this._view.webview);
         }
+        //if afk is not currently active on start call executeAfkCheck
         if (!afkActiveStart) {
+            //executeAfkCheck sets current status to afk and retrieves the timestamp of when afk expires
             (0, sessionUpdate_1.executeAfkCheck)("7311fb2a-f09b-4575-9ca2-254f7cbfeda6", "cd68f3ed9b605731d2cae49a41eeaf405e4a9d37b74c2a1e8f1ad08cc58a17ee", "60").then((exp) => {
+                //ensures that webview exists and then sends afk timestamp to callback messenger
                 if (this._view) {
                     this._view.webview.postMessage({ type: "setExpirationAFK", value: exp });
                 }
             });
+            //display afk activated message
             vscode.window.showInformationMessage("GIGO AFK Session Activated");
         }
     }
+    //disabelAFK calls executeLiveCheck and rerenders page accordingly
     disableAFK() {
-        console.log("is active in webview: " + this.afkActive);
+        //settig up afk variables
         let afkActiveStart = this.afkActive;
         this.afkActive = false;
+        //retrieve gigo config
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         gigoConfig.update("afk.on", false);
+        //ensure that webview exists and then rerender html
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
             this._view.webview.html = this._getHtmlForWebview(this._view.webview);
         }
+        //if afk is active then executeLiveCheck
         if (afkActiveStart) {
-            // TODO: execute live check to disabled afk
+            //executeLiveCheck stes current timestamp to timestamp retrieved from http
             (0, sessionUpdate_1.executeLiveCheck)("7311fb2a-f09b-4575-9ca2-254f7cbfeda6", "cd68f3ed9b605731d2cae49a41eeaf405e4a9d37b74c2a1e8f1ad08cc58a17ee");
+            //display afk session deactivated
             vscode.window.showInformationMessage("GIGO AFK Session Deactivated");
         }
     }
+    //_getHtmlForWebview renders afk enbaled and disabled pages
     _getHtmlForWebview(webview) {
         if (this.afkActive) {
             return this._getAfkEnabledHtml(webview);
         }
         return this._getAfkDisabledHtml(webview);
     }
+    //_getAfkDisabledHtml renders page for when afk is disabled
     _getAfkDisabledHtml(webview) {
         // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'afk', 'media', 'disabled.js'));
@@ -134,6 +162,7 @@ class AFKWebViewprovider {
 			</body>
 			</html>`;
     }
+    //_getAfkEnabledHtml renders page for when afk is enabled
     _getAfkEnabledHtml(webview) {
         // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'afk', 'media', 'enabled.js'));

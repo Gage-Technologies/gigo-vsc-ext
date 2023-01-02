@@ -4,70 +4,83 @@ import axios from "axios";
 export let userHasBeenActive = false;
 let nextTimeStamp = (Date.now()/1000) + (30 * 60);
 let isAFK = false;
+
+//activateTimeout is called when the extension is activated
 export async function activateTimeout(context: vscode.ExtensionContext) {
     // link callbacks for tracking user activity
     checkUserActivity();
-
-
     
-
+    //core loop iterates until user is inactive for a set amount of time
     while(true){
+        //interior loop iterates until a sepcified time is remaining before the use is dtermined to be inactive
         while(true){
+            //if the user is afk wait 1 second before checking again
             if (!isAFK){
+                //determine time remaining before user is considered inactive
                 let currentTimeRemaining = nextTimeStamp - (Date.now()/1000);
+                //if user has less than or equal to 3 minutes remaining break from loop 
                 if (currentTimeRemaining <= 180){
                     break;
                 }
             }
             
+            //wait 1 second before iterating again
             await new Promise(f => setTimeout(f, 1000));
         }
 
+        //prompt user that with inactive pop-up and display time remaining before session timeout
         let isRenewed = (await renewPopup()).valueOf();
 
+        //if the user is not afk and is still inactive terminate the session
         if (!isRenewed && !isAFK){
             vscode.window.showInformationMessage("Session is being terminated due to inactivity");
             break;
-            
-            ///TODO send kill command
         }
-
+        
+        //if user is not afk but is active call live check to renew session timer
         await executeLiveCheck("7311fb2a-f09b-4575-9ca2-254f7cbfeda6", "cd68f3ed9b605731d2cae49a41eeaf405e4a9d37b74c2a1e8f1ad08cc58a17ee");
-        
-        //console.log("time stamp: " + nextTimeStamp);
-        
     }
-   
-
-    
-    //renewPopup();
-
 }
 
+
+//renewPopup will continously displaya popup every minute prompting the user to renew session or session will end
 async function renewPopup(): Promise<boolean>{
+    //determine time remaining
     let timeRemaining = nextTimeStamp - (Date.now()/1000);
     let isRenewed = false;
+
+    //if the user has not renewed the session and there is time remaining continue looping
     while(!isRenewed && timeRemaining > 0){
-        console.log("user been active: " + userHasBeenActive)
+        console.log("user been active: " + userHasBeenActive);
+
+        //if the user has been active display welcome back message, break from loop, and return true
         if (userHasBeenActive){
             vscode.window.showInformationMessage("Welcome back");
             isRenewed = true;
             return true;
         }
+        //if the user has not been active diplay 'are you still there' message
         vscode.window.showInformationMessage(`Are you still there?\n    session will auto close in ${Math.round(timeRemaining/60)} minutes`, "Continue session").then(selection => {
+            //if user clicks continue button display welcome message, break from loop, and return true
             vscode.window.showInformationMessage("Welcome back");
             isRenewed = true;
             return true;
         });
         
+        //wait for 1 minute before checking again
         await new Promise(f => setTimeout(f, 60000));
+        //reduce time remaining by 1 minute
         timeRemaining = timeRemaining - 60;
     }
 
+    //time remaining is 0 and user has not been active, return false
     return false;
 }
 
+
+//executeLiveCheck will execute a live check to renew session timer by calling http function in GIGO
 export async function executeLiveCheck(wsID: any, secret: any){
+    //await result from http function in GIGO
     let res = await axios.post(
         "http://gigo.gage.intranet/api/internal/ws/live-check", 
         {
@@ -77,22 +90,20 @@ export async function executeLiveCheck(wsID: any, secret: any){
         }
     );
 
+    //if non status code 200 is returned, return -1 and log failure message
     if (res.status !== 200) { 
         console.log("failed to execute live-check: ", res);
         return -1;
     }
 
-    console.log("response print: ", res);
-
-
-    console.log("json print: ", res.data);
-
+    //set next timeout to timestamp retrieved from http call
     nextTimeStamp = res.data.expiration;
-   // console.log("timestamp: " + nextTimeStamp)
 }
 
+
+//executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
 export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
-    
+    //awair result from http function in GIGO
     let res = await axios.post(
         "http://gigo.gage.intranet/api/internal/ws/afk", 
         {
@@ -104,32 +115,34 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
         }
     );
 
-    
-
+    //if non status code 200 is returned, return -1 and log failure message
     if (res.status !== 200) { 
         console.log("failed to execute live-check: ", res);
         return -1;
     }
 
-    console.log("response print: ", res);
-
-
-    console.log("json print: ", res.data);
-
+    //set afk variable to true
     isAFK = true;
     
+    //return afk timestamp
     return res.data.expiration;
-   // console.log("timestamp: " + nextTimeStamp)
 }
 
-function activityCallback() {
 
+//activityCallback is called upon user interaction and sets states to user active
+function activityCallback() {
+    //set user active to true
     userHasBeenActive = true;
+    //execute disable afk command
     vscode.commands.executeCommand("gigo.disableAFK");
+    //set is afk to false
     isAFK = false;
 }
 
+
+//checkUserActivity is a callback funtion that occurs whenever a user does a recognizable input
 function checkUserActivity() {
+    //all callback functions call activityCallback on registered input
     vscode.window.onDidChangeActiveTerminal(activityCallback);
 
     vscode.window.onDidChangeActiveTextEditor(activityCallback);

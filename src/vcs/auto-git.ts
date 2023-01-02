@@ -8,6 +8,7 @@ import exp = require('constants');
 
 let myStatusBarItem: vscode.StatusBarItem;
 
+//auto git dynamically commits and pushes to git
 class AutoGit implements vscode.Disposable { 
     public counter: number = 0;
     private intervalId: any = null;
@@ -20,15 +21,23 @@ class AutoGit implements vscode.Disposable {
     private gitcfg!: string;
 	public isInitialized: boolean = false;
 
+    //class constructor 
     constructor(){
+        //attempt to find the home directory of workspace
 		this.checkWorkspace();
+
+        //ensure that current workspace is a git repository
 		this.checkGit();
 
 		try {
+            //ensure that config exists
             fs.statSync(this.cfg);
 			this.isInitialized = true;
+
+            //read user git config
             var userCfg: any = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
             var currentCfg: any = this.currentConfigSchema();
+            //validate that all parameters are present in current config
             if(!this.compareKeys(userCfg, currentCfg)){
                 const newProperties = Object.keys(currentCfg).filter(prop => !userCfg.hasOwnProperty(prop));
 
@@ -43,7 +52,9 @@ class AutoGit implements vscode.Disposable {
         }
 	}
 
+    //actiavet() is called on startup
     public activate(context: vscode.ExtensionContext): void {
+        //register necessary commands
         let cmdversion = vscode.commands.registerCommand('autogit.version', () => {
             vscode.window.showInformationMessage('Version 1.1.4 by Eray Sönmez <dev@ray-works.de>');
         });
@@ -62,9 +73,12 @@ class AutoGit implements vscode.Disposable {
             }
         });
         
+        //ensure that workspace and git repo are both valid on start
         let cmdstart = vscode.commands.registerCommand('autogit.start', () => {
             if(this.checkWorkspace() && this.checkGit()){
+                //ensure that git is initialized
                 if(this.isInitialized){
+                    //if extension is not currently active start it
                     if(!this.running){
                         this.start();
                         vscode.window.showInformationMessage('Auto-Git started.');
@@ -124,6 +138,7 @@ class AutoGit implements vscode.Disposable {
             }
         }
     
+        //create status bar icon for displaying time until next auto save
         myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         context.subscriptions.push(myStatusBarItem);
         myStatusBarItem.show();
@@ -133,6 +148,7 @@ class AutoGit implements vscode.Disposable {
         this.stop();
     }
 
+    //basic config is configured to auto update every 5 secs
     public currentConfigSchema(): object {
         return { 
             "runOnStart": true,
@@ -151,32 +167,52 @@ class AutoGit implements vscode.Disposable {
         return JSON.stringify(aKeys) === JSON.stringify(bKeys);
     }
 
+    //update status bar with passed in text
     private updateStatusBarItem(text: string): void {
         myStatusBarItem.text = text;
     }
 
+    //start() functions as main loop for auto-git extension
     public start(): void {
+        //loads auto-git config into json object
         var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+
+        //setting up local variables for auto-update intervals
         this.running = true;
         this.counter = cfg.updateInterval;
+
+        //begin interval interation and retrieve intervalid for loop control
         this.intervalId = setInterval(() => {
+            //decrement counter
             this.counter--;
             try {
+                //display time until next commit
                 this.updateStatusBarItem("Next Auto-Git in... " + this.counter);
             } catch (e) {
                 console.log("failed to update status bar: ", e);
             }
+            //when counter reaches zero execute auto-git extension
             if(this.counter === 0){
                 this.updateStatusBarItem("Auto-Git: Checking files...");
+                //reset counter from config parameter
                 this.counter = cfg.updateInterval;
+                //load repository from workspace file
                 const git: SimpleGit = simpleGit(this.workspace.fsPath);
+
+                //pull repository
                 git.pull();
+                //append to tree
                 git.add('.'+ path.sep + '*');
+
+                //check if repository is dirty and compile changes
                 git.status().then(async (status: any) => { 
+                    //deyermine number of changes from status modified, created, deleted, and renamed files
                     let changes = status.modified.length + status.created.length + status.deleted.length + status.renamed.length;
                     if(changes > 0){
+                        //update status bar
                         this.updateStatusBarItem("Auto-Git: Pushing files...");
 
+                        //time formatting options
                         let options = { 
                             weekday: 'long',
                             year: 'numeric',
@@ -205,13 +241,18 @@ class AutoGit implements vscode.Disposable {
                             "{ts.locale.long}": new Date().toLocaleString(cfg.locale ?? 'en-US', options)
                         };
 
+                        //format config message
                         cfg.commitMessage = cfg.commitMessage.replace(/\{.+?\}/g, (key: string): string => replacements[key]);
 
+                        //await commit message
                         await git.commit(cfg.commitMessage ?? "--- Auto-Git Commit ---");
 						var remote = status.tracking.split('/')[0] ?? "origin";
 						var branch = status.tracking.split('/')[1] ?? "master";
+
+                        //push commit to origin/master
                         await git.push(remote, branch, ['-u']);
 
+                        //log to file
                         console.log("[Auto-Git]: Changes since last sync: modified (" + status.modified.length + ") | created (" + status.created.length + ") | deleted (" + status.deleted.length + ") | renamed: (" + status.renamed.length + ")" );
                         if(cfg.logging){
                             var date = new Date();
@@ -250,15 +291,19 @@ class AutoGit implements vscode.Disposable {
                             fs.writeFileSync(this.logsdir + path.sep + 'log-' + date.getDate() + '-' + date.getMonth() + '-' + date.getFullYear() + '-' + date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds() + '.txt', log);
                         }
                         if(!cfg.silent){
+                            //if not silent display update message with number of modified files
                             vscode.window.showInformationMessage("Auto-Git updated " + changes + " change(s)."); 
                         }
 
+                        //update status bar
                         this.updateStatusBarItem("Auto-Git: Push done. Starting next cycle...");
                     }
                 });
 
+                //reset interval for next interation
                 clearInterval(this.intervalId);
                 this.intervalId = null;
+                //recursively call this function again after 5s
                 setTimeout(() => {
                     this.start();
                 }, 5000);
@@ -266,9 +311,12 @@ class AutoGit implements vscode.Disposable {
         }, 1000);
     }
 
+    //stop() pauses all actions and updates status bar
     public stop(): void {
         if(this.running){
+            //stop interval iteration
             clearInterval(this.intervalId);
+            //reset interval value for restart
             this.intervalId = null;
             this.running = false;
             this.updateStatusBarItem("--- Auto-Git not running ---");
@@ -308,6 +356,7 @@ class AutoGit implements vscode.Disposable {
 		this.isInitialized = true;
     }
 
+    //checkGit() validates that the current workspace is a git repo
     public checkGit(): boolean {
         try {
             fs.statSync(this.gitdir);
@@ -321,6 +370,7 @@ class AutoGit implements vscode.Disposable {
         }
     }
 
+    //checkWorkspace() validates that the current working directory is a workspace and that proper git files are present
     public checkWorkspace(): boolean {
         try {
 			if(vscode.workspace.workspaceFolders !== undefined){

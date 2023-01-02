@@ -1,21 +1,13 @@
-// file: webview-ui/main.js
 
-//import {Uri} from "vscode";
-
-// import * as vscode2 from 'vscode';
 
 
 const vscode = acquireVsCodeApi();
 
 window.addEventListener("load", main);
 
+// main() will be called when page is rendered
 function main() {
-
-  vscode.postMessage({
-    command: "hello",
-    text: "in main 🤠",
-  });
-    
+  //add listeners for each button
   try{
     const previous = document.getElementById("previousTutorial");
   
@@ -29,7 +21,7 @@ function main() {
 }
 
 
-
+//nextMarkdown() on next tutorial button click increase page number and send to message handler
 function nextMarkdown() {
   
   try{
@@ -48,14 +40,10 @@ function nextMarkdown() {
           text: `${e}`,
         });
   }
-
-  vscode.postMessage({
-    command: "hello",
-    text: "worked",
-  });
 }
 
 
+//previousMarkdown() on previous tutorial button click decrease page number and send to message handler
 function previousMarkdown() {
   try{
 
@@ -73,9 +61,4 @@ function previousMarkdown() {
           text: `${e}`,
         });
   }
-
-  vscode.postMessage({
-    command: "hello",
-    text: "worked",
-  });
 }

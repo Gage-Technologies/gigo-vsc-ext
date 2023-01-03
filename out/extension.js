@@ -6,6 +6,7 @@ const auto_git_1 = require("./vcs/auto-git");
 // import {activateTimeout} from './callback/timeout';
 const webview_1 = require("./afk/webview");
 const sessionUpdate_1 = require("./session/sessionUpdate");
+const webview_2 = require("./tutorial/webview");
 let autoGit;
 let tutorial;
 //activate function registers all listed commands and initializes some classes on startup
@@ -18,6 +19,7 @@ function activate(context) {
     (0, sessionUpdate_1.activateTimeout)(context);
     //start afk using its local activation function
     (0, webview_1.activateAfkWebView)(context);
+    (0, webview_2.activateTutorialWebView)(context);
 }
 exports.activate = activate;
 function deactivate() {

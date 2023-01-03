@@ -1,0 +1,45 @@
+body {
+	background-color: transparent;
+}
+
+.enable-gigo-afk-button {
+	display: block;
+	border: none;
+	margin: 0 auto;
+}
+
+.disable-gigo-afk-button {
+	display: block;
+	border: none;
+	margin: 0 auto;
+}
+
+.expiration-countdown-title {
+	display: inline-flexbox;
+}
+
+#nextButton {
+	float: left;
+	margin-right: 40px;
+	font-size: medium;
+}
+
+#previousButton {
+    float: right;
+	margin-left: 40px;
+	font-size: smaller;
+}
+
+.enable-gigo-tutorial-next-button{
+	border-radius: 4px;
+	width: 100px;
+	height: 25px;
+	font-size: 11px;
+}
+
+.enable-gigo-tutorial-previous-button{
+	border-radius: 4px;
+	width: 100px;
+    height: 25px;
+	font-size: 11px;
+}

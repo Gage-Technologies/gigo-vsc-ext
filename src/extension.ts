@@ -7,6 +7,7 @@ import AutoGit from './vcs/auto-git';
 // import {activateTimeout} from './callback/timeout';
 import { activateAfkWebView } from './afk/webview';
 import { activateTimeout } from './session/sessionUpdate';
+import { activateTutorialWebView } from './tutorial/webview';
 
 let autoGit: AutoGit;
 let tutorial: Tutorial;
@@ -23,6 +24,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     //start afk using its local activation function
     activateAfkWebView(context);
+
+    activateTutorialWebView(context);
     
 }
 

@@ -48,8 +48,19 @@
         "title": "Sam is smart"
       },
       {
-        "command": "tutorial.start",
-        "title": "GIGO Tutorial"
+        "command": "gigo.tutorial.start",
+        "category": "GIGO TUTORIAL",
+        "title": "GIGO Start Tutorial"
+      },
+      {
+        "command": "gigo.tutorial.next",
+        "category": "GIGO TUTORIAL",
+        "title": "GIGO Next Tutorial"
+      },
+      {
+        "command": "gigo.tutorial.previous",
+        "category": "GIGO TUTORIAL",
+        "title": "GIGO Previous Tutorial"
       },
       {
         "command": "gigo.enableAFK",
@@ -68,6 +79,11 @@
           "id": "afk",
           "title": "AFK",
           "icon": "$(watch)"
+        },
+        {
+          "id": "tutorial",
+          "title": "Tutorial",
+          "icon": "$(book)"
         }
       ]
     },
@@ -78,8 +94,16 @@
           "type": "webview",
           "name": "GIGO AFK Session"
         }
+      ],
+      "tutorial": [
+        {
+          "id": "gigo.tutorialView",
+          "type": "webview",
+          "name": "GIGO Tutorial"
+        }
       ]
     },
+    
     "markdown.markdownItPlugins": true,
     "markdown.previewStyles": [
       "./dist/base.css",
@@ -94,6 +118,11 @@
             "type": "boolean",
             "description": "Toggles the AFK (Away From Keyboard) feature of the GIGO workspace.",
             "default": false
+          },
+          "gigo.tutorial.on": {
+            "type": "boolean",
+            "description": "Toggles the GIGO Tutorial feature of the GIGO workspace.",
+            "default": true
           }
         }
       },

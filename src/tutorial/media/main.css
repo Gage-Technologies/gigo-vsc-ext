@@ -19,14 +19,14 @@ body {
 }
 
 #nextButton {
-	float: left;
-	margin-right: 40px;
+	float: right;
+	margin-left: 40px;
 	font-size: medium;
 }
 
 #previousButton {
-    float: right;
-	margin-left: 40px;
+    float: left;
+	margin-right: 40px;
 	font-size: smaller;
 }
 
@@ -35,11 +35,44 @@ body {
 	width: 100px;
 	height: 25px;
 	font-size: 11px;
+	cursor: pointer;
 }
+
+.enable-gigo-tutorial-next-button:disabled,
+.enable-gigo-tutorial-next-button[disabled]{
+	border-radius: 4px;
+	
+	width: 100px;
+	height: 25px;
+	font-size: 11px;
+	opacity: .4;
+	cursor: not-allowed;
+	outline: none;
+	border: none;
+	box-shadow: none;;
+	
+}
+
+
 
 .enable-gigo-tutorial-previous-button{
 	border-radius: 4px;
 	width: 100px;
     height: 25px;
 	font-size: 11px;
+	cursor: pointer;
+}
+.enable-gigo-tutorial-previous-button:disabled,
+.enable-gigo-tutorial-previous-button[disabled]{
+	border-radius: 4px;
+	
+	width: 100px;
+	height: 25px;
+	font-size: 11px;
+	opacity: .4;
+	cursor: not-allowed;
+	outline: none;
+	border: none;
+	box-shadow: none;;
+	
 }

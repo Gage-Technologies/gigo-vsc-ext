@@ -260,17 +260,18 @@ class TutorialWebViewprovider {
                 console.log(err);
                 return;
             }
+            console.log("currentPgNum: " + currentPgNum);
             //html of previous button
             var previousButton = `<button class="enable-gigo-tutorial-previous-button">Previous Tutorial</button>`;
             //if current page number is 1 disable previoous button
             if (currentPgNum === 1) {
-                previousButton = ` <button class="enable-gigo-tutorial-previous-button" disabled>Previous Tutorial</button>`;
+                previousButton = ` <button disabled class="enable-gigo-tutorial-previous-button">Previous Tutorial</button>`;
             }
             //html of next button
             var nextButton = `<button class="enable-gigo-tutorial-next-button">Next Tutorial</button>`;
             //if current page number is last page disable next button
             if (currentPgNum >= mds.length) {
-                nextButton = `<button class="enable-gigo-tutorial-next-button" disabled>Next Tutorial</button>`;
+                nextButton = `<button disabled class="enable-gigo-tutorial-next-button">Next Tutorial</button>`;
             }
             //set current index to bed 1 less than current page
             let index = currentPgNum - 1;
@@ -307,12 +308,13 @@ class TutorialWebViewprovider {
 			<body>
                 <br/>
                 <br/>
-                <div id="previousButton">
-                    ${previousButton}
-                </div>
                 <div id="nextButton">
                     ${nextButton}
                 </div>
+                <div id="previousButton">
+                    ${previousButton}
+                </div>
+                
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;

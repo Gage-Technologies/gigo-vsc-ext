@@ -279,11 +279,13 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 //get all README files from file path and push to markdown array
                 fs.readdir(tuitotialPaths, (err: any, files: any) => {
                     files.forEach((f: any) =>{
-                        //console.log(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
-                        mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                        if (f.endsWith(".md") && f.indexOf("tutorial-")!== -1) {
+                            //console.log(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                            mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                        }
                     });
                     console.log("mdarrr: " + mdArr.length);
-                    
+
                 });
             });
             
@@ -292,6 +294,8 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         }
 
         console.log("mdarrr: "+mdArr.length);
+
+        
 
         //return markdown array
         return await mdArr;
@@ -385,6 +389,14 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 		// Use a nonce to only allow a specific script to be run.
 		const nonce = getNonce();
 
+        let bottomPages = ""
+
+        for (let i = 0; i < mds.length; i++) {
+            bottomPages += `<button class="pageButton" onclick="page(${i+1})" name="page-${i+1}">${i+1}</button>\n`;
+            // bottomPages += `&nbsp`;
+        }
+        
+
         if (this._view){
             this._view.webview.html = `<!DOCTYPE html>
 			<html lang="en">
@@ -416,10 +428,18 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 <div id="previousButton">
                     ${previousButton}
                 </div>
-                
-				<script nonce="${nonce}" src="${scriptUri}"></script>
+                <br/>
+                <br/>
+                <div class="pageButtonContainer">
+                    ${bottomPages}
+                </div>
 			</body>
+           
+            <script nonce="${nonce}" src="${scriptUri}"></script>
+           
 			</html>`;
+
+            console.log(this._view.webview.html);
         }
 
         });

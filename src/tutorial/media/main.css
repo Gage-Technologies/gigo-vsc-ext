@@ -76,3 +76,46 @@ body {
 	box-shadow: none;;
 	
 }
+
+#pageButton {
+	align-self: center;
+	float: center;
+	outline: none; 
+	padding: auto;
+	background-color: transparent;
+	border: none;
+    
+}
+
+.divider{
+    width:5px;
+    height: 0px;
+    display:inline-block;
+}
+
+.pageButtonContainer{
+	display: flex;
+	/* width: 100%; */
+}
+
+
+#pageButton{
+	background-color: transparent; 
+	background: transparent;
+	width: 10px; 
+	height: auto; 
+	border: none; 
+	text-decoration: underline; 
+	display: flexbox;
+	outline: none;
+}
+
+.pageButton{
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	outline: none;
+	background-color: transparent; 
+	background: transparent;
+	border-radius: 4px;
+}

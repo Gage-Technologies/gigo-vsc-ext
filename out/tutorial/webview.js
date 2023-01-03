@@ -204,8 +204,10 @@ class TutorialWebViewprovider {
                 //get all README files from file path and push to markdown array
                 fs.readdir(tuitotialPaths, (err, files) => {
                     files.forEach((f) => {
-                        //console.log(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
-                        mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                        if (f.endsWith(".md") && f.indexOf("tutorial-") !== -1) {
+                            //console.log(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                            mdArr.push(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
+                        }
                     });
                     console.log("mdarrr: " + mdArr.length);
                 });
@@ -283,6 +285,11 @@ class TutorialWebViewprovider {
             const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'tutorial', 'media', 'main.css'));
             // Use a nonce to only allow a specific script to be run.
             const nonce = getNonce();
+            let bottomPages = "";
+            for (let i = 0; i < mds.length; i++) {
+                bottomPages += `<button class="pageButton" onclick="page(${i + 1})" name="page-${i + 1}">${i + 1}</button>\n`;
+                // bottomPages += `&nbsp`;
+            }
             if (this._view) {
                 this._view.webview.html = `<!DOCTYPE html>
 			<html lang="en">
@@ -314,10 +321,17 @@ class TutorialWebViewprovider {
                 <div id="previousButton">
                     ${previousButton}
                 </div>
-                
-				<script nonce="${nonce}" src="${scriptUri}"></script>
+                <br/>
+                <br/>
+                <div class="pageButtonContainer">
+                    ${bottomPages}
+                </div>
 			</body>
+           
+            <script nonce="${nonce}" src="${scriptUri}"></script>
+           
 			</html>`;
+                console.log(this._view.webview.html);
             }
         });
     }

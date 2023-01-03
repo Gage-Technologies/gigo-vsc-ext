@@ -7,6 +7,12 @@ window.addEventListener("load", main);
 
 // main() will be called when page is rendered
 function main() {
+
+  vscode.postMessage({
+    type: "hello",
+    text: `starting`,
+  });
+  
   //add listeners for each button
   try{
     document.querySelector('.enable-gigo-tutorial-previous-button').addEventListener('click', () => {
@@ -18,6 +24,10 @@ function main() {
   document.querySelector('.enable-gigo-tutorial-next-button').addEventListener('click', () => {
     nextMarkdown();
   });
+
+  
+
+  
 
 
 }
@@ -38,10 +48,29 @@ function nextMarkdown() {
    
   }catch(e){
     vscode.postMessage({
-          command: "hello",
+          type: "hello",
           text: `${e}`,
         });
   }
+}
+
+function page(pageNum) {
+  vscode.postMessage({
+      command: "currentPage",
+      text: pageNum,
+  });
+}
+
+function pageButtons() {
+
+  let button = document.getElementsByName(`page-${i+1}`)
+
+  .addEventListener('click', () => {
+    vscode.postMessage({
+      command: "currentPage",
+      text: `${i + 1}`,
+    });
+  });
 }
 
 
@@ -59,7 +88,7 @@ function previousMarkdown() {
    
   }catch(e){
     vscode.postMessage({
-          command: "hello",
+          type: "hello",
           text: `${e}`,
         });
   }

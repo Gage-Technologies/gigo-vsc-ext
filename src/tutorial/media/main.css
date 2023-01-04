@@ -110,6 +110,20 @@ body {
 	outline: none;
 }
 
+.pageButton:disabled,
+.pageButton[disabled]{
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	outline: none;
+	background-color: transparent; 
+	background: transparent;
+	border-radius: 4px;
+	cursor: not-allowed;
+	opacity: .2;
+	
+}
+
 .pageButton{
 	flex: 1;
 	display: flex;

@@ -61,6 +61,8 @@ function page(pageNum) {
   });
 }
 
+
+
 function pageButtons() {
 
   let button = document.getElementsByName(`page-${i+1}`)
@@ -72,6 +74,34 @@ function pageButtons() {
     });
   });
 }
+
+
+
+function nextGroup() {
+
+  vscode.postMessage({
+    type: "hello",
+    text: `next group`,
+  });
+
+  vscode.postMessage({
+    command: "nextGroup",
+    text: "next",
+  });
+}
+
+function lastGroup() {
+
+  vscode.postMessage({
+    type: "hello",
+    text: `last group`,
+  });
+  vscode.postMessage({
+    command: "lastGroup",
+    text: "last",
+  });
+}
+
 
 
 //previousMarkdown() on previous tutorial button click decrease page number and send to message handler
@@ -93,3 +123,4 @@ function previousMarkdown() {
         });
   }
 }
+

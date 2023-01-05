@@ -445,6 +445,10 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
         //iterate from the minPage to the maxPage and add a pagination button for each number in the range
         for (let i = this.minPages; i <= this.maxPages; i++) {
+            if (i === currentPgNum){
+                bottomPages += `<button disabled current class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
+                continue;
+            }
             bottomPages += `<button class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
             // bottomPages += `&nbsp`;
         }
@@ -492,6 +496,10 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
 
         for (let i = this.minPages; i <= this.maxPages; i++) {
+            if (i === currentPgNum){
+                bottomPages += `<button disabled current class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
+                continue;
+            }
             bottomPages += `<button class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
             // bottomPages += `&nbsp`;
         }
@@ -541,6 +549,10 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
 
         for (let i = this.minPages; i <= this.maxPages; i++) {
+            if (i === currentPageNum){
+                bottomPages += `<button disabled class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
+                continue;
+            }
             bottomPages += `<button class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
             // bottomPages += `&nbsp`;
         }

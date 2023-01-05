@@ -243,9 +243,12 @@ class TutorialWebViewprovider {
     //nextPageGroup reRenders only the bottom pagination buttons to allow the user to scroll to the next grouping without changing pages
     nextPageGroup(currentPgNum) {
         let bottomPages = "";
-        //this.minPages = (this.minPages +8) - (this.minPages + 8) % 8;
+        this.minPages = (this.maxPages) - (this.maxPages) % 8;
+        if (this.minPages < 0) {
+            this.minPages = 1;
+        }
         //set the min pages to the old max
-        this.minPages = this.maxPages;
+        //this.minPages = this.maxPages;
         //set the maxpages to the next page number divisible by 8
         this.maxPages = (this.maxPages + 8) - (this.maxPages + 8) % 8;
         //last group button allows user to scroll back to the last grouping of 8 pages
@@ -302,6 +305,9 @@ class TutorialWebViewprovider {
         if (this.maxPages <= 8) {
             //disable the last group button
             lastGroup = `<button disabled class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
+            if (this.numOfTutorials >= 8) {
+                this.maxPages = 8;
+            }
         }
         //add the last group button to the page
         bottomPages += lastGroup;

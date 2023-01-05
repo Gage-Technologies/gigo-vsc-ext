@@ -318,10 +318,14 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     public nextPageGroup(currentPgNum: number){
         let bottomPages = "";
 
-        //this.minPages = (this.minPages +8) - (this.minPages + 8) % 8;
+        this.minPages = (this.maxPages) - (this.maxPages) % 8;
+
+        if (this.minPages < 0){
+            this.minPages = 1;
+        }
 
         //set the min pages to the old max
-        this.minPages = this.maxPages;
+        //this.minPages = this.maxPages;
         //set the maxpages to the next page number divisible by 8
         this.maxPages = (this.maxPages + 8) - (this.maxPages + 8) % 8;
 
@@ -332,6 +336,9 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
         //next group button allows user to scroll to the next grouping of 8 pages
         let nextGroup = `<button class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
+
+        
+
 
         //if the max pages has exceeded the number of markdown files
         if (this.maxPages >= this.numOfTutorials){
@@ -377,6 +384,8 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         //subtract 8 from the min number of pages
         this.minPages = this.minPages - 8;
 
+        
+
         //create last page button and next page button for pagination of the last and next grouping of 8 respectively
         let lastGroup = `<button class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
         let nextGroup = `<button class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
@@ -389,10 +398,15 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             lastGroup = `<button disabled class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
         }
 
+        
+
         //if the max pages is less than or equal to 8
         if (this.maxPages <= 8){
             //disable the last group button
             lastGroup = `<button disabled class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
+            if (this.numOfTutorials >= 8 ){
+                this.maxPages = 8;
+            }
         }
 
         //add the last group button to the page

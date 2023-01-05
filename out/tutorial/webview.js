@@ -18,13 +18,6 @@ async function activateTutorialWebView(context) {
     context.subscriptions.push(vscode.commands.registerCommand('gigo.tutorial.previous', () => {
         provider.previousTutorial();
     }));
-    console.log("before start");
-    //await provider.start();
-    console.log("after start");
-    // context.subscriptions.push(
-    // 	vscode.commands.registerCommand('gigo.disableAFK', () => {
-    // 		provider.disableAFK();
-    // 	}));
 }
 exports.activateTutorialWebView = activateTutorialWebView;
 //afk webview provider has basic functions for handling afk system
@@ -60,11 +53,9 @@ class TutorialWebViewprovider {
                 vscode.window.showInformationMessage("Open a folder/workspace first");
                 return;
             }
-            //set base path of workspace for future file handling 
-            //console.log('workspace: ', vscode.workspace);
+            //set base path of workspace for future file handling
             this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
             this.baseWorkspaceUri.fsPath.replace("file://", "");
-            //console.log("this: "+this.baseWorkspaceUri.fsPath.replace("file://", ""));
             //determine first README to start on
             this._getCurrentPage(this._view.webview);
             // this._getPageGroupButtons(this._view.webview);
@@ -72,54 +63,8 @@ class TutorialWebViewprovider {
                 this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
                 await this._getHtmlForWebview(this._view.webview, "");
             }
-            // //call render for first page
-            // this.render(this.tuitorialPanel, context);
-            // //rerender whenever page changes
-            // this.tuitorialPanel.onDidChangeViewState((e) => {
-            //     this.render(e.webviewPanel, context);
-            // });
         }
     }
-    // private _getPageGroupButtons(webview: vscode.Webview) {
-    //      //get message from message hander of current page number
-    //      webview.onDidReceiveMessage(
-    //         async (message: any) => {
-    //           const command = message.command;
-    //           //verify command received is currentPage and write to config file
-    //           switch (command) {
-    //             case "nextGroup":
-    //               try{
-    //                   if (this._view) {
-    //                       this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                       await this._getHtmlForWebview(this._view.webview, "next");
-    //                   }
-    //               }catch(err){
-    //                   console.log(err);
-    //               }
-    //             case "lastGroup":
-    //                 try{
-    //                     if (this._view) {
-    //                         this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                         await this._getHtmlForWebview(this._view.webview, "last");
-    //                     }
-    //                 }catch(err){
-    //                     console.log(err);
-    //                 }
-    //             default:
-    //                 try{
-    //                     if (this._view) {
-    //                         this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                         await this._getHtmlForWebview(this._view.webview, "");
-    //                     }
-    //                 }catch(err){
-    //                     console.log(err);
-    //                 }
-    //               return;
-    //           }
-    //         },
-    //         undefined,
-    //       );
-    // }
     //_getCurrentPage retrieves the number of the current page from the configfile
     _getCurrentPage(webview) {
         //get message from message hander of current page number
@@ -191,15 +136,12 @@ class TutorialWebViewprovider {
             return;
         }
         //set base path of workspace for future file handling 
-        //console.log('workspace: ', vscode.workspace);
         this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
         this.baseWorkspaceUri.fsPath.replace("file://", "");
-        // console.log("this: "+this.baseWorkspaceUri.fsPath.replace("file://", ""));
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
             this._getCurrentPage(this._view.webview);
             await this._getHtmlForWebview(this._view.webview, "");
-            //console.log("view: " + this._view.webview.html);
         }
         //callback for registered commands
         webviewView.webview.onDidReceiveMessage(data => {
@@ -268,7 +210,6 @@ class TutorialWebViewprovider {
                 });
                 //get path to tutorial
                 let tuitotialPaths = this.baseWorkspaceUri.fsPath + "/.tutorials/";
-                //console.log(tuitotialPaths);
                 //get all README files from file path and push to markdown array
                 fs.readdir(tuitotialPaths, (err, files) => {
                     files.forEach((f) => {
@@ -276,29 +217,24 @@ class TutorialWebViewprovider {
                             var numberPattern = /\d+/g;
                             ;
                             let tutorialNum = f.match(numberPattern)[0];
-                            console.log(f);
-                            console.log(tutorialNum);
                             if (tutorialNum) {
-                                console.log(`/////////////////////////////////////////////////////////////////////////\n${tutorialNum}\n///////////////////////`);
-                                //console.log(md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8')));
                                 mdArr[tutorialNum - 1] = md.render(fs.readFileSync(`${tuitotialPaths}${f}`, 'utf-8'));
                             }
                         }
                     });
-                    //console.log("mdarrr: " + mdArr.length);
                 });
             });
         }
         catch (err) {
             console.log(err);
         }
-        //console.log("mdarrr: "+mdArr.length);
         //return markdown array
         return await mdArr;
     }
     getUri(webview, extensionUri, pathList) {
         return webview.asWebviewUri(vscode_1.Uri.joinPath(extensionUri, ...pathList));
     }
+    //renderBottomButtons renders the pagination buttons on the bottom of the page
     renderBottomButtons(currentPgNum) {
         let bottomPages = "";
         //if the current page number is more than 8
@@ -314,13 +250,13 @@ class TutorialWebViewprovider {
         let nextGroup = `<button class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
         //if the current page number is less than 8
         if (currentPgNum < 8) {
-            console.log("last page button disabled");
             //disable the last group button as there are no groups before this
             lastGroup = `<button disabled class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
             //set the range to be 1-8
             this.maxPages = 8;
             this.minPages = 1;
         }
+        //add last group button to page render
         bottomPages += lastGroup;
         //if the current page number is divisible by 8 and that number is not 1 or 0
         if ((currentPgNum % 8 === 0) && (currentPgNum > 1)) {
@@ -335,7 +271,6 @@ class TutorialWebViewprovider {
             //disable the next group button as there are no groups after this
             nextGroup = `<button disabled class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
         }
-        //console.log(`page 10: ${mds[9]}`);
         //iterate from the minPage to the maxPage and add a pagination button for each number in the range
         for (let i = this.minPages; i <= this.maxPages; i++) {
             if (i === currentPgNum) {
@@ -343,84 +278,106 @@ class TutorialWebViewprovider {
                 continue;
             }
             bottomPages += `<button class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
-            // bottomPages += `&nbsp`;
         }
-        // //add next page group button to proceed to the next grouping of 8 pages
-        // bottomPages += `<button class="pageButton" name="nextPageGroup" onclick="nextGroup()">">"</button>`
         //if the current page number is greater than or equal to the number of markdown files
         if (currentPgNum >= this.numOfTutorials) {
             //disable the next page group button as there are no groups after this
             nextGroup = `<button disabled class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
         }
+        // //add next page group button to proceed to the next grouping of 8 pages
         bottomPages += nextGroup;
+        //set html to page button variable to be added to page later
         this.pageButtonsHTML = bottomPages;
     }
+    //nextPageGroup reRenders only the bottom pagination buttons to allow the user to scroll to the next grouping without changing pages
     nextPageGroup(currentPgNum) {
         let bottomPages = "";
-        console.log(`max before: ${this.maxPages}`);
+        //this.minPages = (this.minPages +8) - (this.minPages + 8) % 8;
+        //set the min pages to the old max
+        this.minPages = this.maxPages;
+        //set the maxpages to the next page number divisible by 8
         this.maxPages = (this.maxPages + 8) - (this.maxPages + 8) % 8;
-        this.minPages = (this.minPages + 8) - (this.minPages + 8) % 8;
-        console.log("maxPages: " + this.maxPages);
-        console.log("minPages: " + this.minPages);
+        //last group button allows user to scroll back to the last grouping of 8 pages
         let lastGroup = `<button class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
+        //add last group button to the page
         bottomPages += lastGroup;
+        //next group button allows user to scroll to the next grouping of 8 pages
         let nextGroup = `<button class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
+        //if the max pages has exceeded the number of markdown files
         if (this.maxPages >= this.numOfTutorials) {
+            //disable the next group button
             nextGroup = `<button disabled class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
+            //set the max pages to the number of markdown files
             this.maxPages = this.numOfTutorials;
         }
+        //iterate over the range from minPages to maxPages and create the page buttons
         for (let i = this.minPages; i <= this.maxPages; i++) {
+            //when the currently displayed markdown is reached, disbaled the page button for it
             if (i === currentPgNum) {
                 bottomPages += `<button disabled current class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
                 continue;
             }
+            //add the page button to the page
             bottomPages += `<button class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
-            // bottomPages += `&nbsp`;
         }
+        //if the current page is the last page
         if (currentPgNum >= this.numOfTutorials) {
+            //disabled the next group button
             nextGroup = `<button disabled class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
         }
+        //add the next group button to the page
         bottomPages += nextGroup;
+        //set the page button member variable to be the html generated in this function
         this.pageButtonsHTML = bottomPages;
-        console.log(`ended next group: ${this.pageButtonsHTML}`);
     }
+    //lastPageGroup reRenders only the bottom pagination buttons to allow the user to scroll to the last grouping without changing pages
     lastPageGroup(currentPageNum) {
         let bottomPages = "";
-        console.log(`max before in last: ${this.maxPages}`);
+        //set the max number pages to the old minimum number of pages
         this.maxPages = this.minPages;
+        //subtract 8 from the min number of pages
         this.minPages = this.minPages - 8;
+        //create last page button and next page button for pagination of the last and next grouping of 8 respectively
         let lastGroup = `<button class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
         let nextGroup = `<button class="pageButton" name="nextPageGroup" onclick="nextGroup()">></button>`;
+        //if the min number of pages is less than 1 
         if (this.minPages <= 0) {
+            //set the number of pages to 1
             this.minPages = 1;
+            //disable the last group button
             lastGroup = `<button disabled class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
         }
+        //if the max pages is less than or equal to 8
         if (this.maxPages <= 8) {
+            //disable the last group button
             lastGroup = `<button disabled class="pageButton" name="lastPageGroup" onclick="lastGroup()"><</button>`;
         }
-        console.log("maxPages in last: " + this.maxPages);
-        console.log("minPages in last: " + this.minPages);
+        //add the last group button to the page
         bottomPages += lastGroup;
+        //iterate over the range of minPages to maxPages and add the page buttons
         for (let i = this.minPages; i <= this.maxPages; i++) {
+            //when the current page number is reached
             if (i === currentPageNum) {
+                //disable the current page button
                 bottomPages += `<button disabled class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
                 continue;
             }
+            //add the page button to the page
             bottomPages += `<button class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
-            // bottomPages += `&nbsp`;
         }
+        //ad the next group button to the page
         bottomPages += nextGroup;
+        //set the page buttons to the member variable for the bottom of the page
         this.pageButtonsHTML = bottomPages;
-        console.log(`ended next group: ${this.pageButtonsHTML}`);
     }
     //_getAfkDisabledHtml renders page for when afk is disabled
+    //takes in a group string to determine whether to render the whole page or
+    //to just render the next and last group page controls
     async _getHtml(webview, group) {
         //get markdown files
         let mds = await this.findMDFiles();
         //init packages
         const fs = require('fs');
-        //console.log("length of mds: " + mds.length);
-        //console.log("mds: " + mds);
         const markdown = require('markdown-it');
         const shiki = require('shiki');
         //get shiki highlighter
@@ -452,7 +409,6 @@ class TutorialWebViewprovider {
                 console.log(err);
                 return;
             }
-            console.log("currentPgNum: " + currentPgNum);
             //html of previous button
             var previousButton = `<button class="enable-gigo-tutorial-previous-button">Previous Tutorial</button>`;
             //if current page number is 1 disable previoous button
@@ -475,43 +431,26 @@ class TutorialWebViewprovider {
             const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'tutorial', 'media', 'main.css'));
             // Use a nonce to only allow a specific script to be run.
             const nonce = getNonce();
+            //set the number of tutorials to the current number of markdown files matching the preset formatting
             this.numOfTutorials = mds.length;
+            //group control
             switch (group) {
+                //render the next group page buttons
                 case "next":
-                    console.log("INSIDE NEXT GROUP");
                     this.nextPageGroup(currentPgNum);
                     break;
+                //render the last group page buttons
                 case "last":
-                    console.log("INSIDE LAST GROUP");
                     this.lastPageGroup(currentPgNum);
                     break;
+                //if no string is input or an unrecognized string is passed
+                //render the page normally
                 default:
                     this.renderBottomButtons(currentPgNum);
                     break;
             }
-            // let bottomPages = ""
-            // if (currentPgNum > 8) {
-            //     this.maxPages = (currentPgNum + 8) - (currentPgNum + 8) % 8;
-            //     this.minPages = currentPgNum - (currentPgNum % 8);
-            // } 
-            // if (currentPgNum < 8){
-            //     this.maxPages = 8;
-            //     this.minPages = 1;
-            // }
-            // if (currentPgNum % 8 === 0 && currentPgNum > 1) {
-            //     this.maxPages = currentPgNum + 8;
-            //     this.minPages = currentPgNum;
-            // }
-            // if (this.maxPages >= mds.length){
-            //     this.maxPages = mds.length;
-            // }
-            // //console.log(`page 10: ${mds[9]}`);
-            // bottomPages += `<button class="lastPageGroup" onclick="lastGroup()">"<"</button>`
-            // for (let i = this.minPages; i <= this.maxPages; i++) {
-            //     bottomPages += `<button class="pageButton" onclick="page(${i})" name="page-${i}">${i}</button>\n`;
-            //     // bottomPages += `&nbsp`;
-            // }
             if (this._view) {
+                //render the html for the page by passing it to the view
                 this._view.webview.html = `<!DOCTYPE html>
 			<html lang="en">
             <input name="currentPgNum" type="hidden" value="${currentPgNum}"></input>
@@ -568,8 +507,6 @@ class TutorialWebViewprovider {
             <script nonce="${nonce}" src="${scriptUri}"></script>
            
 			</html>`;
-                console.log(`final: ${this._view.webview.html}`);
-                //(this._view.webview.html);
             }
         });
     }

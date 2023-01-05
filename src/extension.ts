@@ -2,7 +2,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { HelloWorldPanel } from './helloWorld';
-import Tutorial from './tutorial/tutorial';
+//import Tutorial from './tutorial/tutorial';
 import AutoGit from './vcs/auto-git';
 // import {activateTimeout} from './callback/timeout';
 import { activateAfkWebView } from './afk/webview';
@@ -10,7 +10,7 @@ import { activateTimeout } from './session/sessionUpdate';
 import { activateTutorialWebView } from './tutorial/webview';
 
 let autoGit: AutoGit;
-let tutorial: Tutorial;
+//let tutorial: Tutorial;
 
 //activate function registers all listed commands and initializes some classes on startup
 export function activate(context: vscode.ExtensionContext) {
@@ -19,8 +19,8 @@ export function activate(context: vscode.ExtensionContext) {
     autoGit.activate(context);
 
     //start tutorial using its local activation function
-    tutorial = new Tutorial(context);
-    activateTimeout(context);
+    // tutorial = new Tutorial(context);
+    // activateTimeout(context);
 
     //start afk using its local activation function
     activateAfkWebView(context);

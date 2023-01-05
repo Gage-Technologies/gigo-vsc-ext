@@ -7,12 +7,6 @@ window.addEventListener("load", main);
 
 // main() will be called when page is rendered
 function main() {
-
-  vscode.postMessage({
-    type: "hello",
-    text: `starting`,
-  });
-  
   //add listeners for each button
   try{
     document.querySelector('.enable-gigo-tutorial-previous-button').addEventListener('click', () => {
@@ -78,12 +72,6 @@ function pageButtons() {
 
 
 function nextGroup() {
-
-  vscode.postMessage({
-    type: "hello",
-    text: `next group`,
-  });
-
   vscode.postMessage({
     command: "nextGroup",
     text: "next",
@@ -91,11 +79,6 @@ function nextGroup() {
 }
 
 function lastGroup() {
-
-  vscode.postMessage({
-    type: "hello",
-    text: `last group`,
-  });
   vscode.postMessage({
     command: "lastGroup",
     text: "last",

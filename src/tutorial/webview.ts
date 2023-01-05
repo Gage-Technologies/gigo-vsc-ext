@@ -11,21 +11,6 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext) 
 	//push and regsitser necessary commands
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(TutorialWebViewprovider.viewType, provider));
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('gigo.tutorial.start', () => {
-			//provider.start();
-		}));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('gigo.tutorial.next', () => {
-            provider.nextTutorial();
-        }));
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('gigo.tutorial.previous', () => {
-            provider.previousTutorial();
-        }));
 }
 
 //afk webview provider has basic functions for handling afk system
@@ -66,39 +51,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         this.isTutorialActive = gigoConfig.get("gigo.tutorial.on");
-        
-
-        //this.disableAFK();
-    }
-
-
-    public async start(){
-
-        if (this._view){
-            
-
-            //ensure that user has opened a project before continuing
-            if (!vscode.workspace.workspaceFolders) {
-                vscode.window.showInformationMessage("Open a folder/workspace first");
-                return;
-            }
-
-            //set base path of workspace for future file handling
-            this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-            this.baseWorkspaceUri.fsPath.replace("file://", "");
-
-            //determine first README to start on
-            this._getCurrentPage(this._view.webview);
-           // this._getPageGroupButtons(this._view.webview);
-
-            if (this._view) {
-                this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-                await this._getHtmlForWebview(this._view.webview, "");
-                
-            }
-        }
-            
-        
     }
 
     //_getCurrentPage retrieves the number of the current page from the configfile
@@ -170,12 +122,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 		_token: vscode.CancellationToken,
 	) {
 
-        
-        
-        // if (this.baseWorkspaceUri.fsPath === undefined) {
-        //     return;
-        // }
-
 		this._view = webviewView;
 
         
@@ -211,17 +157,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 		//callback for registered commands
 		webviewView.webview.onDidReceiveMessage(data => {
 			switch (data.type) {
-				case 'tutorial.start':
-					//call enable afk function when enableAFK command is called
-                   // this.start();
-                    break;
-                case 'tutorial.next':
-					//call disable afk function when disableAFK command is called
-                    this.nextTutorial();
-                    break;
-                case 'tutorial.previous':
-                    this.previousTutorial();
-                    break;
                 case "hello":
 					//display message when hello command is called
                     vscode.window.showInformationMessage(data.text);
@@ -229,14 +164,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 			}
 		});
 	}
-
-    public nextTutorial() {
-        vscode.window.showInformationMessage("changing to next page");
-    }
-
-    public previousTutorial() {
-        vscode.window.showInformationMessage("changing to previous page");
-    }
 
 	//addColor sends color message to messsage handler
 	public addColor() {

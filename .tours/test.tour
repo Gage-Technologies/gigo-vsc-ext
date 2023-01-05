@@ -1,0 +1,16 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "Test",
+  "steps": [
+    {
+      "title": "Introduction",
+      "description": "This is the intro"
+    },
+    {
+      "file": "src/tutorial/webview.ts",
+      "description": "This is where we want a print\n\n```typescipt\n     console.log(\"here\")\n```",
+      "line": 513
+    }
+  ],
+  "ref": "638037e0bd9b523f66b0cafd21c384014e03a0fe"
+}

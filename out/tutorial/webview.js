@@ -24,6 +24,7 @@ class TutorialWebViewprovider {
         this.maxPages = 8;
         this.numOfTutorials = 0;
         this.pageButtonsHTML = "";
+        this.codeTour = vscode.extensions.getExtension("vsls-contrib.codetour");
         //defining base color pallettes
         this.themeConfigValues = {
             'auto': true,
@@ -83,6 +84,24 @@ class TutorialWebViewprovider {
                         console.log(err);
                     }
                     break;
+                case "startCodeTour":
+                    try {
+                        if (this.codeTour) {
+                            console.log(this.codeTour);
+                            this.codeTour.activate();
+                            const codeTourApi = this.codeTour.exports;
+                            let uri = vscode.Uri.file(`/home/user/Development/Fun/hopeThisWorks/.tours/tutorial-${message.text}.tour`);
+                            codeTourApi.startTourByUri(uri);
+                            // if (this._view) {
+                            //     //let uri = this.getUri(this._view.webview, this._extensionUri,  ["/home/user/Development/Fun/hopeThisWorks/.tours/tuitorial-2.tour"])
+                            //     codeTourApi.startTourByUri(this.baseWorkspaceUri.fsPath + "/.tours/tuitorial-2.tour");
+                            // }
+                        }
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                    break;
                     return;
             }
         }, undefined);
@@ -105,6 +124,7 @@ class TutorialWebViewprovider {
         }
         //set base path of workspace for future file handling 
         this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        console.log(vscode.workspace.workspaceFolders);
         this.baseWorkspaceUri.fsPath.replace("file://", "");
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
@@ -181,6 +201,25 @@ class TutorialWebViewprovider {
         }
         //return markdown array
         return await mdArr;
+    }
+    getCodeTours() {
+        const fs = require('fs');
+        var ctArr = [];
+        var numberPattern = /\d+/g;
+        ;
+        let tourPaths = this.baseWorkspaceUri.fsPath + "/.tours/";
+        fs.readdir(tourPaths, (err, files) => {
+            files.forEach((f) => {
+                if (f.endsWith(".tour") && f.indexOf("tutorial-") !== -1) {
+                    let tourNum = f.match(numberPattern)[0];
+                    if (tourNum) {
+                        console.log(f);
+                        ctArr[tourNum - 1] = f;
+                    }
+                }
+            });
+        });
+        return ctArr;
     }
     getUri(webview, extensionUri, pathList) {
         return webview.asWebviewUri(vscode_1.Uri.joinPath(extensionUri, ...pathList));
@@ -333,6 +372,7 @@ class TutorialWebViewprovider {
     async _getHtml(webview, group) {
         //get markdown files
         let mds = await this.findMDFiles();
+        let cts = this.getCodeTours();
         //init packages
         const fs = require('fs');
         const markdown = require('markdown-it');
@@ -390,6 +430,14 @@ class TutorialWebViewprovider {
             const nonce = getNonce();
             //set the number of tutorials to the current number of markdown files matching the preset formatting
             this.numOfTutorials = mds.length;
+            let codeTourButton = "";
+            console.log(cts);
+            if (cts[index]) {
+                console.log("in cts");
+                codeTourButton = ` <div class="codeTourLink">
+                    <button id="codeTour" class="codeTourButton" onclick="startCodeTour(${currentPgNum})">Start CodeTour</button>
+                </div>`;
+            }
             //group control
             switch (group) {
                 //render the next group page buttons
@@ -426,6 +474,7 @@ class TutorialWebViewprovider {
 				<link href="${styleMainUri}" rel="stylesheet">
 				<title>GIGO AFK Session</title>
 			</head>
+            ${codeTourButton}
             <div id="big">
                 ${mds[index]}
             </div>
@@ -443,6 +492,7 @@ class TutorialWebViewprovider {
                 <div class="pageButtonContainer">
                     ${this.pageButtonsHTML}
                 </div>
+               
 			</body>
 
             <style>

@@ -30,6 +30,9 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     public maxPages = 8;
     public numOfTutorials: number = 0;
     public pageButtonsHTML = "";
+    public codeTour = vscode.extensions.getExtension(
+        "vsls-contrib.codetour"
+      );
 
     //defining base color pallettes
     private themeConfigValues: { [key: string]: boolean } = {
@@ -106,6 +109,28 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
                         }
                         break;
+                    case "startCodeTour":
+                        try {
+                            if (this.codeTour) {
+                                console.log(this.codeTour);
+                                this.codeTour.activate();
+                                const codeTourApi = this.codeTour.exports;
+                                
+                                
+                                let uri = vscode.Uri.file(`/home/user/Development/Fun/hopeThisWorks/.tours/tutorial-${message.text}.tour`);
+                                codeTourApi.startTourByUri(uri);
+                                // if (this._view) {
+                                //     //let uri = this.getUri(this._view.webview, this._extensionUri,  ["/home/user/Development/Fun/hopeThisWorks/.tours/tuitorial-2.tour"])
+                                //     codeTourApi.startTourByUri(this.baseWorkspaceUri.fsPath + "/.tours/tuitorial-2.tour");
+                                // }
+                                
+                            }
+
+                        } catch (err) {
+                            console.log(err);
+
+                        }
+                        break;
 
                         return;
                 }
@@ -144,6 +169,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
         //set base path of workspace for future file handling 
         this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        console.log(vscode.workspace.workspaceFolders)
         this.baseWorkspaceUri.fsPath.replace("file://", "");
 
 
@@ -235,6 +261,27 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
         //return markdown array
         return await mdArr;
+    }
+
+    public getCodeTours(): any{
+        const fs = require('fs');
+        var ctArr: any[] = [];
+        var numberPattern = /\d+/g;;
+        
+        let tourPaths = this.baseWorkspaceUri.fsPath + "/.tours/";
+        fs.readdir(tourPaths, (err: any, files: any) => {
+            files.forEach((f: any) => {
+                if (f.endsWith(".tour") && f.indexOf("tutorial-")!== -1){
+                    let tourNum = f.match(numberPattern)[0];
+                    if (tourNum) {
+                        console.log(f);
+                        ctArr[tourNum - 1] = f;
+                    }
+                }
+            });
+        });
+
+        return ctArr;
     }
 
 
@@ -439,6 +486,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     private async _getHtml(webview: vscode.Webview, group: string) {
         //get markdown files
         let mds = await this.findMDFiles();
+        let cts = this.getCodeTours();
 
         //init packages
         const fs = require('fs');
@@ -512,6 +560,16 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             //set the number of tutorials to the current number of markdown files matching the preset formatting
             this.numOfTutorials = mds.length;
 
+            let codeTourButton = "";
+
+            console.log(cts);
+            if (cts[index]){
+                console.log("in cts")
+                codeTourButton = ` <div class="codeTourLink">
+                    <button id="codeTour" class="codeTourButton" onclick="startCodeTour(${currentPgNum})">Start CodeTour</button>
+                </div>`;
+            }
+
             
 
             //group control
@@ -551,6 +609,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 				<link href="${styleMainUri}" rel="stylesheet">
 				<title>GIGO AFK Session</title>
 			</head>
+            ${codeTourButton}
             <div id="big">
                 ${mds[index]}
             </div>
@@ -568,6 +627,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 <div class="pageButtonContainer">
                     ${this.pageButtonsHTML}
                 </div>
+               
 			</body>
 
             <style>

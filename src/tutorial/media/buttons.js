@@ -56,6 +56,14 @@ function page(pageNum) {
 }
 
 
+function startCodeTour(currentNum){
+  vscode.postMessage({
+      command: "startCodeTour",
+      text: `${currentNum}`,
+    });
+}
+
+
 
 function pageButtons() {
 

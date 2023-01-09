@@ -7,6 +7,9 @@ const vscode_1 = require("vscode");
 async function activateTutorialWebView(context) {
     //register afk provider by calling class constructor
     const provider = new TutorialWebViewprovider(context.extensionUri);
+    if (provider.codeTour) {
+        provider.codeTour.activate();
+    }
     //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(TutorialWebViewprovider.viewType, provider));
 }
@@ -88,11 +91,8 @@ class TutorialWebViewprovider {
                 case "startCodeTour":
                     try {
                         if (this.codeTour) {
-                            console.log(this.codeTour);
-                            this.codeTour.activate();
                             const codeTourApi = this.codeTour.exports;
                             let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-                            console.log("fspath: " + uri.fsPath);
                             codeTourApi.startTourByUri(uri);
                         }
                     }
@@ -103,14 +103,18 @@ class TutorialWebViewprovider {
                 case "startCodeTourStep":
                     try {
                         const step = message.step;
-                        console.log(`69: ${step}`);
                         if (this.codeTour) {
-                            console.log(this.codeTour);
-                            this.codeTour.activate();
                             const codeTourApi = this.codeTour.exports;
                             let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-                            console.log("fspath: " + uri.fsPath);
-                            codeTourApi.startTourByUri(uri, step - 1);
+                            try {
+                                await codeTourApi.endCurrentTour();
+                            }
+                            catch (err) { }
+                            await codeTourApi.startTourByUri(uri, 0);
+                            await codeTourApi.startTourByUri(uri, step - 1);
+                            // await codeTourApi.startTourByUri(uri, step - 1);
+                            //codeTourApi.startTourByUri(uri, step - 1);
+                            //codeTourApi.endCurrentTour();
                         }
                     }
                     catch (err) {
@@ -139,7 +143,6 @@ class TutorialWebViewprovider {
         }
         //set base path of workspace for future file handling 
         this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        console.log(vscode.workspace.workspaceFolders);
         this.baseWorkspaceUri.fsPath.replace("file://", "");
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
@@ -230,15 +233,12 @@ class TutorialWebViewprovider {
                     if (tourNum) {
                         let tour = fs.readFileSync(`${tourPaths}${f}`, 'utf-8');
                         let ts = JSON.parse(tour).steps;
-                        console.log(ts.length);
                         this.tourSteps[tourNum - 1] = ts.length;
-                        console.log("in loop:", this.tourSteps);
                         ctArr[tourNum - 1] = f;
                     }
                 }
             });
         });
-        console.log(`tour steps: ${this.tourSteps}`);
         return ctArr;
     }
     getUri(webview, extensionUri, pathList) {
@@ -451,34 +451,20 @@ class TutorialWebViewprovider {
             //set the number of tutorials to the current number of markdown files matching the preset formatting
             this.numOfTutorials = mds.length;
             let codeTourButton = "";
-            console.log(cts);
             if (cts[index]) {
-                console.log("in cts");
-                console.log(this.tourSteps);
                 codeTourButton = ` <div class="codeTourLink">
                     <button id="codeTour" class="codeTourButton" onclick="startCodeTour(${currentPgNum})">Start CodeTour</button>
                 </div>`;
                 if (mds[index].indexOf("@@@")) {
                     var numberPattern = '@@@.*([Ss][Tt][Ee][Pp]).*(?<step_number>\\d+).*@@@';
-                    // var m;
-                    // do {
-                    //     m = numberPattern.exec(mds[index]);
-                    //     if (m) {
-                    //         console.log(`match: ${m}`);
-                    //     }
-                    // } while (m);
                     let stepNumber = [...mds[index].matchAll(numberPattern)];
-                    console.log(`stepNumber: ${stepNumber[1]}`);
                     for (let i = 0; i < stepNumber.length; i++) {
-                        console.log(stepNumber[i][2]);
-                        console.log(this.tourSteps[index]);
                         if (stepNumber[i][2] > this.tourSteps[index]) {
                             continue;
                         }
                         let stepButton = ` <div class="codeTourStep">
                         <button id="codeStep${stepNumber[i][2]}" class="codeTourStep" onclick="startCodeTour(${currentPgNum}, ${stepNumber[i][2]})">Interactive Step ${stepNumber[i][2]}</button>
                     </div>`;
-                        console.log(stepButton);
                         mds[index] = mds[index].replace(stepNumber[i][0], stepButton);
                     }
                 }

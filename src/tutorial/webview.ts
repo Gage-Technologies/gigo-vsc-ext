@@ -8,6 +8,11 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext) 
     //register afk provider by calling class constructor
     const provider = new TutorialWebViewprovider(context.extensionUri);
 
+    if (provider.codeTour){
+        provider.codeTour.activate();
+    }
+    
+
     //push and regsitser necessary commands
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(TutorialWebViewprovider.viewType, provider));
@@ -52,9 +57,11 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     constructor(
         private readonly _extensionUri: vscode.Uri,
     ) {
+        
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         this.isTutorialActive = gigoConfig.get("gigo.tutorial.on");
+        
     }
 
     //_getCurrentPage retrieves the number of the current page from the configfile
@@ -113,13 +120,8 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                     case "startCodeTour":
                         try {
                             if (this.codeTour) {
-                                console.log(this.codeTour);
-                                this.codeTour.activate();
                                 const codeTourApi = this.codeTour.exports;
-                                
-                                
                                 let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-                                console.log("fspath: " + uri.fsPath);
                                 codeTourApi.startTourByUri(uri);
                             }
 
@@ -131,16 +133,18 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                     case "startCodeTourStep":
                         try {
                             const step = message.step;
-                            console.log(`69: ${step}`);
                             if (this.codeTour) {
-                                console.log(this.codeTour);
-                                this.codeTour.activate();
                                 const codeTourApi = this.codeTour.exports;
-                                
-                                
                                 let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-                                console.log("fspath: " + uri.fsPath);
-                                codeTourApi.startTourByUri(uri, step - 1);
+                                try {
+                                    await codeTourApi.endCurrentTour();
+                                } catch (err) {}
+                                await codeTourApi.startTourByUri(uri, 0);
+                                await codeTourApi.startTourByUri(uri, step - 1);
+                                // await codeTourApi.startTourByUri(uri, step - 1);
+                                //codeTourApi.startTourByUri(uri, step - 1);
+                                
+                                //codeTourApi.endCurrentTour();
                             }
 
                         } catch (err) {
@@ -186,7 +190,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
         //set base path of workspace for future file handling 
         this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        console.log(vscode.workspace.workspaceFolders)
         this.baseWorkspaceUri.fsPath.replace("file://", "");
 
 
@@ -294,17 +297,13 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                     if (tourNum) {
                         let tour = fs.readFileSync(`${tourPaths}${f}`, 'utf-8');
                         let ts = JSON.parse(tour).steps;
-
-                        console.log(ts.length);
                         this.tourSteps[tourNum - 1] = ts.length;
-                        console.log("in loop:", this.tourSteps);
                         ctArr[tourNum - 1] = f;
                     }
                 }
             });
         });
-        console.log(`tour steps: ${this.tourSteps}`);
-        return ctArr
+        return ctArr;
     }
 
 
@@ -585,35 +584,20 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
             let codeTourButton = "";
 
-            console.log(cts);
             if (cts[index]){
-                console.log("in cts");
-                console.log(this.tourSteps);
                 codeTourButton = ` <div class="codeTourLink">
                     <button id="codeTour" class="codeTourButton" onclick="startCodeTour(${currentPgNum})">Start CodeTour</button>
                 </div>`;
                 if (mds[index].indexOf("@@@")){
                     var numberPattern = '@@@.*([Ss][Tt][Ee][Pp]).*(?<step_number>\\d+).*@@@';
-                    // var m;
-                    // do {
-                    //     m = numberPattern.exec(mds[index]);
-                    //     if (m) {
-                    //         console.log(`match: ${m}`);
-                    //     }
-                    // } while (m);
-                    let stepNumber = [...mds[index].matchAll(numberPattern)]
-                    console.log(`stepNumber: ${stepNumber[1]}`);
+                    let stepNumber = [...mds[index].matchAll(numberPattern)];
                     for (let i = 0; i < stepNumber.length; i++) {
-                        console.log(stepNumber[i][2]);
-                        console.log(this.tourSteps[index]);
                         if (stepNumber[i][2] > this.tourSteps[index]){
                             continue;
                         }
                         let stepButton = ` <div class="codeTourStep">
                         <button id="codeStep${stepNumber[i][2]}" class="codeTourStep" onclick="startCodeTour(${currentPgNum}, ${stepNumber[i][2]})">Interactive Step ${stepNumber[i][2]}</button>
                     </div>`;
-
-                        console.log(stepButton);
                         mds[index] = mds[index].replace(stepNumber[i][0], stepButton);
                        
                     }

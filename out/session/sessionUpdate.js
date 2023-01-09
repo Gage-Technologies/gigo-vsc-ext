@@ -4,11 +4,10 @@ exports.executeAfkCheck = exports.executeLiveCheck = exports.activateTimeout = e
 const vscode = require("vscode");
 const axios_1 = require("axios");
 exports.userHasBeenActive = false;
-let nextTimeStamp = (Date.now() / 1000) + (4 * 60);
+let nextTimeStamp = (Date.now() / 1000) + (3 * 60);
 let isAFK = false;
 //activateTimeout is called when the extension is activated
 async function activateTimeout(context) {
-    console.log("starting afk");
     // link callbacks for tracking user activity
     checkUserActivity();
     //core loop iterates until user is inactive for a set amount of time
@@ -46,7 +45,6 @@ async function renewPopup() {
     let isRenewed = false;
     //if the user has not renewed the session and there is time remaining continue looping
     while (!isRenewed && timeRemaining > 0) {
-        console.log("user been active: " + exports.userHasBeenActive);
         //if the user has been active display welcome back message, break from loop, and return true
         if (exports.userHasBeenActive) {
             vscode.window.showInformationMessage("Welcome back");
@@ -108,11 +106,16 @@ async function executeAfkCheck(wsID, secret, addMin) {
 exports.executeAfkCheck = executeAfkCheck;
 //activityCallback is called upon user interaction and sets states to user active
 function activityCallback() {
-    console.log("activity registered");
+    if (!exports.userHasBeenActive) {
+        vscode.window.showInformationMessage("Welcome back");
+    }
     //set user active to true
     exports.userHasBeenActive = true;
-    //execute disable afk command
-    vscode.commands.executeCommand("gigo.disableAFK");
+    if (isAFK) {
+        //execute disable afk command
+        vscode.commands.executeCommand("gigo.disableAFK");
+        vscode.window.showInformationMessage("Welcome back");
+    }
     //set is afk to false
     isAFK = false;
 }

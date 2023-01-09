@@ -30,6 +30,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     public maxPages = 8;
     public numOfTutorials: number = 0;
     public pageButtonsHTML = "";
+    public tourSteps: any[] = [];
     public codeTour = vscode.extensions.getExtension(
         "vsls-contrib.codetour"
       );
@@ -283,6 +284,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         const fs = require('fs');
         var ctArr: any[] = [];
         var numberPattern = /\d+/g;;
+     
         
         let tourPaths = this.baseWorkspaceUri.fsPath + "/.tours/";
         fs.readdir(tourPaths, (err: any, files: any) => {
@@ -290,14 +292,19 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 if (f.endsWith(".tour") && f.indexOf("tutorial-")!== -1){
                     let tourNum = f.match(numberPattern)[0];
                     if (tourNum) {
-                        console.log(f);
+                        let tour = fs.readFileSync(`${tourPaths}${f}`, 'utf-8');
+                        let ts = JSON.parse(tour).steps;
+
+                        console.log(ts.length);
+                        this.tourSteps[tourNum - 1] = ts.length;
+                        console.log("in loop:", this.tourSteps);
                         ctArr[tourNum - 1] = f;
                     }
                 }
             });
         });
-
-        return ctArr;
+        console.log(`tour steps: ${this.tourSteps}`);
+        return ctArr
     }
 
 
@@ -581,6 +588,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             console.log(cts);
             if (cts[index]){
                 console.log("in cts");
+                console.log(this.tourSteps);
                 codeTourButton = ` <div class="codeTourLink">
                     <button id="codeTour" class="codeTourButton" onclick="startCodeTour(${currentPgNum})">Start CodeTour</button>
                 </div>`;
@@ -596,6 +604,11 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                     let stepNumber = [...mds[index].matchAll(numberPattern)]
                     console.log(`stepNumber: ${stepNumber[1]}`);
                     for (let i = 0; i < stepNumber.length; i++) {
+                        console.log(stepNumber[i][2]);
+                        console.log(this.tourSteps[index]);
+                        if (stepNumber[i][2] > this.tourSteps[index]){
+                            continue;
+                        }
                         let stepButton = ` <div class="codeTourStep">
                         <button id="codeStep${stepNumber[i][2]}" class="codeTourStep" onclick="startCodeTour(${currentPgNum}, ${stepNumber[i][2]})">Interactive Step ${stepNumber[i][2]}</button>
                     </div>`;

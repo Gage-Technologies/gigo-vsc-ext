@@ -2,11 +2,12 @@ import * as vscode from 'vscode';
 import axios from "axios";
 
 export let userHasBeenActive = false;
-let nextTimeStamp = (Date.now()/1000) + (30 * 60);
+let nextTimeStamp = (Date.now()/1000) + (4 * 60);
 let isAFK = false;
 
 //activateTimeout is called when the extension is activated
 export async function activateTimeout(context: vscode.ExtensionContext) {
+    console.log("starting afk");
     // link callbacks for tracking user activity
     checkUserActivity();
     
@@ -131,6 +132,7 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
 
 //activityCallback is called upon user interaction and sets states to user active
 function activityCallback() {
+    console.log("activity registered");
     //set user active to true
     userHasBeenActive = true;
     //execute disable afk command

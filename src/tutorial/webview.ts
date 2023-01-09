@@ -117,13 +117,29 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                                 const codeTourApi = this.codeTour.exports;
                                 
                                 
-                                let uri = vscode.Uri.file(`/home/user/Development/Fun/hopeThisWorks/.tours/tutorial-${message.text}.tour`);
+                                let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
+                                console.log("fspath: " + uri.fsPath);
                                 codeTourApi.startTourByUri(uri);
-                                // if (this._view) {
-                                //     //let uri = this.getUri(this._view.webview, this._extensionUri,  ["/home/user/Development/Fun/hopeThisWorks/.tours/tuitorial-2.tour"])
-                                //     codeTourApi.startTourByUri(this.baseWorkspaceUri.fsPath + "/.tours/tuitorial-2.tour");
-                                // }
+                            }
+
+                        } catch (err) {
+                            console.log(err);
+
+                        }
+                        break;
+                    case "startCodeTourStep":
+                        try {
+                            const step = message.step;
+                            console.log(`69: ${step}`);
+                            if (this.codeTour) {
+                                console.log(this.codeTour);
+                                this.codeTour.activate();
+                                const codeTourApi = this.codeTour.exports;
                                 
+                                
+                                let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
+                                console.log("fspath: " + uri.fsPath);
+                                codeTourApi.startTourByUri(uri, step - 1);
                             }
 
                         } catch (err) {
@@ -564,10 +580,33 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
             console.log(cts);
             if (cts[index]){
-                console.log("in cts")
+                console.log("in cts");
                 codeTourButton = ` <div class="codeTourLink">
                     <button id="codeTour" class="codeTourButton" onclick="startCodeTour(${currentPgNum})">Start CodeTour</button>
                 </div>`;
+                if (mds[index].indexOf("@@@")){
+                    var numberPattern = '@@@.*([Ss][Tt][Ee][Pp]).*(?<step_number>\\d+).*@@@';
+                    // var m;
+                    // do {
+                    //     m = numberPattern.exec(mds[index]);
+                    //     if (m) {
+                    //         console.log(`match: ${m}`);
+                    //     }
+                    // } while (m);
+                    let stepNumber = [...mds[index].matchAll(numberPattern)]
+                    console.log(`stepNumber: ${stepNumber[1]}`);
+                    for (let i = 0; i < stepNumber.length; i++) {
+                        let stepButton = ` <div class="codeTourStep">
+                        <button id="codeStep${stepNumber[i][2]}" class="codeTourStep" onclick="startCodeTour(${currentPgNum}, ${stepNumber[i][2]})">Interactive Step ${stepNumber[i][2]}</button>
+                    </div>`;
+
+                        console.log(stepButton);
+                        mds[index] = mds[index].replace(stepNumber[i][0], stepButton);
+                       
+                    }
+
+
+                }
             }
 
             

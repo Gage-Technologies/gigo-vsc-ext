@@ -144,6 +144,25 @@ body {
 	padding-bottom: 10px;
 }
 
+
+.codeTourButton{
+	display: flex;
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	border-radius: 4px;
+}
+
+.codeTourStep{
+	margin: auto;
+	flex: 1;
+	justify-content: center;
+	width: 30%;
+	display: flex;
+	
+	border-radius: 4px;
+}
+
 code {
 	border-radius: 6px;
 	padding: .2em .4em;

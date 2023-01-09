@@ -20,8 +20,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     //start tutorial using its local activation function
     // tutorial = new Tutorial(context);
-    // activateTimeout(context);
+    activateTimeout(context);
 
+    console.log("calling afk activation");
     //start afk using its local activation function
     activateAfkWebView(context);
 

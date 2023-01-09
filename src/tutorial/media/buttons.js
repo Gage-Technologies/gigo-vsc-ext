@@ -56,7 +56,14 @@ function page(pageNum) {
 }
 
 
-function startCodeTour(currentNum){
+function startCodeTour(currentNum, step){
+  if (step){
+    vscode.postMessage({
+      command: "startCodeTourStep",
+      text: `${currentNum}`,
+      step: `${step}`,
+    });
+  }
   vscode.postMessage({
       command: "startCodeTour",
       text: `${currentNum}`,

@@ -8,6 +8,7 @@ import AutoGit from './vcs/auto-git';
 import { activateAfkWebView } from './afk/webview';
 import { activateTimeout } from './session/sessionUpdate';
 import { activateTutorialWebView } from './tutorial/webview';
+import {activateStreakWebView} from './streak/webview'
 
 let autoGit: AutoGit;
 //let tutorial: Tutorial;
@@ -27,6 +28,11 @@ export function activate(context: vscode.ExtensionContext) {
     activateAfkWebView(context);
 
     activateTutorialWebView(context);
+
+    activateStreakWebView(context);
+
+
+    
     
 }
 

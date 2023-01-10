@@ -1,0 +1,206 @@
+body {
+	background-color: transparent;
+}
+
+
+/* #big{
+	width: 100%;
+	font-family: Helvetica, arial, sans-serif;
+	font-size: 18px;
+	font-weight: bold;
+	font-size: 2.5vw;
+	line-height: 2;
+	padding-top: 10px;
+	padding-bottom: 10px;
+} */
+
+
+.bigger {
+	font-size: medium;;
+	/* font-weight: bold; */
+	font-family: Helvetica, arial, sans-serif;
+
+  }
+
+.streakBox{
+	width: 80%;
+	height: 325px;
+	flex: 1;
+	display: flex;
+	padding: 30px;
+	border: 2px solid gray;
+	border-radius: 22px;
+	
+}
+
+.streakText{
+	padding: auto;
+	font-size: 40px;
+	/* font-weight: bold; */
+	font-family: Helvetica, arial, sans-serif;
+	position: fixed; /* or absolute */
+	
+	left: 45%;
+	/* bring your own prefixes */
+	transform: translate(-50%, -50%);
+}
+
+.streakNumber{
+	font-size: 100px;
+	font-weight: bold;
+	opacity: 10%;
+	font-family: Helvetica, arial, sans-serif;
+	position: fixed; /* or absolute */
+	font-family: Helvetica, arial, sans-serif;
+	top: 45%;
+	left: 45%;
+	/* bring your own prefixes */
+	transform: translate(-50%, -50%);
+}
+  
+
+.streakIcon{
+	opacity: 10%;
+	position: fixed; /* or absolute */
+	top: 32%;
+	left: 45%;
+	/* bring your own prefixes */
+	transform: translate(-50%, -50%);
+	/* filter: invert(70%) sepia(94%) saturate(5873%) hue-rotate(167deg) brightness(103%) contrast(101%); */
+	
+}
+
+.streakNumberOnFire{
+	font-size: 100px;
+	font-weight: bold;
+	font-family: Helvetica, arial, sans-serif;
+	position: fixed; /* or absolute */
+	color: #ff8f3c;
+	top: 45%;
+	left: 45%;
+	/* bring your own prefixes */
+	transform: translate(-50%, -50%);
+}
+
+.streakIconOnFire{
+	opacity: 100%;
+	position: fixed; /* or absolute */
+	top: 32%;
+	left: 45%;
+	/* bring your own prefixes */
+	transform: translate(-50%, -50%);
+	/* filter: invert(70%) sepia(94%) saturate(5873%) hue-rotate(167deg) brightness(103%) contrast(101%); */
+	filter: invert(60%) sepia(82%) saturate(659%) hue-rotate(331deg) brightness(101%) contrast(101%);
+}
+
+
+.streakWeekBox{
+	width: 80%;
+	height: 100px;
+	flex: 1;
+	display: flex;
+	padding: 30px;
+	border: 2px solid gray;
+	border-radius: 22px;
+	
+}
+
+.streakWeekText{
+    padding: auto;
+	font-size: 30px;
+	/* font-weight: bold; */
+	font-family: Helvetica, arial, sans-serif;
+	position: fixed; /* or absolute */
+	
+	left: 45%;
+	/* bring your own prefixes */
+	transform: translate(-50%, -50%);
+}
+
+.weekdays {
+	margin: 0;
+	top: 45%;
+	left: 45%;
+
+	padding: 10px;
+	padding-top: 50px;
+	background-color: transparent;;
+	width: 100%;
+}
+  
+.weekdays li {
+	display: inline-block;
+	width: 100%;
+	font-family: Helvetica, arial, sans-serif;
+	color: #666;
+	text-align: center;
+	font-size: 17px;
+}
+
+/* .weekdays li .active{
+	color: white;
+	padding: 10px;
+	background: #ff8f3c;
+	border: 3px solid #000;
+	line-height: 120px;
+	text-align: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+} */
+
+.weekdays li .active{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background-color: #ff8f3c;
+	color: #666;
+	min-width: 2em;
+	border-radius: 50%;
+	vertical-align: middle;
+}
+.weekdays li .active:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 100%;
+  }
+  
+
+.weekdays li .disabled{
+	color: #666;
+	padding: 7px;
+	opacity: 10%;
+	border-radius: 100px;
+}
+
+.weekdays li .selected{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgb(73, 73, 73);
+	color: rgb(192, 192, 192);
+	min-width: 2em;
+	border-radius: 50%;
+	vertical-align: middle;
+}
+.weekdays li .selected:before{
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 100%;
+}
+
+/* Add media queries for smaller screens */
+@media screen and (max-width:720px) {
+	.weekdays li, .days li {width: 13.1%;}
+  }
+  
+@media screen and (max-width: 420px) {
+	.weekdays li, .days li {width: 12.5%;}
+	.days li .active {padding: 2px;}
+}
+
+@media screen and (max-width: 290px) {
+	.weekdays li, .days li {width: 12.2%;}
+}

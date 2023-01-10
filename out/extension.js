@@ -7,6 +7,7 @@ const auto_git_1 = require("./vcs/auto-git");
 const webview_1 = require("./afk/webview");
 const sessionUpdate_1 = require("./session/sessionUpdate");
 const webview_2 = require("./tutorial/webview");
+const webview_3 = require("./streak/webview");
 let autoGit;
 //let tutorial: Tutorial;
 //activate function registers all listed commands and initializes some classes on startup
@@ -21,6 +22,7 @@ function activate(context) {
     //start afk using its local activation function
     (0, webview_1.activateAfkWebView)(context);
     (0, webview_2.activateTutorialWebView)(context);
+    (0, webview_3.activateStreakWebView)(context);
 }
 exports.activate = activate;
 function deactivate() {

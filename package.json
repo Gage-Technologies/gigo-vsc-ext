@@ -84,6 +84,11 @@
           "id": "tutorial",
           "title": "Tutorial",
           "icon": "$(book)"
+        },
+        {
+          "id": "streak",
+          "title": "Streak",
+          "icon": "$(flame)"
         }
       ]
     },
@@ -100,6 +105,13 @@
           "id": "gigo.tutorialView",
           "type": "webview",
           "name": "GIGO Tutorial"
+        }
+      ],
+      "streak": [
+        {
+          "id": "gigo.streakView",
+          "type": "webview",
+          "name": "GIGO Streak"
         }
       ]
     },

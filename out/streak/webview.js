@@ -15,6 +15,8 @@ exports.activateStreakWebView = activateStreakWebView;
 class StreakWebViewprovider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;
+        this.activeDays = [];
+        this.activeDays = [1, 2];
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
     }
@@ -61,6 +63,7 @@ class StreakWebViewprovider {
     //                         }
     //                     } catch (err) {
     //                         console.log(err);
+    // main.css
     //                     }
     //                     break;
     //                 case "startCodeTour":
@@ -212,14 +215,14 @@ class StreakWebViewprovider {
                     <span class="streakWeekText">Week In Review</span>
                     <br/>
                     <br/>
-                    <ul class="weekdays">
-                        <li><span class="active">M</span></li>
-                        <li><span class="active">T</span></li>
-                        <li><span class="selected">W</span></li>
-                        <li>T</li>
-                        <li>F</li>
-                        <li>S</li>
-                        <li>S</li>
+                    <ul class="weekdays" >
+                        <li><span class=${this.activeDays.includes(0) && this.activeDays.includes(1) ? "activeLeft" : this.activeDays.includes(0) && !this.activeDays.includes(1) ? "alone" : ""}>M</span></li>
+                        <li><span class="leftActive">T</span></li>
+                        <li><span class="active">W</span></li>
+                        <li><span class="rightActive">T</span></li>
+                        <li><span>F</span></li>
+                        <li><span class="alone">S</span></li>
+                        <li><span class=${this.activeDays.includes(6) && this.activeDays.includes(5) ? "activeRight" : this.activeDays.includes(6) && !this.activeDays.includes(5) ? "alone" : ""}>S</span></li>
                     </ul>
 
                 </div>

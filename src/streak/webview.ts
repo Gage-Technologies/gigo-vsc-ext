@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { Uri, Webview } from 'vscode';
 import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
 
+
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 export async function activateStreakWebView(context: vscode.ExtensionContext) {
     //register afk provider by calling class constructor
@@ -25,16 +26,22 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     public toolkitUri!: vscode.Uri;
     public mainUri!: vscode.Uri;
     public baseWorkspaceUri!: vscode.Uri;
+
+    public activeDays: number[] = []
    
 
     public static readonly viewType = 'gigo.streakView';
 
     private _view?: vscode.WebviewView;
 
+  
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
     ) {
+
+        this.activeDays = [1,2]
+
         
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
@@ -92,7 +99,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
     //                     } catch (err) {
     //                         console.log(err);
-
+    // main.css
     //                     }
     //                     break;
     //                 case "startCodeTour":
@@ -285,14 +292,14 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                     <span class="streakWeekText">Week In Review</span>
                     <br/>
                     <br/>
-                    <ul class="weekdays">
-                        <li><span class="active">M</span></li>
-                        <li><span class="active">T</span></li>
-                        <li><span class="selected">W</span></li>
-                        <li>T</li>
-                        <li>F</li>
-                        <li>S</li>
-                        <li>S</li>
+                    <ul class="weekdays" >
+                        <li><span class=${this.activeDays.includes(0) && this.activeDays.includes(1) ? "activeLeft" : this.activeDays.includes(0) && !this.activeDays.includes(1) ? "alone" : ""}>M</span></li>
+                        <li><span class="leftActive">T</span></li>
+                        <li><span class="active">W</span></li>
+                        <li><span class="rightActive">T</span></li>
+                        <li><span>F</span></li>
+                        <li><span class="alone">S</span></li>
+                        <li><span class=${this.activeDays.includes(6) && this.activeDays.includes(5) ? "activeRight" : this.activeDays.includes(6) && !this.activeDays.includes(5) ? "alone" : ""}>S</span></li>
                     </ul>
 
                 </div>

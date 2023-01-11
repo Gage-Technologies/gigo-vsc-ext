@@ -95,6 +95,7 @@ body {
 
 
 .streakWeekBox{
+
 	width: 80%;
 	height: 100px;
 	flex: 1;
@@ -118,12 +119,13 @@ body {
 }
 
 .weekdays {
+	display: flex;
 	margin: 0;
 	top: 45%;
 	left: 45%;
 
 	padding: 10px;
-	padding-top: 50px;
+	padding-top: 30px;
 	background-color: transparent;;
 	width: 100%;
 }
@@ -131,6 +133,7 @@ body {
 .weekdays li {
 	display: inline-block;
 	width: 100%;
+	height: 100%;
 	font-family: Helvetica, arial, sans-serif;
 	color: #666;
 	text-align: center;
@@ -150,22 +153,92 @@ body {
 } */
 
 .weekdays li .active{
-	display: inline-flex;
+	display: inline-block;;
+	/* align-items: center;
+	justify-content: center; */
+	background-color: #ff8f3c;
+	color: #666;
+	min-width: 95%;
+	min-height: 75%;
+	/* vertical-align: middle; */
+	border-right: 10px solid #ff8f3c !important;
+}
+
+.weekdays li .alone{
+	display: inline-block;
 	align-items: center;
 	justify-content: center;
 	background-color: #ff8f3c;
 	color: #666;
-	min-width: 2em;
+	min-width: 2.8em;
 	border-radius: 50%;
 	vertical-align: middle;
 }
-.weekdays li .active:before {
+
+.weekdays li .leftActive{
+	display: inline-block;
+	align-items: center;
+	justify-content: center;
+	background-color: #ff8f3c;
+	color: #666;
+	min-width: 95%;
+	min-height: 75%;
+	border-radius: 50% 0% 0% 50%;
+	vertical-align: middle;
+	/* border-right-width: 4em; */
+	border-right: 10px solid #ff8f3c !important;
+}
+
+.weekdays li .rightActive{
+	display: inline-block;
+	align-items: center;
+	justify-content: center;
+	background-color: #ff8f3c;
+	color: #666;
+	min-width: 95%;
+	min-height: 75%;
+	border-radius: 0% 50% 50% 0%;
+	vertical-align: middle;
+	border-left: 10px solid #ff8f3c !important;
+}
+
+
+
+.dot {
+	height: 25px;
+	width: variable;
+	background-color: #bbb;
+	border-radius: 50%;
+	display: inline-block;
+  }
+/* .weekdays li .active:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 100%;
+  } */
+
+  .weekdays li .alone:before {
 	content:'';
 	float: left;
 	width: auto;
 	padding-bottom: 100%;
   }
-  
+
+  /* .weekdays li .rightActive:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 50%;
+  }
+
+  .weekdays li .leftActive:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 50%;
+  }
+   */
 
 .weekdays li .disabled{
 	color: #666;
@@ -180,7 +253,7 @@ body {
 	justify-content: center;
 	background-color: rgb(73, 73, 73);
 	color: rgb(192, 192, 192);
-	min-width: 2em;
+	min-width: 2.8em;
 	border-radius: 50%;
 	vertical-align: middle;
 }

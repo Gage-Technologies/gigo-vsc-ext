@@ -8,6 +8,7 @@ const webview_1 = require("./afk/webview");
 const sessionUpdate_1 = require("./session/sessionUpdate");
 const webview_2 = require("./tutorial/webview");
 const webview_3 = require("./streak/webview");
+const webview_4 = require("./teacher/webview");
 let autoGit;
 //let tutorial: Tutorial;
 //activate function registers all listed commands and initializes some classes on startup
@@ -23,6 +24,7 @@ function activate(context) {
     (0, webview_1.activateAfkWebView)(context);
     (0, webview_2.activateTutorialWebView)(context);
     (0, webview_3.activateStreakWebView)(context);
+    (0, webview_4.activateTeacherWebView)(context);
 }
 exports.activate = activate;
 function deactivate() {

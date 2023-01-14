@@ -13,6 +13,8 @@ export async function activateTeacherWebView(context: vscode.ExtensionContext) {
     }
     
 
+    
+
     //push and regsitser necessary commands
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(TeacherWebViewprovider.viewType, provider));
@@ -253,7 +255,7 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
 
 
          // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'tutorial', 'media', 'buttons.js'));
+         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'teacher', 'media', 'buttons.js'));
 
          // Do the same for the stylesheet.
          const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'tutorial', 'media', 'reset.css'));
@@ -278,11 +280,12 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
                 and only allow scripts that have a specific nonce.
                 (See the 'webview-sample' extension sample for img-src content security policy examples)
             -->
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+            <meta http-equiv="Content-Security-Policy" default-src * 'unsafe-inline' 'unsafe-eval'; script-src ${webview.cspSource} img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link href="${styleResetUri}" rel="stylesheet">
             <link href="${styleVSCodeUri}" rel="stylesheet">
             <link href="${styleMainUri}" rel="stylesheet">
+         
             <title>GIGO AFK Session</title>
         </head>
         
@@ -290,7 +293,25 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
             Code Teacher is a ride along tool 
             
         </div>
-        <body>
+        <div class="codeTeacherAnimation">
+            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            <lottie-player src="https://assets7.lottiefiles.com/private_files/lf30_Fy9W8c.json"  background="transparent"  speed=".6"    loop  autoplay></lottie-player>   <body>
+        </div>
+            <br/>
+            <br/>
+            
+            
+            <div class="dropdown">
+                <button onclick="myFunction()" class="dropbtn">Dropdown⬇</button>
+                <div id="myDropdown" class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div> 
+
+            <br/>
+            <br/>
             <br/>
             <br/>
             
@@ -302,7 +323,7 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
                 <br/>
                 <br/>
                 <div class="input-group">
-                    <label class="inputTitle">Some input</label>
+                    <text class="inputTitle" style="font-size: 60px;">Some input</text>
                     <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
                 </div>
                 <br/>
@@ -319,11 +340,12 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
 
             <div class="outputBox">
                 <label class="outputTitle">Solution</label>
-                <textarea class="outputBox" name="outputBox" rows="20" cols="10" wrap="soft"></textarea>
+                <textarea class="outputBox" name="outputBox" rows="5" cols="10" wrap="soft"></textarea>
             </div>
             
             <br/>
             <br/>
+
             
         </body>
 

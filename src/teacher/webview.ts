@@ -36,6 +36,11 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
     public minPages = 1;
     public maxPages = 8;
     public numOfTutorials: number = 0;
+    public loadingTitle: any;
+    public loadingIcon: any;
+    public submitButton: any;
+    public inputBox1: any;
+    public inputBox2: any;
     public pageButtonsHTML = "";
     public tourSteps: any[] = [];
     public codeTour = vscode.extensions.getExtension(
@@ -59,6 +64,30 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
     constructor(
         private readonly _extensionUri: vscode.Uri,
     ) {
+
+        const fs = require('fs');
+        console.log(fs.readFileSync("/home/user/.gigo/ws-config.json", 'utf-8'));
+
+        this.loadingIcon = `<div id="loadingAnim" style="display:none">
+        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+        <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  loop  autoplay></lottie-player>
+        </div>`;
+
+        this.submitButton = `<div class="buttonWrapper">
+        <button class="submitButton" onclick="submitFunc()">Fix My Code</button>
+        </div>`;
+
+        this.inputBox1 = `<div class="input-group">
+        <label class="inputTitle">Code</label>
+        <textarea class="inputBox" name="inputBox1" rows="10" cols="10" wrap="soft"></textarea>
+        </div>`;
+
+        this.inputBox2 = `<div class="input-group">
+        <text class="inputTitle">Error</text>
+        <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
+        </div>`;
+
+        this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
         
         // load configuration value for afk from
         // let gigoConfig = vscode.workspace.getConfiguration("gigo");
@@ -66,101 +95,81 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
         
     }
 
-    // //_getCurrentPage retrieves the number of the current page from the configfile
-    // private _getCurrentPage(webview: vscode.Webview) {
-    //     //get message from message hander of current page number
-    //     webview.onDidReceiveMessage(
-    //         async (message: any) => {
-    //             const command = message.command;
-    //             const text = message.text;
+    //_getCurrentPage retrieves the number of the current page from the configfile
+    private _getCurrentPage(webview: vscode.Webview) {
+        //get message from message hander of current page number
+        webview.onDidReceiveMessage(
+            async (message: any) => {
+                const command = message.command;
+                const text = message.text;
 
-    //             //verify command received is currentPage and write to config file
-    //             switch (command) {
-    //                 case "currentPage":
-    //                     try {
-    //                         const fs = require('fs');
-    //                         //create json formatted string
-    //                         let yamlContent = `{\"currentPageNum\": ${text}}`;
-    //                         //write json formatted string to config file
-    //                         fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", yamlContent);
-    //                         //render page with current page number as main page
-    //                         if (this._view) {
-    //                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                             await this._getHtmlForWebview(this._view.webview, "");
+                //verify command received is currentPage and write to config file
+                switch (command) {
+                    
+                    case "loadingIcon":
+                        try {
+                            if (this._view) {
+                                this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
+                                if (message.text === "enable"){
+                                    this.loadingIcon =  `<div id="loadingAnim">
+                                    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+                                    <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
+                                    </div>`;
+                                    this.submitButton =  `<div class="buttonWrapper">
+                                    <button disabled class="submitButton"><div class="button--loading"/></button>
+                                    </div>`;
 
-    //                         }
-    //                     } catch (err) {
-    //                         console.log(err);
-    //                     }
-    //                     break;
-    //                 case "nextGroup":
-    //                     try {
-    //                         if (this._view) {
-    //                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                             await this._getHtmlForWebview(this._view.webview, "next");
+                                    this.inputBox1 = `<div hidden class="input-group">
+                                    <label class="inputTitle">Code</label>
+                                    <textarea class="inputBox" name="inputBox1" rows="10" cols="10" wrap="soft"></textarea>
+                                    </div>`;
 
-    //                         }
+                                    this.inputBox2 = `<div hidden class="input-group">
+                                    <text class="inputTitle">Error</text>
+                                    <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
+                                    </div>`;
 
-    //                     } catch (err) {
-    //                         console.log(err);
+                                    this.loadingTitle = `<div class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
 
-    //                     }
-    //                     break;
-    //                 case "lastGroup":
-    //                     try {
-    //                         if (this._view) {
-    //                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                             await this._getHtmlForWebview(this._view.webview, "last");
+                                }else{
+                                    this.loadingIcon = `<div id="loadingAnim" style="display:none">
+                                    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+                                    <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
+                                    </div>`;
+                                    this.submitButton =  `<div class="buttonWrapper">
+                                    <button class="submitButton" onclick="submitFunc()">Fix My Code</button>
+                                    </div>`;
+                                    this.inputBox1 = `<div class="input-group">
+                                    <label class="inputTitle">Code</label>
+                                    <textarea class="inputBox" name="inputBox1" rows="10" cols="10" wrap="soft"></textarea>
+                                    </div>`;
 
-    //                         }
+                                    this.inputBox2 = `<div class="input-group">
+                                    <text class="inputTitle">Error</text>
+                                    <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
+                                    </div>`;
 
-    //                     } catch (err) {
-    //                         console.log(err);
+                                    this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
 
-    //                     }
-    //                     break;
-    //                 case "startCodeTour":
-    //                     try {
-    //                         if (this.codeTour) {
-    //                             const codeTourApi = this.codeTour.exports;
-    //                             let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-    //                             codeTourApi.startTourByUri(uri);
-    //                         }
+                                }
 
-    //                     } catch (err) {
-    //                         console.log(err);
-
-    //                     }
-    //                     break;
-    //                 case "startCodeTourStep":
-    //                     try {
-    //                         const step = message.step;
-    //                         if (this.codeTour) {
-    //                             const codeTourApi = this.codeTour.exports;
-    //                             let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-    //                             try {
-    //                                 await codeTourApi.endCurrentTour();
-    //                             } catch (err) {}
-    //                             await codeTourApi.startTourByUri(uri, 0);
-    //                             await codeTourApi.startTourByUri(uri, step - 1);
-    //                             // await codeTourApi.startTourByUri(uri, step - 1);
-    //                             //codeTourApi.startTourByUri(uri, step - 1);
+                                console.log(this.loadingIcon);
                                 
-    //                             //codeTourApi.endCurrentTour();
-    //                         }
+                                await this._getHtml(this._view.webview);
 
-    //                     } catch (err) {
-    //                         console.log(err);
+                            }
 
-    //                     }
-    //                     break;
+                        } catch (err) {
+                            console.log(err);
 
-    //                     return;
-    //             }
-    //         },
-    //         undefined,
-    //     );
-    // }
+                        }
+                        break;
+                   
+                }
+            },
+            undefined,
+        );
+    }
 
 
     //resolveWebviewView handles editor callback functions and basic html render
@@ -198,7 +207,7 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
 
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-            // this._getCurrentPage(this._view.webview);
+            this._getCurrentPage(this._view.webview);
             await this._getHtmlForWebview(this._view.webview, "");
         }
 
@@ -233,7 +242,7 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
     //_getHtmlForWebview renders afk enbaled and disabled pages
     private async _getHtmlForWebview(webview: vscode.Webview, group: string) {
         {
-            await this._getHtml(webview, group);
+            await this._getHtml(webview);
         }
     }
 
@@ -244,15 +253,41 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
     }
 
 
+    // public sync codeRequest(){
+    //       //awair result from http function in GIGO
+    //     let res = await axios.post(
+    //         "http://gigo.gage.intranet/api/internal/ws/afk", 
+    //         {
+    //             // eslint-disable-next-line @typescript-eslint/naming-convention
+    //             "coder_id": wsID,
+    //             "secret": secret,
+    //             // eslint-disable-next-line @typescript-eslint/naming-convention
+    //             "add_min": addMin
+    //         }
+    //     );
+
+    //     //if non status code 200 is returned, return -1 and log failure message
+    //     if (res.status !== 200) { 
+    //         console.log("failed to execute live-check: ", res);
+    //         return -1;
+    //     }
+
+    //     //set afk variable to true
+    //     isAFK = true;
+        
+    //     //return afk timestamp
+    //     return res.data.expiration;
+    // }
+
 
    
 
     //_getAfkDisabledHtml renders page for when afk is disabled
     //takes in a group string to determine whether to render the whole page or
     //to just render the next and last group page controls
-    private async _getHtml(webview: vscode.Webview, group: string) {
+    private async _getHtml(webview: vscode.Webview) {
       
-
+        
 
          // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
          const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'teacher', 'media', 'buttons.js'));
@@ -267,9 +302,10 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
         // Use a nonce to only allow a specific script to be run.
         const nonce = getNonce();
         
-
+        
 
         if (this._view) {
+            
             //render the html for the page by passing it to the view
             this._view.webview.html = `<!DOCTYPE html>
         <html lang="en">
@@ -286,51 +322,44 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
             <link href="${styleVSCodeUri}" rel="stylesheet">
             <link href="${styleMainUri}" rel="stylesheet">
          
-            <title>GIGO AFK Session</title>
+            <title>GIGO Code Teacher</title>
         </head>
-        
-        <div id="big">
-            Code Teacher is a ride along tool 
-            
+        <div class = "betaAnimation">
+            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
+            <lottie-player src="https://lottie.host/e7405d0c-ceaa-42a4-accf-5699b5009196/VIpLHU1HM2.json" background="transparent" speed="1" loop autoplay></lottie-player> 
         </div>
-        <div class="codeTeacherAnimation">
-            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-            <lottie-player src="https://assets7.lottiefiles.com/private_files/lf30_Fy9W8c.json"  background="transparent"  speed=".6"    loop  autoplay></lottie-player>   <body>
-        </div>
-            <br/>
-            <br/>
-            
-            
-            <div class="dropdown">
-                <button onclick="myFunction()" class="dropbtn">Dropdown⬇</button>
-                <div id="myDropdown" class="dropdown-content">
-                    <a href="#">Link 1</a>
-                    <a href="#">Link 2</a>
-                    <a href="#">Link 3</a>
+        <details><summary><b class="aboutTitle">About Code Teacher</b></summary>
+            <div id="aboutContent" class="aboutText">
+                <div class="big">
+                    GIGO Code Teacher is an AI system that helps users interpret error messages and understand problems in their code. It is a powerful tool designed to assist developers in quickly identifying errors, as well as providing explanations for why they occurred.
                 </div>
-            </div> 
-
+                <div class="codeTeacherAnimation">
+                    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+                    <lottie-player src="https://assets7.lottiefiles.com/private_files/lf30_Fy9W8c.json"  background="transparent"  speed=".6"    loop  autoplay></lottie-player>   <body>
+                </div>
+                <div class="big">
+                    During its experimental Beta release, you can enjoy using Code Teacher for free while it continues to learn and improve with each use. However, please note that since this is an experimental system at times the responses may be incorrect or incoherent so always double-check before making any changes based on the advice provided by Code Teacher.
+                </div>
+            </div>
+        </details>
+       
+            <br/>
+            <br/>
             <br/>
             <br/>
             <br/>
             <br/>
             
             <div class="inputs">
-                <div class="input-group">
-                    <label class="inputTitle">Some input</label>
-                    <textarea class="inputBox" name="inputBox1" rows="10" cols="10" wrap="soft"></textarea>
-                </div>
+                ${this.inputBox1}
                 <br/>
                 <br/>
-                <div class="input-group">
-                    <text class="inputTitle" style="font-size: 60px;">Some input</text>
-                    <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
-                </div>
+                ${this.inputBox2}
+                ${this.loadingTitle}
+                ${this.loadingIcon}
                 <br/>
                 <br/>
-                <div class="buttonWrapper">
-                    <button class="submitButton">Fix My Code</button>
-                </div>
+                ${this.submitButton}
             </div>
 
             <br/>
@@ -338,9 +367,27 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
             <br/>
             <br/>
 
+            
+            
             <div class="outputBox">
                 <label class="outputTitle">Solution</label>
-                <textarea class="outputBox" name="outputBox" rows="5" cols="10" wrap="soft"></textarea>
+                <br/>
+                <br/>
+                <div class="solutionBox">
+                    <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                        <pre>
+import chad-lang
+import os
+
+def isBased():
+    for i in os.opendir("/daniel-gym-photos/):
+        if i.contains("daniel"):
+            print("whata fuckin bloatlord chad")
+            return True
+isBased()
+                        </pre>
+                    </code>
+                </div>
             </div>
             
             <br/>

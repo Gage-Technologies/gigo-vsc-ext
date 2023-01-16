@@ -27,3 +27,23 @@ window.onclick = function(event) {
     }
   }
 } 
+
+
+function aboutFunc(){
+  document.getElementById("aboutContent").classList.toggle("show");
+  vscode.postMessage({
+    type: "hello",
+    text: `about`,
+  });
+}
+
+function submitFunc(){
+  vscode.postMessage({
+    type: "hello",
+    text: `about`,
+  });
+    vscode.postMessage({
+      command: "loadingIcon",
+      text: `enable`,
+    });
+}

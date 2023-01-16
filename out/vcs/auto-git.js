@@ -17,6 +17,11 @@ class AutoGit {
         this.checkWorkspace();
         //ensure that current workspace is a git repository
         this.checkGit();
+        // ensure that the auto git directory exists
+        if (!this.isInitialized) {
+            this.setup();
+            vscode.window.showInformationMessage('Auto-Git initialized.');
+        }
         try {
             //ensure that config exists
             fs.statSync(this.cfg);
@@ -41,7 +46,7 @@ class AutoGit {
     activate(context) {
         //register necessary commands
         let cmdversion = vscode.commands.registerCommand('autogit.version', () => {
-            vscode.window.showInformationMessage('Version 1.1.4 by Eray Sönmez <dev@ray-works.de>');
+            vscode.window.showInformationMessage('Version 0.0.1 by Gigo Dev <dev@gigo.dev> (Forked From Version 1.1.4 by Eray Sönmez <dev@ray-works.de>)');
         });
         let cmdinit = vscode.commands.registerCommand('autogit.init', () => {
             if (this.checkWorkspace() && this.checkGit()) {
@@ -62,18 +67,20 @@ class AutoGit {
         let cmdstart = vscode.commands.registerCommand('autogit.start', () => {
             if (this.checkWorkspace() && this.checkGit()) {
                 //ensure that git is initialized
-                if (this.isInitialized) {
-                    //if extension is not currently active start it
-                    if (!this.running) {
-                        this.start();
-                        vscode.window.showInformationMessage('Auto-Git started.');
-                    }
-                    else {
-                        vscode.window.showInformationMessage('Auto-Git is already running.');
-                    }
+                if (!this.isInitialized) {
+                    this.setup();
+                    vscode.window.showInformationMessage('Auto-Git initialized.');
                 }
                 else {
-                    vscode.window.showInformationMessage('Run `Auto-Git: Init` before `Auto-Git: Start`.');
+                    vscode.window.showInformationMessage('Auto-Git is already initialized.');
+                }
+                //if extension is not currently active start it
+                if (!this.running) {
+                    this.start();
+                    vscode.window.showInformationMessage('Auto-Git started.');
+                }
+                else {
+                    vscode.window.showInformationMessage('Auto-Git is already running.');
                 }
             }
             else {
@@ -102,13 +109,16 @@ class AutoGit {
                     vscode.window.showInformationMessage('Auto-Git restarted.');
                 }
                 else {
-                    if (this.isInitialized) {
-                        this.start();
-                        vscode.window.showInformationMessage('Auto-Git restarted.');
+                    //ensure that git is initialized
+                    if (!this.isInitialized) {
+                        this.setup();
+                        vscode.window.showInformationMessage('Auto-Git initialized.');
                     }
                     else {
-                        vscode.window.showInformationMessage('Run `Auto-Git: Init` before `Auto-Git: Restart`.');
+                        vscode.window.showInformationMessage('Auto-Git is already initialized.');
                     }
+                    this.start();
+                    vscode.window.showInformationMessage('Auto-Git restarted.');
                 }
             }
             else {
@@ -138,12 +148,12 @@ class AutoGit {
     currentConfigSchema() {
         return {
             "runOnStart": true,
-            'updateInterval': 5,
+            'updateInterval': 18,
             'logging': true,
             'silent': false,
             "commitMessage": "--- Auto Git Commit ---",
             "locale": "en-US",
-            "timeZone": "Europe/Berlin"
+            "timeZone": "America/Chicago"
         };
     }
     compareKeys(a, b) {
@@ -289,17 +299,18 @@ class AutoGit {
         }
     }
     setup() {
+        console.log("setup auto git");
         try {
             fs.statSync(this.homedir);
         }
         catch (err) {
-            fs.mkdirSync(this.homedir);
+            fs.mkdirSync(this.homedir, { recursive: true });
         }
         try {
             fs.statSync(this.logsdir);
         }
         catch (err) {
-            fs.mkdirSync(this.logsdir);
+            fs.mkdirSync(this.logsdir, { recursive: true });
         }
         try {
             fs.statSync(this.cfg);
@@ -339,9 +350,9 @@ class AutoGit {
                 fs.statSync(vscode.workspace.workspaceFolders[0].uri.fsPath);
                 console.log('[Auto-Git] [OK]: Workspace found: ' + vscode.workspace.workspaceFolders[0].uri.fsPath);
                 this.workspace = vscode.workspace.workspaceFolders[0].uri;
-                this.homedir = this.workspace.fsPath.concat(path.sep + '.autogit');
-                this.logsdir = this.workspace.fsPath.concat(path.sep + '.autogit/logs');
-                this.cfg = this.workspace.fsPath.concat(path.sep + '.autogit/autogit.json');
+                this.homedir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit');
+                this.logsdir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/logs');
+                this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
                 this.gitdir = this.workspace.fsPath.concat(path.sep + '.git');
                 this.gitcfg = this.workspace.fsPath.concat(path.sep + '.git/config');
                 return true;

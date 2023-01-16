@@ -208,6 +208,16 @@ class TeacherWebViewprovider {
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'teacher', 'media', 'main.css'));
         // Use a nonce to only allow a specific script to be run.
         const nonce = getNonce();
+        let solution = `
+import chad-lang
+import os
+
+def isBased():
+    for i in os.opendir("/daniel-gym-photos/):
+        if i.contains("daniel"):
+            print("whata fuckin bloatlord chad")
+            return True
+isBased()`;
         if (this._view) {
             //render the html for the page by passing it to the view
             this._view.webview.html = `<!DOCTYPE html>
@@ -248,10 +258,6 @@ class TeacherWebViewprovider {
        
             <br/>
             <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
             
             <div class="inputs">
                 ${this.inputBox1}
@@ -279,15 +285,7 @@ class TeacherWebViewprovider {
                 <div class="solutionBox">
                     <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
                         <pre>
-import chad-lang
-import os
-
-def isBased():
-    for i in os.opendir("/daniel-gym-photos/):
-        if i.contains("daniel"):
-            print("whata fuckin bloatlord chad")
-            return True
-isBased()
+${solution}
                         </pre>
                     </code>
                 </div>

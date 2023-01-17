@@ -23,70 +23,71 @@ body {
   }
 
 .streakBox{
-	width: 80%;
-	height: 325px;
-	flex: 1;
-	display: flex;
-	padding: 30px;
-	border: 2px solid gray;
+	width: 80vw;
+	height: auto;
+	padding: 2vw;
+	box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
 	border-radius: 22px;
-	
+	display: flex;
+	justify-content: center;
+    align-items: center;
+	flex-wrap: wrap;
 }
 
 .streakText{
-	padding: auto;
-	font-size: 40px;
+	/* padding: auto; */
+	/* font-size: .3em; */
 	/* font-weight: bold; */
 	font-family: Helvetica, arial, sans-serif;
-	position: fixed; /* or absolute */
+	/* position: fixed; or absolute */
+	font-size: 6vw;
 	
-	left: 45%;
+	
+	/* left: 45%; */
 	/* bring your own prefixes */
-	transform: translate(-50%, -50%);
+	/* transform: translate(-50%, -50%); */
 }
 
 .streakNumber{
-	font-size: 100px;
+	font-size: 20vw;
 	font-weight: bold;
 	opacity: 10%;
 	font-family: Helvetica, arial, sans-serif;
-	position: fixed; /* or absolute */
-	font-family: Helvetica, arial, sans-serif;
-	top: 45%;
-	left: 45%;
+	/* position: fixed; */
+	
+	/* top: 55%; */
+	/* left: 45%; */
 	/* bring your own prefixes */
-	transform: translate(-50%, -50%);
+	/* transform: translate(-50%, -50%); */
 }
   
 
 .streakIcon{
 	opacity: 10%;
-	position: fixed; /* or absolute */
-	top: 32%;
-	left: 45%;
+	height: 10vh;
+	width: auto;
+	/* position: fixed; or absolute */
+	/* top: 32%; */
+	/* left: 45%; */
 	/* bring your own prefixes */
-	transform: translate(-50%, -50%);
+	/* transform: translate(-50%, -50%); */
 	/* filter: invert(70%) sepia(94%) saturate(5873%) hue-rotate(167deg) brightness(103%) contrast(101%); */
 	
 }
 
 .streakNumberOnFire{
-	font-size: 100px;
+	font-size: 20vw;
 	font-weight: bold;
+	opacity: 100%;
 	font-family: Helvetica, arial, sans-serif;
-	position: fixed; /* or absolute */
-	color: #ff8f3c;
-	top: 45%;
-	left: 45%;
-	/* bring your own prefixes */
-	transform: translate(-50%, -50%);
+	color: #ff7a0e;
 }
 
 .streakIconOnFire{
 	opacity: 100%;
 	position: fixed; /* or absolute */
 	top: 32%;
-	left: 45%;
+	left: 100%;
 	/* bring your own prefixes */
 	transform: translate(-50%, -50%);
 	/* filter: invert(70%) sepia(94%) saturate(5873%) hue-rotate(167deg) brightness(103%) contrast(101%); */
@@ -94,113 +95,115 @@ body {
 }
 
 
-.streakWeekBox{
+.streakAnimOnFire{
+	opacity: 100%;
+	display: inline;
+	align-items: center;
+    justify-content: center;
+	height: auto;
+	width: 50vw;
+}
 
-	width: 80%;
-	height: 100px;
-	flex: 1;
-	display: flex;
-	padding: 30px;
-	border: 2px solid gray;
+.streakAnim{
+	opacity: 10%;
+	display: inline;
+	align-items: center;
+    justify-content: center;
+	height: auto;
+	width: 50vw;
+}
+
+
+.streakWeekBox{
+	width: 80vw;
+	height: auto;
+	padding: 2vw;
+	box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
 	border-radius: 22px;
-	
+	display: flex;
+	justify-content: center;
+    align-items: center;
+	flex-wrap: wrap;
 }
 
 .streakWeekText{
-    padding: auto;
-	font-size: 30px;
-	/* font-weight: bold; */
-	font-family: Helvetica, arial, sans-serif;
-	position: fixed; /* or absolute */
-	
-	left: 45%;
-	/* bring your own prefixes */
-	transform: translate(-50%, -50%);
+    font-family: Helvetica, arial, sans-serif;
+	/* position: fixed; or absolute */
+	font-size: 6vw;
 }
 
 .weekdays {
+	width: 80vw;
+	height: auto;
+	align-items: center;
+    justify-content: center;
+	white-space: nowrap;
 	display: flex;
-	margin: 0;
-	top: 45%;
-	left: 45%;
-
-	padding: 10px;
-	padding-top: 30px;
-	background-color: transparent;;
-	width: 100%;
+	justify-content: center;
+    align-items: center;
+	flex-wrap: wrap;
 }
   
-.weekdays li {
+/* .weekdays {
+	height: 1em;
+	width: 1em;
+	border-radius: 50%;
 	display: inline-block;
-	width: 100%;
-	height: 100%;
-	font-family: Helvetica, arial, sans-serif;
+} */
+
+.weekday {
+	opacity: 10%;
+	font-family: monospace,monospace;
+	background-color: #ff7a0e;
 	color: #666;
 	text-align: center;
-	font-size: 17px;
+	vertical-align: middle;
+	line-height: 8vw;
+	font-size: 4vw;
+	border-radius: 50%;
+	width: 8vw;
+	height: 8vw;
+}
+
+.separator{
+	opacity: 10%;
+	color: #ff7a0e;
+	
+	
+	
+	font-size: 4vw;
+}
+
+.separatorActive{
+	opacity: 100%;
+}
+
+.weekdayActive{
+	opacity: 100%;
+}
+
+.weekdayToday{
+	opacity: 80%;
+	background-color: #144e5f;
+	color: white
 }
 
 /* .weekdays li .active{
-	color: white;
-	padding: 10px;
-	background: #ff8f3c;
-	border: 3px solid #000;
-	line-height: 120px;
-	text-align: center;
-	width: 34px;
-	height: 34px;
-	border-radius: 50%;
-} */
-
-.weekdays li .active{
-	display: inline-block;;
+	
 	/* align-items: center;
 	justify-content: center; */
-	background-color: #ff8f3c;
+	/* background-color: #ff8f3c;
 	color: #666;
-	min-width: 95%;
-	min-height: 75%;
-	/* vertical-align: middle; */
-	border-right: 10px solid #ff8f3c !important;
-}
-
-.weekdays li .alone{
-	display: inline-block;
-	align-items: center;
-	justify-content: center;
-	background-color: #ff8f3c;
-	color: #666;
-	min-width: 2.8em;
+	height: 2em;
+	width: 2em;
+	
 	border-radius: 50%;
-	vertical-align: middle;
-}
+	display: flex;; */
+	/* vertical-align: middle; */
+	
+/* } */
 
-.weekdays li .leftActive{
-	display: inline-block;
-	align-items: center;
-	justify-content: center;
-	background-color: #ff8f3c;
-	color: #666;
-	min-width: 95%;
-	min-height: 75%;
-	border-radius: 50% 0% 0% 50%;
-	vertical-align: middle;
-	/* border-right-width: 4em; */
-	border-right: 10px solid #ff8f3c !important;
-}
 
-.weekdays li .rightActive{
-	display: inline-block;
-	align-items: center;
-	justify-content: center;
-	background-color: #ff8f3c;
-	color: #666;
-	min-width: 95%;
-	min-height: 75%;
-	border-radius: 0% 50% 50% 0%;
-	vertical-align: middle;
-	border-left: 10px solid #ff8f3c !important;
-}
 
 
 

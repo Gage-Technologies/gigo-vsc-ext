@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { runInThisContext } from 'vm';
 import * as vscode from 'vscode';
 import { Uri, Webview } from 'vscode';
@@ -27,7 +28,11 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     public mainUri!: vscode.Uri;
     public baseWorkspaceUri!: vscode.Uri;
 
+    public streakAnim: any;
+    public streakNum: any;
+
     public activeDays: number[] = []
+    public isOnFire: boolean = false;
    
 
     public static readonly viewType = 'gigo.streakView';
@@ -42,12 +47,44 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         this.activeDays = [1,2]
 
-        
+        this.streakAnim = `<div class="streakAnim">
+        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
+        <lottie-player src="https://lottie.host/6a43c37a-8fb7-43e8-adcb-1a650a039733/NwYos3Ht64.json" background="transparent" speed="1"  loop autoplay></lottie-player>
+        </div>`;
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         
         
     }
+
+    //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
+    public async executeStreakCheck(wsID: any, secret: any, ownerID: any){
+        //awair result from http function in GIGO
+        let res = await axios.post(
+            "http://gigo.gage.intranet/api/internal/ws/afk", 
+            {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                "coder_id": wsID,
+                "secret": secret,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                "owner_id": ownerID,
+
+            }
+        );
+
+        //if non status code 200 is returned, return -1 and log failure message
+        if (res.status !== 200) { 
+            console.log("failed to execute live-check: ", res);
+            return -1;
+        }
+
+        this.isOnFire = res.data.is_on_fire;
+        this.activeDays = res.data.streak_week_days;
+        this.streakNum = res.data.current_streak_num;
+        
+        return; 
+    }
+
 
     // //_getCurrentPage retrieves the number of the current page from the configfile
     // private _getCurrentPage(webview: vscode.Webview) {
@@ -236,6 +273,13 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     //to just render the next and last group page controls
     private async _getHtml(webview: vscode.Webview, group: string) {
 
+            if (this.isOnFire){
+                this.streakAnim = `<div class="streakAnimOnFire">
+                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
+                <lottie-player src="https://lottie.host/943c92a4-fc4d-42d7-b9f5-fd5f2f2783bd/PgLfoB1v2G.json" background="transparent" speed="1" loop autoplay></lottie-player>
+                </div>`;
+            }
+
 
             // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
             const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'tutorial', 'media', 'buttons.js'));
@@ -276,9 +320,14 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
                     
 
-                    <img class="streakIcon" src="https://www.svgrepo.com/show/359972/fire.svg" align="right"
-                        alt="Size Limit logo by Anton Lovchikov" width="180" height="356">
-               
+
+
+
+                    
+
+                    
+                    ${this.streakAnim}
+                
                     <span class="streakNumber">
                         190
                        
@@ -292,15 +341,21 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                     <span class="streakWeekText">Week In Review</span>
                     <br/>
                     <br/>
-                    <ul class="weekdays" >
-                        <li><span class=${this.activeDays.includes(0) && this.activeDays.includes(1) ? "activeLeft" : this.activeDays.includes(0) && !this.activeDays.includes(1) ? "alone" : ""}>M</span></li>
-                        <li><span class="leftActive">T</span></li>
-                        <li><span class="active">W</span></li>
-                        <li><span class="rightActive">T</span></li>
-                        <li><span>F</span></li>
-                        <li><span class="alone">S</span></li>
-                        <li><span class=${this.activeDays.includes(6) && this.activeDays.includes(5) ? "activeRight" : this.activeDays.includes(6) && !this.activeDays.includes(5) ? "alone" : ""}>S</span></li>
-                    </ul>
+                    <div class="weekdays" >
+                        <div class="weekday"><span>M</span></div>
+                        <div class="separator">-</div>
+                        <div class="weekday weekdayActive"><span>T</span></div>
+                        <div class="separator separatorActive">-</div>
+                        <div class="weekday  weekdayActive"><span>W</span></div>
+                        <div class="separator">-</div>
+                        <div class="weekday"><span>T</span></div>
+                        <div class="separator">-</div>
+                        <div class="weekday weekdayActive"><span>F</span></div>
+                        <div class="separator">-</div>
+                        <div class="weekday weekdayToday"><span>S</span></div>
+                        <div class="separator">-</div>
+                        <div class="weekday"><span>S</span></div>
+                    </div>
 
                 </div>
                 <br/>

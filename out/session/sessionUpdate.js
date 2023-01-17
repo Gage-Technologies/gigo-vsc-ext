@@ -4,7 +4,7 @@ exports.executeAfkCheck = exports.executeLiveCheck = exports.activateTimeout = e
 const vscode = require("vscode");
 const axios_1 = require("axios");
 exports.userHasBeenActive = false;
-let nextTimeStamp = (Date.now() / 1000) + (3 * 60);
+let nextTimeStamp = (Date.now() / 1000) + (10 * 60);
 let isAFK = false;
 //activateTimeout is called when the extension is activated
 async function activateTimeout(context) {

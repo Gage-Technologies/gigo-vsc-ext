@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import axios from "axios";
 
 export let userHasBeenActive = false;
-let nextTimeStamp = (Date.now()/1000) + (3 * 60);
+let nextTimeStamp = (Date.now()/1000) + (10 * 60);
 let isAFK = false;
 
 //activateTimeout is called when the extension is activated

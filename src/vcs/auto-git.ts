@@ -16,13 +16,16 @@ class AutoGit implements vscode.Disposable {
     public running: boolean = false;
     private homedir!: string;
     private logsdir!: string;
-    public cfg!: string;
+    public cfg!: any;
     private gitdir!: string;
     private gitcfg!: string;
 	public isInitialized: boolean = false;
 
     //class constructor 
-    constructor(){
+    constructor(fileCfg: any){
+
+        this.cfg = fileCfg;
+        console.log(this.isInitialized);
         //attempt to find the home directory of workspace
 		this.checkWorkspace();
 
@@ -35,27 +38,27 @@ class AutoGit implements vscode.Disposable {
             vscode.window.showInformationMessage('Auto-Git initialized.');
         }
 
-		try {
-            //ensure that config exists
-            fs.statSync(this.cfg);
-			this.isInitialized = true;
+		// try {
+        //     //ensure that config exists
+        //     fs.statSync(this.cfg);
+		// 	this.isInitialized = true;
 
-            //read user git config
-            var userCfg: any = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
-            var currentCfg: any = this.currentConfigSchema();
-            //validate that all parameters are present in current config
-            if(!this.compareKeys(userCfg, currentCfg)){
-                const newProperties = Object.keys(currentCfg).filter(prop => !userCfg.hasOwnProperty(prop));
+        //     //read user git config
+        //     var userCfg: any = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+        //     var currentCfg: any = this.currentConfigSchema();
+        //     //validate that all parameters are present in current config
+        //     if(!this.compareKeys(userCfg, currentCfg)){
+        //         const newProperties = Object.keys(currentCfg).filter(prop => !userCfg.hasOwnProperty(prop));
 
-                newProperties.forEach(prop => {
-                    userCfg[prop] = currentCfg[prop];
-                });
+        //         newProperties.forEach(prop => {
+        //             userCfg[prop] = currentCfg[prop];
+        //         });
                 
-                fs.writeFileSync(this.cfg, JSON.stringify(userCfg, null, 2));
-            }
-        } catch (err) {
-            console.log(err);
-        }
+        //         fs.writeFileSync(this.cfg, JSON.stringify(userCfg, null, 2));
+        //     }
+        // } catch (err) {
+        //     console.log(err);
+        // }
 	}
 
     //actiavet() is called on startup
@@ -143,11 +146,15 @@ class AutoGit implements vscode.Disposable {
         context.subscriptions.push(cmdstop);
         context.subscriptions.push(cmdrestart);
     
-        if(this.isInitialized){
-            var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
-            if(cfg.runOnStart){
-                this.start();
-            }
+        // if(this.isInitialized){
+        //     var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+        //     if(cfg.runOnStart){
+        //         this.start();
+        //     }
+        // }
+
+        if(this.cfg.runOnStart){
+            this.start();
         }
     
         //create status bar icon for displaying time until next auto save
@@ -187,7 +194,9 @@ class AutoGit implements vscode.Disposable {
     //start() functions as main loop for auto-git extension
     public start(): void {
         //loads auto-git config into json object
-        var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+        // var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+
+        var cfg = this.cfg;
 
         //setting up local variables for auto-update intervals
         this.running = true;
@@ -349,21 +358,24 @@ class AutoGit implements vscode.Disposable {
             fs.mkdirSync(this.logsdir, {recursive: true});
         }
 
-        try {
-            fs.statSync(this.cfg);
-        } catch (err) {
-            fs.writeFileSync(this.cfg, JSON.stringify(this.currentConfigSchema(), null, 2));
-        }
+        // try {
+        //     fs.statSync(this.cfg);
+        // } catch (err) {
+        //     fs.writeFileSync(this.cfg, JSON.stringify(this.currentConfigSchema(), null, 2));
+        // }
 
         try{
             fs.statSync(this.workspace.fsPath.concat(path.sep + '.gitignore'));
         }catch(err){
-            fs.writeFileSync(this.workspace.fsPath.concat(path.sep + '.gitignore'), '.autogit');
+            fs.writeFileSync(this.workspace.fsPath.concat(path.sep + '.gitignore'), '.gigo/autogit');
         }
 
         let gitignore = fs.readFileSync(this.workspace.fsPath.concat(path.sep + '.gitignore'));
-        if(gitignore.indexOf('.autogit') === -1) {
-            fs.appendFileSync(this.workspace.fsPath.concat('.gitignore'), '.autogit');
+        
+        if(gitignore.indexOf('.gigo/autogit') === -1) {
+            console.log(this.workspace.fsPath.concat('.gitignore'));
+    
+            fs.appendFileSync(this.workspace.fsPath + '/.gitignore', '.gigo/autogit');
         }
 
 		this.isInitialized = true;
@@ -393,7 +405,7 @@ class AutoGit implements vscode.Disposable {
 				
 				this.homedir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit');
 				this.logsdir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/logs');
-				this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
+				// this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
 				this.gitdir = this.workspace.fsPath.concat(path.sep + '.git');
 				this.gitcfg = this.workspace.fsPath.concat(path.sep + '.git/config');
 

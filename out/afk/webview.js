@@ -4,9 +4,9 @@ exports.activateAfkWebView = void 0;
 const vscode = require("vscode");
 const sessionUpdate_1 = require("../session/sessionUpdate");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-function activateAfkWebView(context) {
+function activateAfkWebView(context, cfg) {
     //register afk provider by calling class constructor
-    const provider = new AFKWebViewprovider(context.extensionUri);
+    const provider = new AFKWebViewprovider(context.extensionUri, cfg);
     //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(AFKWebViewprovider.viewType, provider));
     context.subscriptions.push(vscode.commands.registerCommand('gigo.enableAFK', () => {
@@ -19,9 +19,10 @@ function activateAfkWebView(context) {
 exports.activateAfkWebView = activateAfkWebView;
 //afk webview provider has basic functions for handling afk system
 class AFKWebViewprovider {
-    constructor(_extensionUri) {
+    constructor(_extensionUri, cfg) {
         this._extensionUri = _extensionUri;
         this.afkActive = false;
+        this.cfg = cfg;
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         this.afkActive = gigoConfig.get("afk.on");
@@ -87,7 +88,7 @@ class AFKWebViewprovider {
         //if afk is not currently active on start call executeAfkCheck
         if (!afkActiveStart) {
             //executeAfkCheck sets current status to afk and retrieves the timestamp of when afk expires
-            (0, sessionUpdate_1.executeAfkCheck)("7311fb2a-f09b-4575-9ca2-254f7cbfeda6", "cd68f3ed9b605731d2cae49a41eeaf405e4a9d37b74c2a1e8f1ad08cc58a17ee", "60").then((exp) => {
+            (0, sessionUpdate_1.executeAfkCheck)(this.cfg.workspace_id, this.cfg.secret, "60").then((exp) => {
                 //ensures that webview exists and then sends afk timestamp to callback messenger
                 if (this._view) {
                     this._view.webview.postMessage({ type: "setExpirationAFK", value: exp });
@@ -113,7 +114,7 @@ class AFKWebViewprovider {
         //if afk is active then executeLiveCheck
         if (afkActiveStart) {
             //executeLiveCheck stes current timestamp to timestamp retrieved from http
-            (0, sessionUpdate_1.executeLiveCheck)("7311fb2a-f09b-4575-9ca2-254f7cbfeda6", "cd68f3ed9b605731d2cae49a41eeaf405e4a9d37b74c2a1e8f1ad08cc58a17ee");
+            (0, sessionUpdate_1.executeLiveCheck)(this.cfg.workspace_id, this.cfg.secret);
             //display afk session deactivated
             vscode.window.showInformationMessage("GIGO AFK Session Deactivated");
         }

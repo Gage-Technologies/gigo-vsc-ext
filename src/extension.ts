@@ -16,8 +16,17 @@ let autoGit: AutoGit;
 
 //activate function registers all listed commands and initializes some classes on startup
 export function activate(context: vscode.ExtensionContext) {
+
+    
+    
+
+    var cfg = getCfg();
+    if (cfg === null) {
+        console.log('ERROR: CONFIGURATION FILE IS MISSING OR INCOMPLETE!');
+    }
+
     //registser autoGit command using its local activation function
-    autoGit = new AutoGit();
+    autoGit = new AutoGit(cfg.workspace_settings.auto_git);
     autoGit.activate(context);
 
     //start tutorial using its local activation function
@@ -26,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log("calling afk activation");
     //start afk using its local activation function
-    activateAfkWebView(context);
+    activateAfkWebView(context, cfg);
 
     activateTutorialWebView(context);
 
@@ -35,6 +44,21 @@ export function activate(context: vscode.ExtensionContext) {
     activateTeacherWebView(context);
     
     
+}
+
+export function getCfg(){
+    var cfg: any;
+    try{
+        const fs = require('fs');
+        let cfgFile = fs.readFileSync(`/home/user/.gigo/ws-config.json`, 'utf-8');
+        cfg = JSON.parse(cfgFile);
+        console.log(`config: ${cfg.workspace_settings.runOnStart}`);
+    }catch(e){
+        console.log(e);
+        return;
+    }
+
+    return cfg;
 }
 
 export function deactivate() {

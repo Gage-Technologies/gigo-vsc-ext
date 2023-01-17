@@ -8,11 +8,13 @@ let myStatusBarItem;
 //auto git dynamically commits and pushes to git
 class AutoGit {
     //class constructor 
-    constructor() {
+    constructor(fileCfg) {
         this.counter = 0;
         this.intervalId = null;
         this.running = false;
         this.isInitialized = false;
+        this.cfg = fileCfg;
+        console.log(this.isInitialized);
         //attempt to find the home directory of workspace
         this.checkWorkspace();
         //ensure that current workspace is a git repository
@@ -22,25 +24,24 @@ class AutoGit {
             this.setup();
             vscode.window.showInformationMessage('Auto-Git initialized.');
         }
-        try {
-            //ensure that config exists
-            fs.statSync(this.cfg);
-            this.isInitialized = true;
-            //read user git config
-            var userCfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
-            var currentCfg = this.currentConfigSchema();
-            //validate that all parameters are present in current config
-            if (!this.compareKeys(userCfg, currentCfg)) {
-                const newProperties = Object.keys(currentCfg).filter(prop => !userCfg.hasOwnProperty(prop));
-                newProperties.forEach(prop => {
-                    userCfg[prop] = currentCfg[prop];
-                });
-                fs.writeFileSync(this.cfg, JSON.stringify(userCfg, null, 2));
-            }
-        }
-        catch (err) {
-            console.log(err);
-        }
+        // try {
+        //     //ensure that config exists
+        //     fs.statSync(this.cfg);
+        // 	this.isInitialized = true;
+        //     //read user git config
+        //     var userCfg: any = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+        //     var currentCfg: any = this.currentConfigSchema();
+        //     //validate that all parameters are present in current config
+        //     if(!this.compareKeys(userCfg, currentCfg)){
+        //         const newProperties = Object.keys(currentCfg).filter(prop => !userCfg.hasOwnProperty(prop));
+        //         newProperties.forEach(prop => {
+        //             userCfg[prop] = currentCfg[prop];
+        //         });
+        //         fs.writeFileSync(this.cfg, JSON.stringify(userCfg, null, 2));
+        //     }
+        // } catch (err) {
+        //     console.log(err);
+        // }
     }
     //actiavet() is called on startup
     activate(context) {
@@ -130,11 +131,14 @@ class AutoGit {
         context.subscriptions.push(cmdstart);
         context.subscriptions.push(cmdstop);
         context.subscriptions.push(cmdrestart);
-        if (this.isInitialized) {
-            var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
-            if (cfg.runOnStart) {
-                this.start();
-            }
+        // if(this.isInitialized){
+        //     var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+        //     if(cfg.runOnStart){
+        //         this.start();
+        //     }
+        // }
+        if (this.cfg.runOnStart) {
+            this.start();
         }
         //create status bar icon for displaying time until next auto save
         myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -168,7 +172,8 @@ class AutoGit {
     //start() functions as main loop for auto-git extension
     start() {
         //loads auto-git config into json object
-        var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+        // var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
+        var cfg = this.cfg;
         //setting up local variables for auto-update intervals
         this.running = true;
         this.counter = cfg.updateInterval;
@@ -312,21 +317,21 @@ class AutoGit {
         catch (err) {
             fs.mkdirSync(this.logsdir, { recursive: true });
         }
-        try {
-            fs.statSync(this.cfg);
-        }
-        catch (err) {
-            fs.writeFileSync(this.cfg, JSON.stringify(this.currentConfigSchema(), null, 2));
-        }
+        // try {
+        //     fs.statSync(this.cfg);
+        // } catch (err) {
+        //     fs.writeFileSync(this.cfg, JSON.stringify(this.currentConfigSchema(), null, 2));
+        // }
         try {
             fs.statSync(this.workspace.fsPath.concat(path.sep + '.gitignore'));
         }
         catch (err) {
-            fs.writeFileSync(this.workspace.fsPath.concat(path.sep + '.gitignore'), '.autogit');
+            fs.writeFileSync(this.workspace.fsPath.concat(path.sep + '.gitignore'), '.gigo/autogit');
         }
         let gitignore = fs.readFileSync(this.workspace.fsPath.concat(path.sep + '.gitignore'));
-        if (gitignore.indexOf('.autogit') === -1) {
-            fs.appendFileSync(this.workspace.fsPath.concat('.gitignore'), '.autogit');
+        if (gitignore.indexOf('.gigo/autogit') === -1) {
+            console.log(this.workspace.fsPath.concat('.gitignore'));
+            fs.appendFileSync(this.workspace.fsPath + '/.gitignore', '.gigo/autogit');
         }
         this.isInitialized = true;
     }
@@ -352,7 +357,7 @@ class AutoGit {
                 this.workspace = vscode.workspace.workspaceFolders[0].uri;
                 this.homedir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit');
                 this.logsdir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/logs');
-                this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
+                // this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
                 this.gitdir = this.workspace.fsPath.concat(path.sep + '.git');
                 this.gitcfg = this.workspace.fsPath.concat(path.sep + '.git/config');
                 return true;

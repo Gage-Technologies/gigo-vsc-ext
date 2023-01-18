@@ -133,15 +133,19 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 				"60"
 			).then((exp) => {
 				debug.appendLine(`AFK Expires: ${exp} `);
-				//ensures that webview exists and then sends afk timestamp to callback messenger
-				if (this._view) {
-					this._view.webview.postMessage({ type: "setExpirationAFK", value: exp });
+				if (exp > 0){
+					//ensures that webview exists and then sends afk timestamp to callback messenger
+					if (this._view) {
+						this._view.webview.postMessage({ type: "setExpirationAFK", value: exp });
+						//display afk activated message
+						vscode.window.showInformationMessage("GIGO AFK Session Activated");
+					}
+					//vscode.window.showInformationMessage(`expiration: ${exp}`);
 				}
-				vscode.window.showInformationMessage(`expiration: ${exp}`);
+			
 			});
 
-			//display afk activated message
-			vscode.window.showInformationMessage("GIGO AFK Session Activated");
+			
 		}
 	}
 
@@ -217,6 +221,9 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
                 <br/>
                 <br/>
 				<button class="enable-gigo-afk-button">Enable AFK</button>
+				<br/>
+				<br/>
+				<text id="errors"></text>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;

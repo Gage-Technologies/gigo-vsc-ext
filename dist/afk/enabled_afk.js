@@ -72,6 +72,21 @@
                     clearInterval(x);
                     document.getElementById("expiration-countdown-value").innerHTML = "EXPIRED";
                 }
+
+            
+
+                if(expiration.getTime()  <= 0){
+                    vscode.postMessage({
+                        type: "hello",
+                        text: `GIGO AFK Disabled: PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN`,
+                    });
+                   
+                    clearInterval(x);
+                    document.getElementById("expiration-countdown-value").innerHTML = "PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN";
+                    
+                    disableAFK();
+                    document.getElementById("errors").innerHTML = "PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN";
+                }
             } catch(e) {
                 vscode.postMessage({
                     type: "hello",

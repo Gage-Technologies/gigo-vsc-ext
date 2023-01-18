@@ -35,7 +35,7 @@ function getCfg() {
     var cfg;
     try {
         const fs = require('fs');
-        let cfgFile = fs.readFileSync(`/home/user/.gigo/ws-config.json`, 'utf-8');
+        let cfgFile = fs.readFileSync(`/home/gigo/.gigo/ws-config.json`, 'utf-8');
         cfg = JSON.parse(cfgFile);
         console.log(`config: ${cfg.workspace_settings.runOnStart}`);
     }

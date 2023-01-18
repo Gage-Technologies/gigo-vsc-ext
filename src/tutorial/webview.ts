@@ -625,6 +625,10 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                     break;
             }
 
+            if (mds[index] === undefined) {
+                mds[index] = "For a more interactive experience add tutorials for others to view.";
+            }
+
             if (this._view) {
                 //render the html for the page by passing it to the view
                 this._view.webview.html = `<!DOCTYPE html>

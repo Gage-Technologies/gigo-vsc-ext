@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import axios from "axios";
 
 export let userHasBeenActive = false;
-let nextTimeStamp = (Date.now()/1000) + (4 * 60);
+let nextTimeStamp = (Date.now()/1000) + (10 * 60);
 let isAFK = false;
 let errors = vscode.window.createOutputChannel("Extension Errors");
 let debug = vscode.window.createOutputChannel("Extension Debug");
@@ -113,7 +113,7 @@ export async function executeLiveCheck(wsID: any, secret: any){
             //     errors.appendLine(`failed to executeLiveCheck: ${res}`);
             //     continue;
             // }
-            errors.appendLine(`res: ${res}`);
+            errors.appendLine(`res live check: ${res}`);
             
         }catch(e){
             errors.appendLine(`failed to executeLiveCheck: ${e}`);
@@ -165,6 +165,13 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
                 //     errors.appendLine(`failed to executeAfkCheck: ${res}`);
                 //     return -1;;
                 // }
+            //set afk variable to true
+            isAFK = true;
+            
+
+            errors.appendLine(`res2: ${res.data.expiration}: ${res.status}`);
+            //return afk timestamp
+            return res.data.expiration;
             
         }catch(e){
             errors.appendLine(`failed to executeAfkCheck: ${e}`);
@@ -173,28 +180,22 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
         }
 
         
-    
-
         break;
     }
   
     try{
+        console.log(`afk result: ${res.data.expiration}`);
         if (res.data.expiration <= 0){
             isAFK = false;
             return -1;
         }
     }catch(e){
+        console.log(`afk result: ${res.data.expiration}`);
         isAFK = false;
         return -1;
     }
 
-    //set afk variable to true
-    isAFK = true;
     
-
-    errors.appendLine(`res2: ${res.data.expiration}: ${res.status}`);
-    //return afk timestamp
-    return res.data.expiration;
 }
 
 
@@ -235,7 +236,7 @@ function checkUserActivity() {
 
     vscode.window.onDidChangeTextEditorOptions(activityCallback);
 
-    // vscode.window.onDidChangeTextEditorSelection(activityCallback);
+    vscode.window.onDidChangeTextEditorSelection(activityCallback);
 
     vscode.window.onDidChangeTextEditorViewColumn(activityCallback);
 

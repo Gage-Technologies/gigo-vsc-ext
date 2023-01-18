@@ -4,7 +4,7 @@ exports.executeAfkCheck = exports.executeLiveCheck = exports.activateTimeout = e
 const vscode = require("vscode");
 const axios_1 = require("axios");
 exports.userHasBeenActive = false;
-let nextTimeStamp = (Date.now() / 1000) + (4 * 60);
+let nextTimeStamp = (Date.now() / 1000) + (10 * 60);
 let isAFK = false;
 let errors = vscode.window.createOutputChannel("Extension Errors");
 let debug = vscode.window.createOutputChannel("Extension Debug");
@@ -94,7 +94,7 @@ async function executeLiveCheck(wsID, secret) {
             //     errors.appendLine(`failed to executeLiveCheck: ${res}`);
             //     continue;
             // }
-            errors.appendLine(`res: ${res}`);
+            errors.appendLine(`res live check: ${res}`);
         }
         catch (e) {
             errors.appendLine(`failed to executeLiveCheck: ${e}`);
@@ -136,6 +136,11 @@ async function executeAfkCheck(wsID, secret, addMin) {
             //     errors.appendLine(`failed to executeAfkCheck: ${res}`);
             //     return -1;;
             // }
+            //set afk variable to true
+            isAFK = true;
+            errors.appendLine(`res2: ${res.data.expiration}: ${res.status}`);
+            //return afk timestamp
+            return res.data.expiration;
         }
         catch (e) {
             errors.appendLine(`failed to executeAfkCheck: ${e}`);
@@ -145,20 +150,17 @@ async function executeAfkCheck(wsID, secret, addMin) {
         break;
     }
     try {
+        console.log(`afk result: ${res.data.expiration}`);
         if (res.data.expiration <= 0) {
             isAFK = false;
             return -1;
         }
     }
     catch (e) {
+        console.log(`afk result: ${res.data.expiration}`);
         isAFK = false;
         return -1;
     }
-    //set afk variable to true
-    isAFK = true;
-    errors.appendLine(`res2: ${res.data.expiration}: ${res.status}`);
-    //return afk timestamp
-    return res.data.expiration;
 }
 exports.executeAfkCheck = executeAfkCheck;
 //activityCallback is called upon user interaction and sets states to user active
@@ -186,7 +188,7 @@ function checkUserActivity() {
     vscode.window.onDidCloseTerminal(activityCallback);
     vscode.window.onDidOpenTerminal(activityCallback);
     vscode.window.onDidChangeTextEditorOptions(activityCallback);
-    // vscode.window.onDidChangeTextEditorSelection(activityCallback);
+    vscode.window.onDidChangeTextEditorSelection(activityCallback);
     vscode.window.onDidChangeTextEditorViewColumn(activityCallback);
     // vscode.window.onDidChangeTextEditorVisibleRanges(activityCallback);
     vscode.window.onDidChangeVisibleTextEditors(activityCallback);

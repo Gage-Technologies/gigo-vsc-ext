@@ -17,3 +17,8 @@ body {
 .expiration-countdown-title {
 	display: inline-flexbox;
 }
+
+.anmim{
+	display: inline-flex;
+    align-items: center;
+}

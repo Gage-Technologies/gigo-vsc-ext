@@ -133,6 +133,7 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 				"60"
 			).then((exp) => {
 				debug.appendLine(`AFK Expires: ${exp} `);
+				console.log(`AFK Expires: ${exp}`);
 				if (exp > 0){
 					//ensures that webview exists and then sends afk timestamp to callback messenger
 					if (this._view) {
@@ -207,8 +208,8 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 					and only allow scripts that have a specific nonce.
 					(See the 'webview-sample' extension sample for img-src content security policy examples)
 				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<meta http-equiv="Content-Security-Policy" default-src * 'unsafe-inline' 'unsafe-eval'; script-src ${webview.cspSource} img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';>
+				
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">
 				<link href="${styleMainUri}" rel="stylesheet">
@@ -224,6 +225,12 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 				<br/>
 				<br/>
 				<text id="errors"></text>
+				<br/>
+				<br/>
+				<div class="anim">
+					<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
+					<lottie-player src="https://lottie.host/95676da9-1d6e-489a-bd6b-fdf154eacbbb/ApmRq8HOuu.json" background="transparent" speed="1" loop autoplay></lottie-player>
+				</div>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;
@@ -251,8 +258,9 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 					and only allow scripts that have a specific nonce.
 					(See the 'webview-sample' extension sample for img-src content security policy examples)
 				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<meta http-equiv="Content-Security-Policy" default-src * 'unsafe-inline' 'unsafe-eval'; script-src ${webview.cspSource} img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';>
+				
+   
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">
 				<link href="${styleMainUri}" rel="stylesheet">
@@ -273,6 +281,13 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
                 <br/>
                 <br/>
 				<button class="disable-gigo-afk-button">Disable AFK</button>
+				<br/>
+                <br/>
+				<br/>
+                <br/>
+				<div class="anim">
+					<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> <lottie-player src="https://lottie.host/b975a4cd-1395-4b1c-aaa2-9f94f5937f4f/cdJEsmskbY.json" background="transparent" speed=".5" loop autoplay></lottie-player>
+				</div>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;

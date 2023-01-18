@@ -157,7 +157,6 @@ async function executeAfkCheck(wsID, secret, addMin) {
         }
     }
     catch (e) {
-        console.log(`afk result: ${res.data.expiration}`);
         isAFK = false;
         return -1;
     }

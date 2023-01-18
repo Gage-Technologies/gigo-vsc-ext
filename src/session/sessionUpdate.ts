@@ -190,7 +190,6 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
             return -1;
         }
     }catch(e){
-        console.log(`afk result: ${res.data.expiration}`);
         isAFK = false;
         return -1;
     }

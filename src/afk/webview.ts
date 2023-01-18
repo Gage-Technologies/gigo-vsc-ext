@@ -142,6 +142,9 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 						vscode.window.showInformationMessage("GIGO AFK Session Activated");
 					}
 					//vscode.window.showInformationMessage(`expiration: ${exp}`);
+				}else{
+					vscode.window.showInformationMessage("GIGO AFK Failed: PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN");
+					this.disableAFK();
 				}
 			
 			});

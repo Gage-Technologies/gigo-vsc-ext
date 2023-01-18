@@ -107,6 +107,10 @@ class AFKWebViewprovider {
                     }
                     //vscode.window.showInformationMessage(`expiration: ${exp}`);
                 }
+                else {
+                    vscode.window.showInformationMessage("GIGO AFK Failed: PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN");
+                    this.disableAFK();
+                }
             });
         }
     }

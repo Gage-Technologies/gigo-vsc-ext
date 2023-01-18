@@ -6,8 +6,9 @@ const axios_1 = require("axios");
 exports.userHasBeenActive = false;
 let nextTimeStamp = (Date.now() / 1000) + (10 * 60);
 let isAFK = false;
+let errors = vscode.window.createOutputChannel("Extension Errors");
 //activateTimeout is called when the extension is activated
-async function activateTimeout(context) {
+async function activateTimeout(context, cfg) {
     // link callbacks for tracking user activity
     checkUserActivity();
     //core loop iterates until user is inactive for a set amount of time
@@ -34,7 +35,7 @@ async function activateTimeout(context) {
             break;
         }
         //if user is not afk but is active call live check to renew session timer
-        await executeLiveCheck("7311fb2a-f09b-4575-9ca2-254f7cbfeda6", "cd68f3ed9b605731d2cae49a41eeaf405e4a9d37b74c2a1e8f1ad08cc58a17ee");
+        await executeLiveCheck(cfg.workspace_id_string, cfg.secret);
     }
 }
 exports.activateTimeout = activateTimeout;
@@ -68,16 +69,26 @@ async function renewPopup() {
 }
 //executeLiveCheck will execute a live check to renew session timer by calling http function in GIGO
 async function executeLiveCheck(wsID, secret) {
-    //await result from http function in GIGO
-    let res = await axios_1.default.post("http://gigo.gage.intranet/api/internal/ws/live-check", {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        "coder_id": wsID,
-        "secret": secret
-    });
-    //if non status code 200 is returned, return -1 and log failure message
-    if (res.status !== 200) {
-        console.log("failed to execute live-check: ", res);
-        return -1;
+    var res;
+    for (let i = 0; i < 3; i++) {
+        try {
+            //await result from http function in GIGO
+            let res = await axios_1.default.post("http://gigo.gage.intranet/api/internal/ws/live-check", {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                "workspace_id": wsID,
+                "secret": secret
+            });
+            //if non status code 200 is returned, return -1 and log failure message
+            if (res.status !== 200) {
+                errors.appendLine(`failed to executeLiveCheck: ${res}`);
+                continue;
+            }
+            errors.appendLine(`res: ${res}`);
+            break;
+        }
+        catch (e) {
+            errors.appendLine(`failed to executeLiveCheck: ${e}`);
+        }
     }
     //set next timeout to timestamp retrieved from http call
     nextTimeStamp = res.data.expiration;
@@ -85,21 +96,29 @@ async function executeLiveCheck(wsID, secret) {
 exports.executeLiveCheck = executeLiveCheck;
 //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
 async function executeAfkCheck(wsID, secret, addMin) {
+    // var res: any;
+    // try{
     //awair result from http function in GIGO
     let res = await axios_1.default.post("http://gigo.gage.intranet/api/internal/ws/afk", {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        "coder_id": wsID,
+        "workspace_id": wsID,
         "secret": secret,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         "add_min": addMin
     });
+    errors.appendLine(`res: ${res.data.expiration}: ${res.status}`);
     //if non status code 200 is returned, return -1 and log failure message
-    if (res.status !== 200) {
-        console.log("failed to execute live-check: ", res);
-        return -1;
-    }
+    // if (res.status !== 200) { 
+    //     errors.appendLine(`failed to executeAfkCheck: ${res}`);
+    //     return -1;;
+    // }
+    // }catch(e){
+    //     errors.appendLine(`failed to executeAfkCheck: ${e}`);
+    //     return -1;
+    // }
     //set afk variable to true
     isAFK = true;
+    errors.appendLine(`res2: ${res.data.expiration}: ${res.status}`);
     //return afk timestamp
     return res.data.expiration;
 }
@@ -109,6 +128,7 @@ function activityCallback() {
     if (!exports.userHasBeenActive) {
         vscode.window.showInformationMessage("Welcome back");
     }
+    vscode.window.showInformationMessage("activity logged");
     //set user active to true
     exports.userHasBeenActive = true;
     if (isAFK) {

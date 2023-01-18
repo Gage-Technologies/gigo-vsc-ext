@@ -51,7 +51,7 @@ body {
 .streakNumber{
 	font-size: 20vw;
 	font-weight: bold;
-	opacity: 10%;
+	opacity: 15%;
 	font-family: Helvetica, arial, sans-serif;
 	/* position: fixed; */
 	
@@ -105,7 +105,7 @@ body {
 }
 
 .streakAnim{
-	opacity: 10%;
+	opacity: 15%;
 	display: inline;
 	align-items: center;
     justify-content: center;
@@ -152,7 +152,7 @@ body {
 } */
 
 .weekday {
-	opacity: 10%;
+	opacity: 15%;
 	font-family: monospace,monospace;
 	background-color: #ff7a0e;
 	color: #666;
@@ -166,7 +166,7 @@ body {
 }
 
 .separator{
-	opacity: 10%;
+	opacity: 15%;
 	color: #ff7a0e;
 	
 	

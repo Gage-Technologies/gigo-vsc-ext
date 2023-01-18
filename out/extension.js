@@ -22,7 +22,7 @@ function activate(context) {
     autoGit.activate(context);
     //start tutorial using its local activation function
     // tutorial = new Tutorial(context);
-    (0, sessionUpdate_1.activateTimeout)(context);
+    (0, sessionUpdate_1.activateTimeout)(context, cfg);
     console.log("calling afk activation");
     //start afk using its local activation function
     (0, webview_1.activateAfkWebView)(context, cfg);
@@ -35,7 +35,7 @@ function getCfg() {
     var cfg;
     try {
         const fs = require('fs');
-        let cfgFile = fs.readFileSync(`/home/gigo/.gigo/ws-config.json`, 'utf-8');
+        let cfgFile = fs.readFileSync(`/home/user/.gigo/ws-config.json`, 'utf-8');
         cfg = JSON.parse(cfgFile);
         console.log(`config: ${cfg.workspace_settings.runOnStart}`);
     }

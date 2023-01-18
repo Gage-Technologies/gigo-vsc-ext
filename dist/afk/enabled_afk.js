@@ -4,6 +4,12 @@
 (function () {
     const vscode = acquireVsCodeApi();
 
+    vscode.postMessage({
+        type: "hello",
+        text: `inside ext`,
+    });
+
+
     const oldState = vscode.getState() || { expiration: undefined };
     
     /** @type {Date} */

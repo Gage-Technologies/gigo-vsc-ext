@@ -136,7 +136,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
     //                     } catch (err) {
     //                         console.log(err);
-    // main.css
+    // main_afk.css
     //                     }
     //                     break;
     //                 case "startCodeTour":
@@ -282,9 +282,9 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
 
             // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-            const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'tutorial', 'media', 'buttons.js'));
-            const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'streak', 'media', 'main.css'));
-            const fireIcon = vscode.Uri.joinPath(this._extensionUri, 'src', 'streak', 'media', 'fire-svgrepo-com.svg');
+            const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'teacher', 'buttons_teacher.js'));
+            const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'streak', 'main_streak.css'));
+
 
             // Use a nonce to only allow a specific script to be run.
             const nonce = getNonce();

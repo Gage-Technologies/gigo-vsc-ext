@@ -125,6 +125,7 @@ body {
 }
 
 .pageButton{
+	color: #8c8c8c;
 	flex: 1;
 	display: flex;
 	justify-content: center;

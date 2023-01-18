@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     //start tutorial using its local activation function
     // tutorial = new Tutorial(context);
-    activateTimeout(context);
+    activateTimeout(context, cfg);
 
     console.log("calling afk activation");
     //start afk using its local activation function
@@ -50,7 +50,7 @@ export function getCfg(){
     var cfg: any;
     try{
         const fs = require('fs');
-        let cfgFile = fs.readFileSync(`/home/gigo/.gigo/ws-config.json`, 'utf-8');
+        let cfgFile = fs.readFileSync(`/home/user/.gigo/ws-config.json`, 'utf-8');
         cfg = JSON.parse(cfgFile);
         console.log(`config: ${cfg.workspace_settings.runOnStart}`);
     }catch(e){

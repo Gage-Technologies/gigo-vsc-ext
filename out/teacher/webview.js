@@ -4,9 +4,9 @@ exports.activateTeacherWebView = void 0;
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-async function activateTeacherWebView(context) {
+async function activateTeacherWebView(context, logger) {
     //register afk provider by calling class constructor
-    const provider = new TeacherWebViewprovider(context.extensionUri);
+    const provider = new TeacherWebViewprovider(context.extensionUri, logger);
     if (provider.codeTour) {
         provider.codeTour.activate();
     }
@@ -16,7 +16,7 @@ async function activateTeacherWebView(context) {
 exports.activateTeacherWebView = activateTeacherWebView;
 //afk webview provider has basic functions for handling afk system
 class TeacherWebViewprovider {
-    constructor(_extensionUri) {
+    constructor(_extensionUri, sysLogger) {
         this._extensionUri = _extensionUri;
         //defining local variables
         this.themeConfigSection = 'markdown-preview-github-styles';
@@ -37,6 +37,7 @@ class TeacherWebViewprovider {
             'dark': true
         };
         this.currentPage = 0;
+        this.logger = sysLogger;
         this.loadingIcon = `<div id="loadingAnim" style="display:none">
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
         <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  loop  autoplay></lottie-player>
@@ -110,6 +111,7 @@ class TeacherWebViewprovider {
                         }
                     }
                     catch (err) {
+                        this.logger.error.appendLine("Code Teacher Failed: Failed to render page for loading");
                         console.log(err);
                     }
                     break;

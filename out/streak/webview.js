@@ -5,19 +5,20 @@ const axios_1 = require("axios");
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-async function activateStreakWebView(context) {
+async function activateStreakWebView(context, logger) {
     //register afk provider by calling class constructor
-    const provider = new StreakWebViewprovider(context.extensionUri);
+    const provider = new StreakWebViewprovider(context.extensionUri, logger);
     //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(StreakWebViewprovider.viewType, provider));
 }
 exports.activateStreakWebView = activateStreakWebView;
 //afk webview provider has basic functions for handling afk system
 class StreakWebViewprovider {
-    constructor(_extensionUri) {
+    constructor(_extensionUri, sysLogger) {
         this._extensionUri = _extensionUri;
         this.activeDays = [];
         this.isOnFire = false;
+        this.logger = sysLogger;
         this.activeDays = [1, 2];
         this.streakAnim = `<div class="streakAnim">
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 

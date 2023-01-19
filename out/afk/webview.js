@@ -5,9 +5,9 @@ const vscode = require("vscode");
 const sessionUpdate_1 = require("../session/sessionUpdate");
 let debug = vscode.window.createOutputChannel("Extension Debug");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-function activateAfkWebView(context, cfg) {
+function activateAfkWebView(context, cfg, logger) {
     //register afk provider by calling class constructor
-    const provider = new AFKWebViewprovider(context.extensionUri, cfg);
+    const provider = new AFKWebViewprovider(context.extensionUri, cfg, logger);
     //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(AFKWebViewprovider.viewType, provider));
     context.subscriptions.push(vscode.commands.registerCommand('gigo.enableAFK', () => {
@@ -20,10 +20,11 @@ function activateAfkWebView(context, cfg) {
 exports.activateAfkWebView = activateAfkWebView;
 //afk webview provider has basic functions for handling afk system
 class AFKWebViewprovider {
-    constructor(_extensionUri, cfg) {
+    constructor(_extensionUri, cfg, sysLogger) {
         this._extensionUri = _extensionUri;
         this.afkActive = false;
         this.cfg = cfg;
+        this.logger = sysLogger;
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         console.log(`currentAfkValue1: ${this.afkActive}`);
@@ -104,11 +105,13 @@ class AFKWebViewprovider {
                         this._view.webview.postMessage({ type: "setExpirationAFK", value: exp });
                         //display afk activated message
                         vscode.window.showInformationMessage("GIGO AFK Session Activated");
+                        this.logger.info.appendLine(`Afk: Result pushed to afk session: ${exp}.`);
                     }
                     //vscode.window.showInformationMessage(`expiration: ${exp}`);
                 }
                 else {
                     vscode.window.showInformationMessage("GIGO AFK Failed: PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN");
+                    this.logger.error.appendLine(`Afk Failed: Result is empty or connection could not be resolved.`);
                     this.disableAFK();
                 }
             });
@@ -133,6 +136,7 @@ class AFKWebViewprovider {
             (0, sessionUpdate_1.executeLiveCheck)(this.cfg.workspace_id_string, this.cfg.secret);
             //display afk session deactivated
             vscode.window.showInformationMessage("GIGO AFK Session Deactivated");
+            this.logger.info.appendLine(`Afk: Deactivated.`);
         }
     }
     //_getHtmlForWebview renders afk enbaled and disabled pages

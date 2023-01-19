@@ -6,9 +6,9 @@ import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
 
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-export async function activateStreakWebView(context: vscode.ExtensionContext) {
+export async function activateStreakWebView(context: vscode.ExtensionContext, logger: any) {
     //register afk provider by calling class constructor
-    const provider = new StreakWebViewprovider(context.extensionUri);
+    const provider = new StreakWebViewprovider(context.extensionUri, logger);
 
 
     
@@ -38,14 +38,17 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'gigo.streakView';
 
     private _view?: vscode.WebviewView;
+    public logger: any;
 
   
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
+        sysLogger: any,
     ) {
 
-        this.activeDays = [1,2]
+        this.logger = sysLogger;
+        this.activeDays = [1,2];
 
         this.streakAnim = `<div class="streakAnim">
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 

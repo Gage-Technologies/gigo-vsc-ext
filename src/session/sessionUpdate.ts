@@ -4,16 +4,17 @@ import axios from "axios";
 export let userHasBeenActive = false;
 let nextTimeStamp = (Date.now()/1000) + (10 * 60);
 let isAFK = false;
-let errors = vscode.window.createOutputChannel("Extension Errors");
-let debug = vscode.window.createOutputChannel("Extension Debug");
+var logger: any;
+
             
 
 //activateTimeout is called when the extension is activated
-export async function activateTimeout(context: vscode.ExtensionContext, cfg: any) {
+export async function activateTimeout(context: vscode.ExtensionContext, cfg: any, sysLogger: any) {
+    logger = sysLogger;
     // link callbacks for tracking user activity
     checkUserActivity();
 
-    errors.appendLine(nextTimeStamp.toString());
+   
     
     //core loop iterates until user is inactive for a set amount of time
     while(true){
@@ -40,6 +41,7 @@ export async function activateTimeout(context: vscode.ExtensionContext, cfg: any
 
         //if the user is not afk and is still inactive terminate the session
         if (!isRenewed && !isAFK){
+            logger.info.appendLine("Session: Session is being terminated due to inactivity.");
             vscode.window.showInformationMessage("Session is being terminated due to inactivity");
             break;
         }
@@ -51,6 +53,7 @@ export async function activateTimeout(context: vscode.ExtensionContext, cfg: any
         console.log(`LIVE CHECK COMPLETED: ${nextTimeStamp}`);
 
         if (res){
+            logger.info.appendLine("Session: Session is being terminated due to inactivity.");
             vscode.window.showInformationMessage("Session is being terminated due to inactivity");
             break;
         }
@@ -68,6 +71,7 @@ async function renewPopup(): Promise<boolean>{
     while(!isRenewed && timeRemaining > 0){
         //if the user has been active display welcome back message, break from loop, and return true
         if (userHasBeenActive){
+            logger.info.appendLine("Session: User is active.");
             vscode.window.showInformationMessage("Welcome back");
             isRenewed = true;
             return true;
@@ -76,6 +80,7 @@ async function renewPopup(): Promise<boolean>{
         vscode.window.showInformationMessage(`Are you still there?\n    session will auto close in ${Math.round(timeRemaining/60)} minutes`, "Continue session").then(selection => {
             //if user clicks continue button display welcome message, break from loop, and return true
             vscode.window.showInformationMessage("Welcome back");
+            logger.info.appendLine("Session: User is active.");
             isRenewed = true;
             return true;
         });
@@ -106,17 +111,16 @@ export async function executeLiveCheck(wsID: any, secret: any){
                 }
             );
 
-            errors.appendLine(`res: ${res.data.expiration}: ${res.status}`);
+            logger.info.appendLine(`Session: Result from live check: ${res.data.expiration}.`);
 
             // //if non status code 200 is returned, return -1 and log failure message
             // if (res.status !== 200) { 
             //     errors.appendLine(`failed to executeLiveCheck: ${res}`);
             //     continue;
             // }
-            errors.appendLine(`res live check: ${res}`);
             
         }catch(e){
-            errors.appendLine(`failed to executeLiveCheck: ${e}`);
+            logger.error.appendLine(`Session Failed: Failed to retrieve result from live check: ${e}.`);
             await new Promise(f => setTimeout(f, 1000));
             continue;
         }
@@ -129,13 +133,13 @@ export async function executeLiveCheck(wsID: any, secret: any){
     try{
         console.log("live check: ", res.data);
         if (res.data.expiration <= 0){
+            logger.error.appendLine(`Session Failed: Failed to retrieve result from live check: no result found.`);
             return -1;
         }
     }catch(e){
+        logger.error.appendLine(`Session Failed: Failed to retrieve result from live check: ${e}.`);
         return -1;
     }
-
-    debug.appendLine(`next live check: ${res.data.expiration}`);
     
     //set next timeout to timestamp retrieved from http call
     nextTimeStamp = res.data.expiration;
@@ -159,7 +163,7 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
                     "add_min": addMin
                 }
             );
-            errors.appendLine(`res: ${res.data.expiration}: ${res.status}`);
+            logger.info.appendLine(`Session: Result from afk check: ${res.data.expiration}.`);
                 //if non status code 200 is returned, return -1 and log failure message
                 // if (res.status !== 200) { 
                 //     errors.appendLine(`failed to executeAfkCheck: ${res}`);
@@ -168,13 +172,11 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
             //set afk variable to true
             isAFK = true;
             
-
-            errors.appendLine(`res2: ${res.data.expiration}: ${res.status}`);
             //return afk timestamp
             return res.data.expiration;
             
         }catch(e){
-            errors.appendLine(`failed to executeAfkCheck: ${e}`);
+            logger.error.appendLine(`Session Failed: Failed to retrieve result from afk check: ${e}.`);
             await new Promise(f => setTimeout(f, 1000));
             continue;
         }
@@ -186,10 +188,12 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
     try{
         console.log(`afk result: ${res.data.expiration}`);
         if (res.data.expiration <= 0){
+            logger.error.appendLine(`Session Failed: Failed to retrieve result from afk check: no result found.`);
             isAFK = false;
             return -1;
         }
     }catch(e){
+        logger.error.appendLine(`Session Failed: Failed to retrieve result from afk check: ${e}.`);
         isAFK = false;
         return -1;
     }
@@ -202,6 +206,7 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
 function activityCallback() {
     if (!userHasBeenActive){
         vscode.window.showInformationMessage("Welcome back");
+        logger.info.appendLine("Session: User is active.");
     }
 
     // vscode.window.showInformationMessage("activity logged");

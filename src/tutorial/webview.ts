@@ -4,9 +4,9 @@ import { Uri, Webview } from 'vscode';
 import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-export async function activateTutorialWebView(context: vscode.ExtensionContext) {
+export async function activateTutorialWebView(context: vscode.ExtensionContext, logger: any) {
     //register afk provider by calling class constructor
-    const provider = new TutorialWebViewprovider(context.extensionUri);
+    const provider = new TutorialWebViewprovider(context.extensionUri, logger);
 
     if (provider.codeTour){
         provider.codeTour.activate();
@@ -52,15 +52,18 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'gigo.tutorialView';
 
     private _view?: vscode.WebviewView;
+    public logger: any;
 
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
+        sysLogger: any,
     ) {
         
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
         this.isTutorialActive = gigoConfig.get("gigo.tutorial.on");
+        this.logger = sysLogger;
         
     }
 
@@ -88,6 +91,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
                             }
                         } catch (err) {
+                            this.logger.error.appendLine(`Tutorial Failed: Failed to change pages in tutorial view: ${err}`);
                             console.log(err);
                         }
                         break;
@@ -100,6 +104,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             }
 
                         } catch (err) {
+                            this.logger.error.appendLine(`Tutorial Failed: Failed to change to next group in tutorial view: ${err}`);
                             console.log(err);
 
                         }
@@ -113,6 +118,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             }
 
                         } catch (err) {
+                            this.logger.error.appendLine(`Tutorial Failed: Failed to change to last page in tutorial view: ${err}`);
                             console.log(err);
 
                         }
@@ -126,6 +132,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             }
 
                         } catch (err) {
+                            this.logger.error.appendLine(`Tutorial Failed: Failed to start code tour in tutorial view: ${err}`);
                             console.log(err);
 
                         }
@@ -138,7 +145,9 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                                 let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
                                 try {
                                     await codeTourApi.endCurrentTour();
-                                } catch (err) {}
+                                } catch (err) {
+                                    this.logger.error.appendLine(`Tutorial Failed: Failed partial execution fo code tour step in tutorial view: ${err}`);
+                                }
                                 await codeTourApi.startTourByUri(uri, 0);
                                 await codeTourApi.startTourByUri(uri, step - 1);
                                 // await codeTourApi.startTourByUri(uri, step - 1);
@@ -148,6 +157,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             }
 
                         } catch (err) {
+                            this.logger.error.appendLine(`Tutorial Failed: Failed to start code tour step in tutorial view: ${err}`);
                             console.log(err);
 
                         }
@@ -185,6 +195,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         //ensure that user has opened a project before continuing
         if (!vscode.workspace.workspaceFolders) {
             vscode.window.showInformationMessage("Open a folder/workspace first");
+            this.logger.error.appendLine(`Tutorial Failed: Failed to start tutorial, a workspace must be open`);
             return;
         }
 
@@ -274,6 +285,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             });
 
         } catch (err) {
+            this.logger.error.appendLine(`Tutorial Failed: Failed to start tutorial, a workspace must be open`);
             console.log(err);
         }
 
@@ -534,15 +546,18 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 if (fs.existsSync(this.baseWorkspaceUri.fsPath + "/.gigo/tutorial/.tutorial_config.json")) {
                     let obj = JSON.parse(fs.readFileSync(this.baseWorkspaceUri.fsPath + "/.gigo/tutorial/.tutorial_config.json", 'utf8'));
                     currentPgNum = obj.currentPageNum;
+                    this.logger.info.appendLine(`Tutorial: Loaded tutorial config.`);
 
                 } else {
                     //if tutorial config does not exist create it and set current page number to 1
                     let yamlContent = "{\"currentPageNum\": 1}";
                     fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.gigo/tutorial/.tutorial_config.json", yamlContent);
                     currentPgNum = 1;
+                    this.logger.info.appendLine(`Tutorial: Created new tutorial config.`);
 
                 }
             } catch (err) {
+                this.logger.error.appendLine(`Tutorial Failed: Failed to open/create tutorial config: ${err}`);
                 console.log(err);
                 return;
             }
@@ -627,6 +642,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
             if (mds[index] === undefined) {
                 mds[index] = "For a more interactive experience add tutorials for others to view.";
+                this.logger.info.appendLine(`Tutorial: No tutorials found in workspace.`);
             }
 
             if (this._view) {

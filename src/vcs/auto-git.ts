@@ -20,10 +20,11 @@ class AutoGit implements vscode.Disposable {
     private gitdir!: string;
     private gitcfg!: string;
 	public isInitialized: boolean = false;
+    public logger: any;
 
     //class constructor 
-    constructor(fileCfg: any){
-
+    constructor(fileCfg: any, sysLogger: any){
+        this.logger = sysLogger;
         this.cfg = fileCfg;
         console.log(this.isInitialized);
         //attempt to find the home directory of workspace
@@ -36,6 +37,7 @@ class AutoGit implements vscode.Disposable {
         if(!this.isInitialized){
             this.setup();
             vscode.window.showInformationMessage('Auto-Git initialized.');
+            this.logger.info.appendLine("AutoGit: Auto-Git initialized.");
         }
 
 		// try {
@@ -161,6 +163,8 @@ class AutoGit implements vscode.Disposable {
         myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         context.subscriptions.push(myStatusBarItem);
         myStatusBarItem.show();
+
+        
     }
 
     dispose(): void {
@@ -210,6 +214,7 @@ class AutoGit implements vscode.Disposable {
                 //display time until next commit
                 this.updateStatusBarItem("Next Auto-Git in... " + this.counter);
             } catch (e) {
+                this.logger.error.appendLine(`AutoGit Failed: Failed to update status bar: ${e}`);
                 console.log("failed to update status bar: ", e);
             }
             //when counter reaches zero execute auto-git extension
@@ -275,6 +280,7 @@ class AutoGit implements vscode.Disposable {
 
                         //log to file
                         console.log("[Auto-Git]: Changes since last sync: modified (" + status.modified.length + ") | created (" + status.created.length + ") | deleted (" + status.deleted.length + ") | renamed: (" + status.renamed.length + ")" );
+                        this.logger.info.appendLine("AutoGit: Changes since last sync: modified (" + status.modified.length + ") | created (" + status.created.length + ") | deleted (" + status.deleted.length + ") | renamed: (" + status.renamed.length + ")");
                         if(cfg.logging){
                             var date = new Date();
                             let log = "-------------------- Auto-Git Log --------------------";
@@ -346,6 +352,7 @@ class AutoGit implements vscode.Disposable {
 
     public setup() {
         console.log("setup auto git");
+        this.logger.info.appendLine("AutoGit: Setting up auto git.");
         try{
             fs.statSync(this.homedir);
         } catch (err) {
@@ -386,10 +393,12 @@ class AutoGit implements vscode.Disposable {
         try {
             fs.statSync(this.gitdir);
             fs.statSync(this.gitcfg);
+            this.logger.appendLine("AutoGit: Workspace is a git repository.");
             console.log('[Auto-Git] [OK]: Workspace is a git repository.');
             return true;
         }
         catch (err) {
+            this.logger.error.appendLine("AutoGit Failed: Workspace is not a git reposiory, disabling extension");
             console.log('[Auto-Git] [Error]: Workspace is not a git repository, disabling extension.');
             return false;
         }
@@ -411,10 +420,12 @@ class AutoGit implements vscode.Disposable {
 
 				return true;
 			} else {
+                this.logger.error.appendLine("AutoGit Failed: No workspace found, disabling extension.");
 				console.log('[Auto-Git] [Error]: No workspace found, disabling extension.');
 			}
         }
         catch (err) {
+            this.logger.error.appendLine("AutoGit Failed: No workspace found, disabling extension.");
             console.log('[Auto-Git] [Error]: No workspace found, disabling extension.');
 		}
 		return false;

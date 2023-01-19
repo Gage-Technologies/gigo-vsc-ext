@@ -4,9 +4,9 @@ import { Uri, Webview } from 'vscode';
 import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-export async function activateTeacherWebView(context: vscode.ExtensionContext) {
+export async function activateTeacherWebView(context: vscode.ExtensionContext, logger: any) {
     //register afk provider by calling class constructor
-    const provider = new TeacherWebViewprovider(context.extensionUri);
+    const provider = new TeacherWebViewprovider(context.extensionUri, logger);
 
     if (provider.codeTour){
         provider.codeTour.activate();
@@ -59,11 +59,15 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'gigo.teacherView';
 
     private _view?: vscode.WebviewView;
+    public logger: any;
 
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
+        sysLogger: any,
     ) {
+
+        this.logger = sysLogger;
 
         this.loadingIcon = `<div id="loadingAnim" style="display:none">
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -157,6 +161,7 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
                             }
 
                         } catch (err) {
+                            this.logger.error.appendLine("Code Teacher Failed: Failed to render page for loading");
                             console.log(err);
 
                         }

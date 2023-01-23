@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activateAfkWebView = void 0;
 const vscode = require("vscode");
 const sessionUpdate_1 = require("../session/sessionUpdate");
-let debug = vscode.window.createOutputChannel("Extension Debug");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 function activateAfkWebView(context, cfg, logger) {
     //register afk provider by calling class constructor
@@ -97,7 +96,7 @@ class AFKWebViewprovider {
         if (!afkActiveStart) {
             //executeAfkCheck sets current status to afk and retrieves the timestamp of when afk expires
             (0, sessionUpdate_1.executeAfkCheck)(this.cfg.workspace_id_string, this.cfg.secret, "60").then((exp) => {
-                debug.appendLine(`AFK Expires: ${exp} `);
+                this.logger.info.appendLine(`AFK Expires: ${exp} `);
                 console.log(`AFK Expires: ${exp}`);
                 if (exp > 0) {
                     //ensures that webview exists and then sends afk timestamp to callback messenger

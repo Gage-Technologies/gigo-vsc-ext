@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
 
-let debug = vscode.window.createOutputChannel("Extension Debug");
+
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 export function activateAfkWebView(context: vscode.ExtensionContext, cfg: any, logger: any) {
@@ -136,7 +136,7 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 				this.cfg.secret,
 				"60"
 			).then((exp) => {
-				debug.appendLine(`AFK Expires: ${exp} `);
+				this.logger.info.appendLine(`AFK Expires: ${exp} `);
 				console.log(`AFK Expires: ${exp}`);
 				if (exp > 0){
 					//ensures that webview exists and then sends afk timestamp to callback messenger

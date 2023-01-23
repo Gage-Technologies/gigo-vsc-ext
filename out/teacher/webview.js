@@ -39,6 +39,7 @@ class TeacherWebViewprovider {
         };
         this.currentPage = 0;
         this.logger = sysLogger;
+        this.logger.info.appendLine("Code Teacher: Starting...");
         this.loadingIcon = `<div id="loadingAnim" style="display:none">
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
         <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  loop  autoplay></lottie-player>
@@ -86,6 +87,7 @@ ${this.solution}
                         if (this._view) {
                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
                             if (message.text === "enable") {
+                                this.logger.info.appendLine("Code Teacher: Executing call");
                                 this.solutionBox = `<div hidden class="outputBox">
                                     <label class="outputTitle">Solution</label>
                                     <br/>
@@ -251,7 +253,8 @@ ${this.solution}
         });
         //if non status code 200 is returned, return -1 and log failure message
         if (res.status !== 200) {
-            console.log("failed to execute live-check: ", res);
+            console.log("failed to execute code request: ", res);
+            this.logger.error.appendLine(`Code Teacher Failed: Failed to execute code request: ${res}`);
             return -1;
         }
         console.log(`response: ${res.data.response}`);
@@ -273,11 +276,13 @@ ${this.solution}
         </div>`;
         this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
         this.solution = res.data.response;
+        this.logger.info.appendLine("Code Teacher: Retrieved result from server");
     }
     //_getAfkDisabledHtml renders page for when afk is disabled
     //takes in a group string to determine whether to render the whole page or
     //to just render the next and last group page controls
     async _getHtml(webview) {
+        this.logger.info.appendLine("Code Teacher: Rendering page");
         // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'teacher', 'buttons_teacher.js'));
         // Do the same for the stylesheet.

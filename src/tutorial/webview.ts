@@ -551,6 +551,10 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 } else {
                     //if tutorial config does not exist create it and set current page number to 1
                     let yamlContent = "{\"currentPageNum\": 1}";
+                    if (!fs.existsSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial")){
+                        fs.mkdirSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial");
+                    }
+                    
                     fs.writeFileSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json", yamlContent);
                     currentPgNum = 1;
                     this.logger.info.appendLine(`Tutorial: Created new tutorial config.`);

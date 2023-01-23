@@ -83,7 +83,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             //create json formatted string
                             let yamlContent = `{\"currentPageNum\": ${text}}`;
                             //write json formatted string to config file
-                            fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.gigo/tutorial/.tutorial_config.json", yamlContent);
+                            fs.writeFileSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json", yamlContent);
                             //render page with current page number as main page
                             if (this._view) {
                                 this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
@@ -543,15 +543,15 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             //check if tutorial config exists and get current page number
             try {
                 //if tutorial config exists get current page number from it
-                if (fs.existsSync(this.baseWorkspaceUri.fsPath + "/.gigo/tutorial/.tutorial_config.json")) {
-                    let obj = JSON.parse(fs.readFileSync(this.baseWorkspaceUri.fsPath + "/.gigo/tutorial/.tutorial_config.json", 'utf8'));
+                if (fs.existsSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json")) {
+                    let obj = JSON.parse(fs.readFileSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json", 'utf8'));
                     currentPgNum = obj.currentPageNum;
                     this.logger.info.appendLine(`Tutorial: Loaded tutorial config.`);
 
                 } else {
                     //if tutorial config does not exist create it and set current page number to 1
                     let yamlContent = "{\"currentPageNum\": 1}";
-                    fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.gigo/tutorial/.tutorial_config.json", yamlContent);
+                    fs.writeFileSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json", yamlContent);
                     currentPgNum = 1;
                     this.logger.info.appendLine(`Tutorial: Created new tutorial config.`);
 

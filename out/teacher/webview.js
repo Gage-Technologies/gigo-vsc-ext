@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activateTeacherWebView = void 0;
+const axios_1 = require("axios");
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
@@ -54,12 +55,26 @@ class TeacherWebViewprovider {
         <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
         </div>`;
         this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
+        this.solutionBox = `<div hidden class="outputBox">
+        <label class="outputTitle">Solution</label>
+        <br/>
+        <br/>
+        <div class="solutionBox">
+            <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                <pre>
+${this.solution}
+                </pre>
+            </code>
+        </div>
+    </div>`;
         // load configuration value for afk from
         // let gigoConfig = vscode.workspace.getConfiguration("gigo");
         // this.isTutorialActive = gigoConfig.get("gigo.tutorial.on");
     }
     //_getCurrentPage retrieves the number of the current page from the configfile
     _getCurrentPage(webview) {
+        var code;
+        var error;
         //get message from message hander of current page number
         webview.onDidReceiveMessage(async (message) => {
             const command = message.command;
@@ -71,6 +86,18 @@ class TeacherWebViewprovider {
                         if (this._view) {
                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
                             if (message.text === "enable") {
+                                this.solutionBox = `<div hidden class="outputBox">
+                                    <label class="outputTitle">Solution</label>
+                                    <br/>
+                                    <br/>
+                                    <div class="solutionBox">
+                                        <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                                            <pre>
+                            ${this.solution}
+                                            </pre>
+                                        </code>
+                                    </div>
+                                </div>`;
                                 this.loadingIcon = `<div id="loadingAnim">
                                     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
                                     <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
@@ -87,8 +114,29 @@ class TeacherWebViewprovider {
                                     <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
                                     </div>`;
                                 this.loadingTitle = `<div class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
+                                await this._getHtml(this._view.webview);
+                                this.code = message.value.code;
+                                this.error = message.value.error;
+                                await this.codeRequest(message.value.code, message.value.error);
+                                this.solutionBox = `<div class="outputBox">
+                                    <label class="outputTitle">Solution</label>
+                                    <br/>
+                                    <br/>
+                                    <div class="solutionBox">
+                                        <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                                            <pre>
+${this.solution}
+                                            </pre>
+                                        </code>
+                                    </div>
+                                </div>`;
+                                console.log("POST SUCCESS CALL");
+                                await this._getHtml(this._view.webview);
                             }
                             else {
+                                this.code = "";
+                                this.error = "";
+                                this.solution = "";
                                 this.loadingIcon = `<div id="loadingAnim" style="display:none">
                                     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
                                     <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
@@ -105,6 +153,19 @@ class TeacherWebViewprovider {
                                     <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft"></textarea>
                                     </div>`;
                                 this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
+                                this.solutionBox = `<div hidden class="outputBox">
+                                    <label class="outputTitle">Solution</label>
+                                    <br/>
+                                    <br/>
+                                    <div class="solutionBox">
+                                        <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                                            <pre>
+${this.solution}
+                                            </pre>
+                                        </code>
+                                    </div>
+                                </div>`;
+                                await this._getHtml(this._view.webview);
                             }
                             console.log(this.loadingIcon);
                             await this._getHtml(this._view.webview);
@@ -174,28 +235,45 @@ class TeacherWebViewprovider {
     getUri(webview, extensionUri, pathList) {
         return webview.asWebviewUri(vscode_1.Uri.joinPath(extensionUri, ...pathList));
     }
-    // public sync codeRequest(){
-    //       //awair result from http function in GIGO
-    //     let res = await axios.post(
-    //         "http://gigo.gage.intranet/api/internal/ws/afk", 
-    //         {
-    //             // eslint-disable-next-line @typescript-eslint/naming-convention
-    //             "coder_id": wsID,
-    //             "secret": secret,
-    //             // eslint-disable-next-line @typescript-eslint/naming-convention
-    //             "add_min": addMin
-    //         }
-    //     );
-    //     //if non status code 200 is returned, return -1 and log failure message
-    //     if (res.status !== 200) { 
-    //         console.log("failed to execute live-check: ", res);
-    //         return -1;
-    //     }
-    //     //set afk variable to true
-    //     isAFK = true;
-    //     //return afk timestamp
-    //     return res.data.expiration;
-    // }
+    async codeRequest(code, error) {
+        // let http = axios.create({
+        //     headers: {
+        //         token: `7ffd6689-5587-4107-9457-b0f70bbd3220 `
+        //     }
+        // })
+        axios_1.default.defaults.headers.common["token"] = `7ffd6689-5587-4107-9457-b0f70bbd3220`;
+        //awair result from http function in GIGO
+        let res = await axios_1.default.post("http://192.168.1.188:8000/api/v1/debug", {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            "code": code,
+            "error": error,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+        });
+        //if non status code 200 is returned, return -1 and log failure message
+        if (res.status !== 200) {
+            console.log("failed to execute live-check: ", res);
+            return -1;
+        }
+        console.log(`response: ${res.data.response}`);
+        console.log(`code res: ${res.data}`);
+        this.loadingIcon = `<div id="loadingAnim" style="display:none">
+        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+        <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
+        </div>`;
+        this.submitButton = `<div class="buttonWrapper">
+        <button class="submitButton" onclick="submitFunc()">Fix My Code</button>
+        </div>`;
+        this.inputBox1 = `<div class="input-group">
+        <label class="inputTitle">Code</label>
+        <textarea class="inputBox" name="inputBox1" rows="10" cols="10" wrap="soft">${code}</textarea>
+        </div>`;
+        this.inputBox2 = `<div class="input-group">
+        <text class="inputTitle">Error</text>
+        <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft">${error}</textarea>
+        </div>`;
+        this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
+        this.solution = res.data.response;
+    }
     //_getAfkDisabledHtml renders page for when afk is disabled
     //takes in a group string to determine whether to render the whole page or
     //to just render the next and last group page controls
@@ -208,16 +286,18 @@ class TeacherWebViewprovider {
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'teacher', 'main_teacher.css'));
         // Use a nonce to only allow a specific script to be run.
         const nonce = getNonce();
-        let solution = `
-import chad-lang
-import os
-
-def isBased():
-    for i in os.opendir("/daniel-gym-photos/):
-        if i.contains("daniel"):
-            print("whata fuckin bloatlord chad")
-            return True
-isBased()`;
+        //         let solution = `
+        // import chad-lang
+        // import os
+        // def isBased():
+        //     for i in os.opendir("/daniel-gym-photos/):
+        //         if i.contains("daniel"):
+        //             print("whata fuckin bloatlord chad")
+        //             return True
+        // isBased()`
+        let solutionPre = `
+${this.solution}
+`;
         if (this._view) {
             //render the html for the page by passing it to the view
             this._view.webview.html = `<!DOCTYPE html>
@@ -278,18 +358,7 @@ isBased()`;
 
             
             
-            <div class="outputBox">
-                <label class="outputTitle">Solution</label>
-                <br/>
-                <br/>
-                <div class="solutionBox">
-                    <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
-                        <pre>
-${solution}
-                        </pre>
-                    </code>
-                </div>
-            </div>
+            ${this.solutionBox}
             
             <br/>
             <br/>

@@ -40,10 +40,38 @@ function aboutFunc(){
 function submitFunc(){
   vscode.postMessage({
     type: "hello",
-    text: `about`,
+    text: `about2`,
   });
+
+  try{
+    var code = document.getElementsByName("inputBox1")[0].value;
+    var error = document.getElementsByName("inputBox2")[0].value;
+  }catch(e){
     vscode.postMessage({
-      command: "loadingIcon",
-      text: `enable`,
+      type: "hello",
+      text: `${e}`,
     });
+  }
+
+  
+   vscode.postMessage({
+    type: "hello",
+    text: `${error}`,
+  });
+  if (error == "" || error == null) {
+    vscode.postMessage({
+      type: "hello",
+      text: `GIGO Code Teacher: PLEASE FILL OUT THE ERROR FIELD`,
+    });
+    return;
+  }
+
+
+
+
+  vscode.postMessage({
+    command: "loadingIcon",
+    text: `enable`,
+    value: {"code": code, "error": error},
+  });
 }

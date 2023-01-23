@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { runInThisContext } from 'vm';
 import * as vscode from 'vscode';
 import { Uri, Webview } from 'vscode';
@@ -41,6 +42,10 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
     public submitButton: any;
     public inputBox1: any;
     public inputBox2: any;
+    public solution: any;
+    public code: any;
+    public error: any;
+    public solutionBox: any;
     public pageButtonsHTML = "";
     public tourSteps: any[] = [];
     public codeTour = vscode.extensions.getExtension(
@@ -89,6 +94,18 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
         </div>`;
 
         this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
+        this.solutionBox = `<div hidden class="outputBox">
+        <label class="outputTitle">Solution</label>
+        <br/>
+        <br/>
+        <div class="solutionBox">
+            <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                <pre>
+${this.solution}
+                </pre>
+            </code>
+        </div>
+    </div>`;
         
         // load configuration value for afk from
         // let gigoConfig = vscode.workspace.getConfiguration("gigo");
@@ -98,6 +115,8 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
 
     //_getCurrentPage retrieves the number of the current page from the configfile
     private _getCurrentPage(webview: vscode.Webview) {
+        var code: any;
+        var error: any;
         //get message from message hander of current page number
         webview.onDidReceiveMessage(
             async (message: any) => {
@@ -112,6 +131,19 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
                             if (this._view) {
                                 this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
                                 if (message.text === "enable"){
+                                    this.solutionBox = `<div hidden class="outputBox">
+                                    <label class="outputTitle">Solution</label>
+                                    <br/>
+                                    <br/>
+                                    <div class="solutionBox">
+                                        <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                                            <pre>
+                            ${this.solution}
+                                            </pre>
+                                        </code>
+                                    </div>
+                                </div>`;
+                                    
                                     this.loadingIcon =  `<div id="loadingAnim">
                                     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
                                     <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
@@ -132,7 +164,31 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
 
                                     this.loadingTitle = `<div class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
 
+                                    await this._getHtml(this._view.webview);
+                                    this.code = message.value.code;
+                                    this.error = message.value.error;
+                                
+                                    await this.codeRequest(message.value.code, message.value.error);
+                                    this.solutionBox = `<div class="outputBox">
+                                    <label class="outputTitle">Solution</label>
+                                    <br/>
+                                    <br/>
+                                    <div class="solutionBox">
+                                        <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                                            <pre>
+${this.solution}
+                                            </pre>
+                                        </code>
+                                    </div>
+                                </div>`;
+                                    console.log("POST SUCCESS CALL");
+                                    await this._getHtml(this._view.webview);
+                                    
+
                                 }else{
+                                    this.code = "";
+                                    this.error = "";
+                                    this.solution = "";
                                     this.loadingIcon = `<div id="loadingAnim" style="display:none">
                                     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
                                     <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
@@ -151,6 +207,19 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
                                     </div>`;
 
                                     this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
+                                    this.solutionBox = `<div hidden class="outputBox">
+                                    <label class="outputTitle">Solution</label>
+                                    <br/>
+                                    <br/>
+                                    <div class="solutionBox">
+                                        <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
+                                            <pre>
+${this.solution}
+                                            </pre>
+                                        </code>
+                                    </div>
+                                </div>`;
+                                    await this._getHtml(this._view.webview);
 
                                 }
 
@@ -255,31 +324,57 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
     }
 
 
-    // public sync codeRequest(){
-    //       //awair result from http function in GIGO
-    //     let res = await axios.post(
-    //         "http://gigo.gage.intranet/api/internal/ws/afk", 
-    //         {
-    //             // eslint-disable-next-line @typescript-eslint/naming-convention
-    //             "coder_id": wsID,
-    //             "secret": secret,
-    //             // eslint-disable-next-line @typescript-eslint/naming-convention
-    //             "add_min": addMin
-    //         }
-    //     );
+    public async codeRequest(code: any, error: string){
 
-    //     //if non status code 200 is returned, return -1 and log failure message
-    //     if (res.status !== 200) { 
-    //         console.log("failed to execute live-check: ", res);
-    //         return -1;
-    //     }
+        // let http = axios.create({
+        //     headers: {
+        //         token: `7ffd6689-5587-4107-9457-b0f70bbd3220 `
+        //     }
+        // })
 
-    //     //set afk variable to true
-    //     isAFK = true;
+        axios.defaults.headers.common["token"] = `7ffd6689-5587-4107-9457-b0f70bbd3220`; 
         
-    //     //return afk timestamp
-    //     return res.data.expiration;
-    // }
+          //awair result from http function in GIGO
+        let res = await axios.post(
+            "http://192.168.1.188:8000/api/v1/debug", 
+            {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                "code": code,
+                "error": error,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+            }
+        );
+
+        //if non status code 200 is returned, return -1 and log failure message
+        if (res.status !== 200) { 
+            console.log("failed to execute live-check: ", res);
+            return -1;
+        }
+
+        console.log(`response: ${res.data.response}`)
+        console.log(`code res: ${res.data}`)
+
+        this.loadingIcon = `<div id="loadingAnim" style="display:none">
+        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+        <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_DVSwGQ.json"  background="transparent"  speed="1"  loop  autoplay></lottie-player>
+        </div>`;
+        this.submitButton =  `<div class="buttonWrapper">
+        <button class="submitButton" onclick="submitFunc()">Fix My Code</button>
+        </div>`;
+        this.inputBox1 = `<div class="input-group">
+        <label class="inputTitle">Code</label>
+        <textarea class="inputBox" name="inputBox1" rows="10" cols="10" wrap="soft">${code}</textarea>
+        </div>`;
+
+        this.inputBox2 = `<div class="input-group">
+        <text class="inputTitle">Error</text>
+        <textarea class="inputBox" name="inputBox2" rows="10" cols="10" wrap="soft">${error}</textarea>
+        </div>`;
+
+        this.loadingTitle = `<div hidden class="loadingTitle"><text class="loadingText">Your code is being processed by a bot.\nRemeber copying code is only based if you understand it.</text></div>`;
+
+        this.solution = res.data.response;
+    }
 
 
    
@@ -304,16 +399,19 @@ class TeacherWebViewprovider implements vscode.WebviewViewProvider {
         // Use a nonce to only allow a specific script to be run.
         const nonce = getNonce();
         
-        let solution = `
-import chad-lang
-import os
+//         let solution = `
+// import chad-lang
+// import os
 
-def isBased():
-    for i in os.opendir("/daniel-gym-photos/):
-        if i.contains("daniel"):
-            print("whata fuckin bloatlord chad")
-            return True
-isBased()`
+// def isBased():
+//     for i in os.opendir("/daniel-gym-photos/):
+//         if i.contains("daniel"):
+//             print("whata fuckin bloatlord chad")
+//             return True
+// isBased()`
+            let solutionPre = `
+${this.solution}
+`
         
 
         if (this._view) {
@@ -377,18 +475,7 @@ isBased()`
 
             
             
-            <div class="outputBox">
-                <label class="outputTitle">Solution</label>
-                <br/>
-                <br/>
-                <div class="solutionBox">
-                    <code class="solutionCode" name="outputBox" rows="5" cols="10" wrap="soft">
-                        <pre>
-${solution}
-                        </pre>
-                    </code>
-                </div>
-            </div>
+            ${this.solutionBox}
             
             <br/>
             <br/>

@@ -10,6 +10,7 @@ import { activateTimeout } from './session/sessionUpdate';
 import { activateTutorialWebView } from './tutorial/webview';
 import {activateStreakWebView} from './streak/webview';
 import { activateTeacherWebView } from './teacher/webview';
+import { openStdin } from 'process';
 
 let autoGit: AutoGit;
 //let tutorial: Tutorial;
@@ -72,12 +73,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function getCfg(){
 
+    
+
     var cfg: any;
     try{
+        const homedir = require('os').homedir();
         const fs = require('fs');
-        let cfgFile = fs.readFileSync(`/home/gigo/.gigo/ws-config.json`, 'utf-8');
+        const path = require('node:path');
+  
+        let cfgPath = path.join(homedir, '.gigo/ws-config.json')
+        let cfgFile = fs.readFileSync(cfgPath, 'utf-8');
         cfg = JSON.parse(cfgFile);
-        console.log(`config: ${cfg.workspace_settings.runOnStart}`);
+        console.log(cfg);
     }catch(e){
         console.log(e);
         return;

@@ -50,10 +50,13 @@ exports.activate = activate;
 function getCfg() {
     var cfg;
     try {
+        const homedir = require('os').homedir();
         const fs = require('fs');
-        let cfgFile = fs.readFileSync(`/home/gigo/.gigo/ws-config.json`, 'utf-8');
+        const path = require('node:path');
+        let cfgPath = path.join(homedir, '.gigo/ws-config.json');
+        let cfgFile = fs.readFileSync(cfgPath, 'utf-8');
         cfg = JSON.parse(cfgFile);
-        console.log(`config: ${cfg.workspace_settings.runOnStart}`);
+        console.log(cfg);
     }
     catch (e) {
         console.log(e);

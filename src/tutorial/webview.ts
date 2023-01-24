@@ -53,12 +53,16 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
     private _view?: vscode.WebviewView;
     public logger: any;
+    public configPath: any;
+    public configFoldr: any;
 
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
         sysLogger: any,
     ) {
+
+       
         
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
@@ -83,7 +87,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             //create json formatted string
                             let yamlContent = `{\"currentPageNum\": ${text}}`;
                             //write json formatted string to config file
-                            fs.writeFileSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json", yamlContent);
+                            fs.writeFileSync(this.configPath, yamlContent);
                             //render page with current page number as main page
                             if (this._view) {
                                 this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
@@ -203,6 +207,9 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
         this.baseWorkspaceUri.fsPath.replace("file://", "");
 
+        const path = require('node:path');
+        this.configPath =  path.join(this.baseWorkspaceUri.fsPath, ".gigo/tutorial/.tutorial_config.json");
+        this.configFoldr = path.join(this.baseWorkspaceUri.fsPath, ".gigo/tutorial");
 
 
         if (this._view) {
@@ -542,20 +549,23 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
             //check if tutorial config exists and get current page number
             try {
+                
+  
+                
                 //if tutorial config exists get current page number from it
-                if (fs.existsSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json")) {
-                    let obj = JSON.parse(fs.readFileSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json", 'utf8'));
+                if (fs.existsSync(this.configPath)) {
+                    let obj = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
                     currentPgNum = obj.currentPageNum;
                     this.logger.info.appendLine(`Tutorial: Loaded tutorial config.`);
 
                 } else {
                     //if tutorial config does not exist create it and set current page number to 1
                     let yamlContent = "{\"currentPageNum\": 1}";
-                    if (!fs.existsSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial")){
-                        fs.mkdirSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial");
+                    if (!fs.existsSync(this.configFoldr)){
+                        fs.mkdirSync(this.configFoldr);
                     }
                     
-                    fs.writeFileSync(this.baseWorkspaceUri.fsPath + ".gigo/tutorial/.tutorial_config.json", yamlContent);
+                    fs.writeFileSync(this.configPath, yamlContent);
                     currentPgNum = 1;
                     this.logger.info.appendLine(`Tutorial: Created new tutorial config.`);
 

@@ -3,7 +3,7 @@
   "displayName": "GIGO Developer Extension",
   "description": "GIGO developer extension integrates a remote VSCode program into the GIGO ecosystem and provides convienence features for GIGO developers.",
   "publisher": "gage",
-  "version": "0.0.43",
+  "version": "0.0.50",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -174,7 +174,11 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",

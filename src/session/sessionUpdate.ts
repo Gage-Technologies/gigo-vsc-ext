@@ -11,16 +11,34 @@ var logger: any;
 //activateTimeout is called when the extension is activated
 export async function activateTimeout(context: vscode.ExtensionContext, cfg: any, sysLogger: any) {
     logger = sysLogger;
+    
     // link callbacks for tracking user activity
     checkUserActivity();
 
-   
+    // retry initial live check every 5 minutes until we hit or timeout 10 minutes later
+    while(true) {
+        //if user is not afk but is active call live check to renew session timer
+        let res = await executeLiveCheck(cfg.workspace_id_string, cfg.secret);
+
+        console.log(`INIT LIVE CHECK COMPLETED: ${nextTimeStamp}`);
+
+        if (res === -1){
+            logger.info.appendLine("Session: Disconnected from GIGO servers.");
+            vscode.window.showInformationMessage("We are unable to connect to GIGO servers. Please check your network connection.");
+            await new Promise(f => setTimeout(f, 5000));
+            continue;
+        }
+
+        // update next timestamp
+        nextTimeStamp = res;
+        break;
+    }
     
     //core loop iterates until user is inactive for a set amount of time
     while(true){
         //interior loop iterates until a sepcified time is remaining before the use is dtermined to be inactive
         while(true){
-            //if the user is afk wait 1 second before checking again
+            //if the user is afk wait 100ms before checking again
             if (!isAFK){
                 //determine time remaining before user is considered inactive
                 let currentTimeRemaining = nextTimeStamp - (Date.now()/1000);
@@ -30,9 +48,10 @@ export async function activateTimeout(context: vscode.ExtensionContext, cfg: any
                 }
             }
             
-            //wait 1 second before iterating again
-            await new Promise(f => setTimeout(f, 1000));
+            //wait 100ms before iterating again
+            await new Promise(f => setTimeout(f, 100));
         }
+        
 
         console.log("calling renewpopup");
         //prompt user that with inactive pop-up and display time remaining before session timeout
@@ -47,16 +66,22 @@ export async function activateTimeout(context: vscode.ExtensionContext, cfg: any
         }
         
         console.log("CALLING LIVE CHECK");
+        logger.info.appendLine(`Session: Calling live check user is afk: ${isAFK}  user is active: ${isRenewed}  time remaining: ${(nextTimeStamp - (Date.now()/1000))/60}`);
         //if user is not afk but is active call live check to renew session timer
         let res = await executeLiveCheck(cfg.workspace_id_string, cfg.secret);
         
         console.log(`LIVE CHECK COMPLETED: ${nextTimeStamp}`);
 
-        if (res){
-            logger.info.appendLine("Session: Session is being terminated due to inactivity.");
-            vscode.window.showInformationMessage("Session is being terminated due to inactivity");
-            break;
+        if (res === -1){
+            logger.info.appendLine("Session: Disconnected from GIGO servers.");
+            vscode.window.showInformationMessage("We are unable to connect to GIGO servers. Please check your network connection.");
+            await new Promise(f => setTimeout(f, 500));
+            continue;
         }
+
+        // update next timestamp
+        nextTimeStamp = res;
+        userHasBeenActive = false;
     }
 }
 
@@ -98,7 +123,9 @@ async function renewPopup(): Promise<boolean>{
 
 //executeLiveCheck will execute a live check to renew session timer by calling http function in GIGO
 export async function executeLiveCheck(wsID: any, secret: any){
-    var res: any;
+    let expiration = -1;
+    isAFK = false;
+
     for(let i = 0; i < 3; i++){
         try{
             //await result from http function in GIGO
@@ -111,38 +138,20 @@ export async function executeLiveCheck(wsID: any, secret: any){
                 }
             );
 
-            logger.info.appendLine(`Session: Result from live check: ${res.data.expiration}.`);
-
-            // //if non status code 200 is returned, return -1 and log failure message
-            // if (res.status !== 200) { 
-            //     errors.appendLine(`failed to executeLiveCheck: ${res}`);
-            //     continue;
-            // }
-            
+            expiration = res.data.expiration;
+            break;
         }catch(e){
             logger.error.appendLine(`Session Failed: Failed to retrieve result from live check: ${e}.`);
-            await new Promise(f => setTimeout(f, 1000));
+            await new Promise(f => setTimeout(f, 300));
             continue;
         }
-        
-        break;
     }
 
-    
 
-    try{
-        console.log("live check: ", res.data);
-        if (res.data.expiration <= 0){
-            logger.error.appendLine(`Session Failed: Failed to retrieve result from live check: no result found.`);
-            return -1;
-        }
-    }catch(e){
-        logger.error.appendLine(`Session Failed: Failed to retrieve result from live check: ${e}.`);
-        return -1;
-    }
+    logger.info.appendLine(`Session: Result from live check: ${expiration}.`);
     
-    //set next timeout to timestamp retrieved from http call
-    nextTimeStamp = res.data.expiration;
+    
+    return expiration;
 }
 
 

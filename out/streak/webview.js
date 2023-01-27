@@ -5,9 +5,11 @@ const axios_1 = require("axios");
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-async function activateStreakWebView(context, logger) {
+async function activateStreakWebView(context, cfg, logger) {
     //register afk provider by calling class constructor
     const provider = new StreakWebViewprovider(context.extensionUri, logger);
+    let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
+    console.log(res);
     //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(StreakWebViewprovider.viewType, provider));
 }
@@ -28,20 +30,23 @@ class StreakWebViewprovider {
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
     }
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
-    async executeStreakCheck(wsID, secret, ownerID) {
+    async executeStreakCheck(wsID, secret) {
         //awair result from http function in GIGO
-        let res = await axios_1.default.post("http://gigo.gage.intranet/api/internal/ws/afk", {
+        let res = await axios_1.default.post("http://gigo.gage.intranet/api/internal/ws/streak-check", {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            "coder_id": wsID,
+            "workspace_id": wsID,
             "secret": secret,
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            "owner_id": ownerID,
+            // "owner_id": ownerID,
         });
         //if non status code 200 is returned, return -1 and log failure message
         if (res.status !== 200) {
             console.log("failed to execute live-check: ", res);
             return -1;
         }
+        console.log(JSON.stringify(res));
+        this.logger.info(JSON.stringify(res));
+        vscode.window.showInformationMessage(`${JSON.stringify(res)}`);
         this.isOnFire = res.data.is_on_fire;
         this.activeDays = res.data.streak_week_days;
         this.streakNum = res.data.current_streak_num;

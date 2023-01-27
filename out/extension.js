@@ -14,6 +14,34 @@ let autoGit;
 //let tutorial: Tutorial;
 //activate function registers all listed commands and initializes some classes on startup
 function activate(context) {
+    // vscode.languages.registerHoverProvider('markdown', {
+    //     provideHover(document, position, token) {
+    //         try{
+    //             let texrEditr =  vscode.window.activeTextEditor;
+    //             const decorationType = vscode.window.createTextEditorDecorationType(
+    //                 {
+    //                     light:
+    //                     {
+    //                         gutterIconPath: '/home/user/Downloads/xlf3lb2pg0x71.svg',
+    //                         gutterIconSize: '85%',
+    //                     },
+    //                     dark:
+    //                     {
+    //                         gutterIconPath: '/home/user/Downloads/xlf3lb2pg0x71.svg',
+    //                         gutterIconSize: '85%'
+    //                     }
+    //                 });
+    //             if (texrEditr) {
+    //                  texrEditr.setDecorations(decorationType, rangesO);
+    //             }
+    //         }catch(error){
+    //             console.log(error);
+    //         }
+    //       return {
+    //         contents: [`${document.lineAt(position.line).text}: ${token.onCancellationRequested}`]
+    //       };
+    //     }
+    //   });
     let logger = {};
     console.log("before output channels");
     let errors = vscode.window.createOutputChannel("GIGO Developer Errors");
@@ -41,7 +69,7 @@ function activate(context) {
     logger.info.appendLine("Starting GIGO Tutorial...");
     (0, webview_2.activateTutorialWebView)(context, logger);
     logger.info.appendLine("Starting GIGO Streak...");
-    (0, webview_3.activateStreakWebView)(context, logger);
+    (0, webview_3.activateStreakWebView)(context, cfg, logger);
     logger.info.appendLine("Starting GIGO Code Teacher...");
     (0, webview_4.activateTeacherWebView)(context, logger);
     logger.info.appendLine("GIGO Extension Setup...");

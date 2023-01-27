@@ -6,11 +6,12 @@ import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
 
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
-export async function activateStreakWebView(context: vscode.ExtensionContext, logger: any) {
+export async function activateStreakWebView(context: vscode.ExtensionContext, cfg: any, logger: any) {
     //register afk provider by calling class constructor
     const provider = new StreakWebViewprovider(context.extensionUri, logger);
 
-
+    let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
+    console.log(res);
     
 
     //push and regsitser necessary commands
@@ -61,16 +62,16 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     }
 
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
-    public async executeStreakCheck(wsID: any, secret: any, ownerID: any){
+    public async executeStreakCheck(wsID: any, secret: any){
         //awair result from http function in GIGO
         let res = await axios.post(
-            "http://gigo.gage.intranet/api/internal/ws/afk", 
+            "http://gigo.gage.intranet/api/internal/ws/streak-check", 
             {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                "coder_id": wsID,
+                "workspace_id": wsID,
                 "secret": secret,
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                "owner_id": ownerID,
+                // "owner_id": ownerID,
 
             }
         );
@@ -80,6 +81,10 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
             console.log("failed to execute live-check: ", res);
             return -1;
         }
+
+        console.log(JSON.stringify(res));
+        this.logger.info(JSON.stringify(res));
+        vscode.window.showInformationMessage(`${JSON.stringify(res)}`)
 
         this.isOnFire = res.data.is_on_fire;
         this.activeDays = res.data.streak_week_days;

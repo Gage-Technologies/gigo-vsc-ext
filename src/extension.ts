@@ -11,6 +11,7 @@ import { activateTutorialWebView } from './tutorial/webview';
 import {activateStreakWebView} from './streak/webview';
 import { activateTeacherWebView } from './teacher/webview';
 import { openStdin } from 'process';
+import path = require('path');
 
 let autoGit: AutoGit;
 //let tutorial: Tutorial;
@@ -19,6 +20,38 @@ let autoGit: AutoGit;
 
 //activate function registers all listed commands and initializes some classes on startup
 export function activate(context: vscode.ExtensionContext) {
+
+
+    // vscode.languages.registerHoverProvider('markdown', {
+    //     provideHover(document, position, token) {
+    //         try{
+    //             let texrEditr =  vscode.window.activeTextEditor;
+    //             const decorationType = vscode.window.createTextEditorDecorationType(
+    //                 {
+    //                     light:
+    //                     {
+    //                         gutterIconPath: '/home/user/Downloads/xlf3lb2pg0x71.svg',
+    //                         gutterIconSize: '85%',
+    //                     },
+    //                     dark:
+    //                     {
+    //                         gutterIconPath: '/home/user/Downloads/xlf3lb2pg0x71.svg',
+    //                         gutterIconSize: '85%'
+    //                     }
+    //                 });
+            
+    //             if (texrEditr) {
+    //                  texrEditr.setDecorations(decorationType, rangesO);
+    //             }
+    //         }catch(error){
+    //             console.log(error);
+    //         }
+            
+    //       return {
+    //         contents: [`${document.lineAt(position.line).text}: ${token.onCancellationRequested}`]
+    //       };
+    //     }
+    //   });
 
 
     let logger: Record<string, any> = {};
@@ -62,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
     activateTutorialWebView(context, logger);
 
     logger.info.appendLine("Starting GIGO Streak...");
-    activateStreakWebView(context, logger);
+    activateStreakWebView(context, cfg, logger);
 
     logger.info.appendLine("Starting GIGO Code Teacher...");
     activateTeacherWebView(context, logger);

@@ -25,7 +25,7 @@ exports.activateEditor = activateEditor;
 class CatScratchEditorProvider {
     constructor(context) {
         this.context = context;
-        this.addCodeTourBtn = `<button class="add-code-tour">Create Code Tour</button>`;
+        this.addCodeTourBtn = `<button class="add-code-tour" onclick="addCodeTour()">Create Code Tour</button>`;
         this.text = "";
     }
     static register(context) {
@@ -40,6 +40,13 @@ class CatScratchEditorProvider {
      */
     async resolveCustomTextEditor(document, webviewPanel, _token) {
         console.log("WE FUCKIN HERE!");
+        //ensure that user has opened a project before continuing
+        if (!vscode.workspace.workspaceFolders) {
+            vscode.window.showInformationMessage("Open a folder/workspace first");
+            return;
+        }
+        this.baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        this.baseWorkspaceUri.fsPath.replace("file://", "");
         // Setup initial content for the webview
         webviewPanel.webview.options = {
             enableScripts: true,
@@ -90,6 +97,12 @@ class CatScratchEditorProvider {
                     vscode.window.showInformationMessage(`${e.message}`);
                 case 'updateFile':
                     this.text = e.message;
+                case "openCodeTourDialog":
+                    vscode.window.showInformationMessage('openCodeTourDialog');
+                case 'addCodeTour':
+                    vscode.window.showInformationMessage('add code tour');
+                // let tourName = document.fileName.replace('cscratch', 'tour');
+                // fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
             }
         });
         updateWebview();
@@ -117,6 +130,9 @@ class CatScratchEditorProvider {
         const codeCompleteStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'autocomplete.css'));
         const codeInStyling = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-input.css'));
         const codeDeBounce = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'debounce-update.js'));
+        const codeTourScript = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.js'));
+        const codeTourStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.css'));
+        const moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon.svg'));
         // Use a nonce to whitelist which scripts can be run
         const nonce = (0, util_1.getNonce)();
         return /* html */ `
@@ -143,6 +159,7 @@ class CatScratchEditorProvider {
 				<link href="${styleMainUri}" rel="stylesheet" />
 				<link href="${codeInStyling}" rel="stylesheet" />
 				<link href="${codeCompleteStyle}" rel="stylesheet" />
+				<link href="${codeTourStyle}" rel="stylesheet" />
 
 				<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 				
@@ -164,6 +181,8 @@ class CatScratchEditorProvider {
 			<script src="${codeIndent}"></script>
 			<script src="${codeComplete}"></script>
 			<script src="${codeDeBounce}"></script>
+
+			<script src="${codeTourScript}"></script>
 			
 			
 			<!--...-->
@@ -180,6 +199,52 @@ class CatScratchEditorProvider {
 			);
 			</script>
 				${this.addCodeTourBtn}
+
+				</br>
+				</br>
+
+				<div class="code-steps-box">
+					<div id="@@@Step1@@@" draggable="true" ondragstart="drag(event)" class="code-steps">
+						<img id="@@@Step1@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${moveSVG}" alt="My Happy SVG">
+					
+
+						<div class="code-steps-inner">	
+							<span id="@@@Step1@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
+						</div>
+						</br>
+						</br>
+						<label>File Path:</label>
+						<input class="file-path-box">
+						</input>
+						<label>Line Number:</label>
+						<input class="line-number-box">
+                        </input>
+						<button class="save-step" onclick="saveStep()">Save</button>
+					</img>
+					</div>
+
+					<div id="@@@Step2@@@" draggable="true" ondragstart="drag(event)" class="code-steps">
+						<img id="@@@Step2@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${moveSVG}" alt="My Happy SVG">
+					
+
+						<div class="code-steps-inner">	
+							<span id="@@@Step2@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 2</b></span> 
+						</div>
+						</br>
+						</br>
+						<label>File Path:</label>
+						<input class="file-path-box">
+						</input>
+						<label>Line Number:</label>
+						<input class="line-number-box">
+                        </input>
+						<button class="save-step" onclick="saveStep()">Save</button>
+					</img>
+					</div>
+				</div>
+
+				</br>
+				</br>
 		
 				<code-input lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>				
 

@@ -3,6 +3,18 @@
 // Based on a CSS-Tricks Post
 const vscode = acquireVsCodeApi();
 
+function addCodeTour(){
+    vscode.postMessage({
+        type: 'addCodeTour'
+    });
+}
+
+function saveStep() {
+    vscode.postMessage({
+        type: 'saveTourStep'
+    });
+}
+
 var codeInput = {
     observedAttributes: [
         "value", 

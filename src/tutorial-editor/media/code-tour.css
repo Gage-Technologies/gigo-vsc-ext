@@ -1,0 +1,65 @@
+.add-code-tour{
+    border-radius: 18px;
+}
+
+.code-steps-box{
+    width: auto;
+    height: 15em;
+    border-radius: 18px;
+    display: flex;
+    gap: 15px;
+   
+    padding: 15px;
+    /* box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px; */
+}
+
+.code-steps{
+    z-index: 0;
+    
+    border: 5px white;
+    outline: 5px white;
+    width: 10em;
+    height: 100%;
+    border-radius: 18px;
+    text-align: center;
+    position: relative;;
+   
+    padding: 5px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+}
+
+.step-title{
+    text-align: center;
+}
+
+.file-path-box{
+    border-radius: 10px;
+}
+
+.line-number-box{
+    border-radius: 10px;
+}
+
+.code-steps-inner{
+    background-color: green;
+    border-radius: 18px;
+}
+
+.move-icon{
+    stroke: none;
+    z-index: 1;
+    position: absolute;
+    color: aqua;
+    width: 20px;
+    height: 20px;
+    left: -10px;
+    top: -10px;
+}
+
+.save-step{
+    border-radius: 18px;
+    width: 8em;
+    height: 1.5em;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+}
+

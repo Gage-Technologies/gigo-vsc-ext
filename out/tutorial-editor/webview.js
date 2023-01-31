@@ -98,8 +98,13 @@ class CatScratchEditorProvider {
         const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'vscode.css'));
         const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'catScratch.css'));
         const styleJS = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'style.js'));
-        const hjs = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'node_modules', 'highlight.js'));
-        const hjStyles = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'node_modules', 'highlight.js', 'default.css'));
+        const codeIn = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-input.js'));
+        const codeAutoDetect = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'autodetect.min.js'));
+        const codeIndent = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'indent.js'));
+        const codeComplete = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'autocomplete.js'));
+        const codeCompleteStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'autocomplete.css'));
+        const codeInStyling = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-input.css'));
+        const codeDeBounce = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'debounce-update.js'));
         // Use a nonce to whitelist which scripts can be run
         const nonce = (0, util_1.getNonce)();
         return /* html */ `
@@ -116,14 +121,19 @@ class CatScratchEditorProvider {
 	
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/default.css" integrity="sha512-HPYcuSKzZ/FwxsRKIiNX6imjfnr5+82poiPO+oXi9WCEEe2q1x2OOBpbF+6cRG+hwoEsBXfs7oQveu5yHbY64g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-markdown.js"></script>
 				<link href="${styleResetUri}" rel="stylesheet" />
 				<link href="${styleVSCodeUri}" rel="stylesheet" />
 				<link href="${styleMainUri}" rel="stylesheet" />
+				<link href="${codeInStyling}" rel="stylesheet" />
+				<link href="${codeCompleteStyle}" rel="stylesheet" />
 
 				<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-
+				
 
 
 				<title>Cat Scratch</title>
@@ -132,24 +142,30 @@ class CatScratchEditorProvider {
 			<div id="container" style="height: 100%"></div>
 			<body>
 			
+			<script src="${codeIn}"></script>
+			<!--...-->
+			<script src="${codeAutoDetect}"></script>
+			<script src="${codeIndent}"></script>
+			<script src="${codeComplete}"></script>
+			<script src="${codeDeBounce}"></script>
 			
+			
+			<!--...-->
+			<script>
+			codeInput.registerTemplate("syntax-highlighted", 
+				codeInput.templates.hljs(
+				hljs, 
+				[
+					
+					
+					new codeInput.plugins.Indent()
+				]
+				)
+			);
+			</script>
 
 		
-
-
-			<textarea id="editing" oninput="update(this.value); sync_scroll(this);" onscroll="sync_scroll(this);" onkeydown="check_tab(this, event);"></textarea>
-			
-
-			<pre id="highlighting" aria-hidden="true">
-			  <code class="prettyprint" id="highlighting-content"></code>
-			</pre>
-
-				<div class="notes">
-					<div class="add-button">
-						<button>Scratch!</button>
-					</div>
-				</div>
-				
+				<code-input lang="Markdown" style="letter-spacing: inherit;"></code-input>				
 
 				<script  nonce="${nonce}" src="${styleJS}" ></script>
 				<script type="module" nonce="${nonce}" src="${scriptUri}"></script>

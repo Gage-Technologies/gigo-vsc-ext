@@ -1,6 +1,7 @@
 // CodeInput
 // by WebCoder49
 // Based on a CSS-Tricks Post
+const vscode = acquireVsCodeApi();
 
 var codeInput = {
     observedAttributes: [
@@ -89,6 +90,11 @@ var codeInput = {
             else this.template.highlight(result_element);
            
             this.plugin_evt("afterHighlight");
+
+            vscode.postMessage({
+                type: 'updateFile',
+                message: `${text}`
+            })
         }
 
         sync_scroll() {

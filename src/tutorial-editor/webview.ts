@@ -31,6 +31,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 	}
 
 	public text: any;
+	public addCodeTourBtn: any = `<button class="add-code-tour">Create Code Tour</button>`;
 
 	private static readonly viewType = 'catCustoms.catScratch';
 
@@ -38,7 +39,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 
 	constructor(
 		private readonly context: vscode.ExtensionContext
-	) { }
+	) { this.text = ""; }
 
 	/**
 	 * Called when our custom editor is opened.
@@ -56,6 +57,17 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			enableScripts: true,
 		};
 		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+
+		let fs = require('fs')
+
+
+		vscode.window.onDidChangeActiveColorTheme(() =>{
+			webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+			
+			
+		});
+
+		
 
 		console.log("WE FUCKIN HERE!");
 		this.text = document.getText();
@@ -101,6 +113,8 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
                     return;
 				case 'hello':
 					vscode.window.showInformationMessage(`${e.message}`);
+				case 'updateFile':
+					this.text = e.message;
 			}
 		});
 
@@ -111,6 +125,15 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 	 * Get the static html used for the editor webviews.
 	 */
 	private getHtmlForWebview(webview: vscode.Webview): string {
+
+
+		let highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-dark.css"/>`;
+
+		if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Light){
+			highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.css"/>`;
+		}
+
+
 		console.log("WE FUCKIN HERE!");
 		console.log(this.context.extensionUri);
 		// Local path to script and css for the webview
@@ -167,6 +190,10 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 				
 
+				${highlightStyle}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
 
 				<title>Cat Scratch</title>
 			</head>
@@ -184,9 +211,9 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			
 			<!--...-->
 			<script>
-			codeInput.registerTemplate("syntax-highlighted", 
-				codeInput.templates.hljs(
-				hljs, 
+			codeInput.registerTemplate("code-input", 
+				codeInput.templates.prism(
+				Prism, 
 				[
 					
 					
@@ -195,9 +222,9 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				)
 			);
 			</script>
-
+				${this.addCodeTourBtn}
 		
-				<code-input lang="Markdown" style="letter-spacing: inherit;"></code-input>				
+				<code-input lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>				
 
 				<script  nonce="${nonce}" src="${styleJS}" ></script>
 				<script type="module" nonce="${nonce}" src="${scriptUri}"></script>

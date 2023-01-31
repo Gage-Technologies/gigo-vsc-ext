@@ -25,6 +25,8 @@ exports.activateEditor = activateEditor;
 class CatScratchEditorProvider {
     constructor(context) {
         this.context = context;
+        this.addCodeTourBtn = `<button class="add-code-tour">Create Code Tour</button>`;
+        this.text = "";
     }
     static register(context) {
         const provider = new CatScratchEditorProvider(context);
@@ -43,6 +45,10 @@ class CatScratchEditorProvider {
             enableScripts: true,
         };
         webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+        let fs = require('fs');
+        vscode.window.onDidChangeActiveColorTheme(() => {
+            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+        });
         console.log("WE FUCKIN HERE!");
         this.text = document.getText();
         function updateWebview() {
@@ -82,6 +88,8 @@ class CatScratchEditorProvider {
                     return;
                 case 'hello':
                     vscode.window.showInformationMessage(`${e.message}`);
+                case 'updateFile':
+                    this.text = e.message;
             }
         });
         updateWebview();
@@ -90,6 +98,10 @@ class CatScratchEditorProvider {
      * Get the static html used for the editor webviews.
      */
     getHtmlForWebview(webview) {
+        let highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-dark.css"/>`;
+        if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Light) {
+            highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.css"/>`;
+        }
         console.log("WE FUCKIN HERE!");
         console.log(this.context.extensionUri);
         // Local path to script and css for the webview
@@ -135,6 +147,10 @@ class CatScratchEditorProvider {
 				<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 				
 
+				${highlightStyle}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
 
 				<title>Cat Scratch</title>
 			</head>
@@ -152,9 +168,9 @@ class CatScratchEditorProvider {
 			
 			<!--...-->
 			<script>
-			codeInput.registerTemplate("syntax-highlighted", 
-				codeInput.templates.hljs(
-				hljs, 
+			codeInput.registerTemplate("code-input", 
+				codeInput.templates.prism(
+				Prism, 
 				[
 					
 					
@@ -163,9 +179,9 @@ class CatScratchEditorProvider {
 				)
 			);
 			</script>
-
+				${this.addCodeTourBtn}
 		
-				<code-input lang="Markdown" style="letter-spacing: inherit;"></code-input>				
+				<code-input lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>				
 
 				<script  nonce="${nonce}" src="${styleJS}" ></script>
 				<script type="module" nonce="${nonce}" src="${scriptUri}"></script>

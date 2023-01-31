@@ -10,6 +10,7 @@ const sessionUpdate_1 = require("./session/sessionUpdate");
 const webview_2 = require("./tutorial/webview");
 const webview_3 = require("./streak/webview");
 const webview_4 = require("./teacher/webview");
+const webview_5 = require("./tutorial-editor/webview");
 let autoGit;
 //let tutorial: Tutorial;
 //activate function registers all listed commands and initializes some classes on startup
@@ -63,6 +64,8 @@ function activate(context) {
     logger.info.appendLine("Starting GIGO Session...");
     (0, sessionUpdate_1.activateTimeout)(context, cfg, logger);
     console.log("calling afk activation");
+    console.log("calling editor activation");
+    (0, webview_5.activateEditor)(context);
     logger.info.appendLine("Starting GIGO AFK Page...");
     //start afk using its local activation function
     (0, webview_1.activateAfkWebView)(context, cfg, logger);

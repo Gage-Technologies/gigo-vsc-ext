@@ -10,6 +10,7 @@ import { activateTimeout } from './session/sessionUpdate';
 import { activateTutorialWebView } from './tutorial/webview';
 import {activateStreakWebView} from './streak/webview';
 import { activateTeacherWebView } from './teacher/webview';
+import { activateEditor } from './tutorial-editor/webview';
 import { openStdin } from 'process';
 import path = require('path');
 
@@ -72,6 +73,8 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
 
+    
+
 
     logger.info.appendLine("Starting GIGO Autogit...");
     //registser autoGit command using its local activation function
@@ -87,6 +90,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log("calling afk activation");
 
+    console.log("calling editor activation");
+    activateEditor(context);
+
     logger.info.appendLine("Starting GIGO AFK Page...");
     //start afk using its local activation function
     activateAfkWebView(context, cfg, logger);
@@ -100,6 +106,9 @@ export function activate(context: vscode.ExtensionContext) {
     logger.info.appendLine("Starting GIGO Code Teacher...");
     activateTeacherWebView(context, logger);
     
+    
+   
+
     logger.info.appendLine("GIGO Extension Setup...");
     
 }

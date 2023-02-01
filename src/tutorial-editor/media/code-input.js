@@ -161,6 +161,7 @@ var codeInput = {
     
             /* Create Textarea */
             let textarea = document.createElement("textarea");
+            textarea.setAttribute("id", "ci-internal");
             textarea.placeholder = placeholder;
             textarea.value = value;
             textarea.setAttribute("spellcheck", "false");

@@ -21,7 +21,7 @@ code-input {
 
   font-size: normal;
   font-family: monospace;
-  line-height: normal;
+  line-height: 15px;
   tab-size: 2;
   caret-color: darkgrey;
   white-space: pre;

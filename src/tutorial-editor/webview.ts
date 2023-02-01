@@ -184,7 +184,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 		const codeTourScript = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.js'));
 		const codeTourStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.css'));
 
-		const moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon.svg'));
+		const moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
 
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
@@ -258,7 +258,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				</br>
 
 				<div class="code-steps-box">
-					<div id="@@@Step1@@@" draggable="true" ondragstart="drag(event)" class="code-steps">
+					<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
 						<img id="@@@Step1@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${moveSVG}" alt="My Happy SVG">
 					
 
@@ -277,30 +277,12 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 					</img>
 					</div>
 
-					<div id="@@@Step2@@@" draggable="true" ondragstart="drag(event)" class="code-steps">
-						<img id="@@@Step2@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${moveSVG}" alt="My Happy SVG">
 					
-
-						<div class="code-steps-inner">	
-							<span id="@@@Step2@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 2</b></span> 
-						</div>
-						</br>
-						</br>
-						<label>File Path:</label>
-						<input class="file-path-box">
-						</input>
-						<label>Line Number:</label>
-						<input class="line-number-box">
-                        </input>
-						<button class="save-step" onclick="saveStep()">Save</button>
-					</img>
-					</div>
-				</div>
 
 				</br>
 				</br>
 		
-				<code-input lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>				
+				<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>				
 
 				<script  nonce="${nonce}" src="${styleJS}" ></script>
 				<script type="module" nonce="${nonce}" src="${scriptUri}"></script>

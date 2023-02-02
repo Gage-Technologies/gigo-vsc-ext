@@ -2,25 +2,89 @@
 
 @import url(https://fonts.googleapis.com/css?family=Lato:300);
 
+.storage-tray{
+    height: 90px; /* Full-height: remove this if you want "auto" height */
+    width: 50px; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 10; /* Stay on top */
+    top: 10%; /* Stay at the top */
+    left: 0;
+    background-color: auto; /* Black */
+    gap: 10px;
+    
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    
+    backdrop-filter: blur(5px);
+    overflow: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
+}
+
+.trash{
+    display: flex;;
+    border-radius: 18px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 30px;
+}
+
+.trash-icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    
+    filter: invert(100%) sepia(0%) saturate(7475%) hue-rotate(108deg) brightness(97%) contrast(109%);
+}
+
+
+
+.trash-icon-open{
+    width: 15px;
+    height: 15px;
+    
+    filter: invert(100%) sepia(0%) saturate(7475%) hue-rotate(108deg) brightness(97%) contrast(109%);
+}
+
+
+
+.storage-tray-button{
+    border-radius: 18px;
+   
+}
 
 .add-code-tour{
     border-radius: 18px;
 }
 
 .code-steps-box{
-    width: auto;
+    width: 40px;
     height: 18em;
     border-radius: 18px;
+    float: left;
     display: flex;
     gap: 15px;
-   
+    opacity: 100%;
+    box-shadow: inset 2px 2px 4px 5px rgba(0,0,0,0.3);
     padding: 15px;
     /* box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px; */
 }
+/* .storage-tray{
+    width: auto;
+    height: 18em;
+    border-radius: 18px;;
+    box-shadow: inset 2px 2px 4px 5px rgba(0,0,0,0.3);
+} */
 
 .code-steps{
     z-index: 9;
-    
+    background-color: auto;
+    backdrop-filter: blur(5px);
+    resize: true;
+    opacity: 100%;
     border: 5px white;
     outline: 5px white;
     width: 10em;
@@ -28,6 +92,7 @@
     border-radius: 18px;
     text-align: center;
     position: absolute;;
+
 
     cursor: move;
   cursor: -webkit-grab;
@@ -42,6 +107,8 @@
     cursor: -webkit-grabbing;
     cursor: -moz-grabbing;
 }
+
+
 
 
 

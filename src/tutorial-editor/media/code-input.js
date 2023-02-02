@@ -103,10 +103,18 @@ var codeInput = {
            
             this.plugin_evt("afterHighlight");
 
+
+            
+            
+
             vscode.postMessage({
                 type: 'updateFile',
                 message: `${text}`
             })
+
+            
+
+            
         }
 
         sync_scroll() {
@@ -116,6 +124,15 @@ var codeInput = {
             // Get and set x and y
             result_element.scrollTop = input_element.scrollTop;
             result_element.scrollLeft = input_element.scrollLeft;
+
+            try{
+                handleCodeSteps();
+            }catch(e){
+                vscode.postMessage({
+                    type: 'hello',
+                    message: `${e}`
+                });
+            }
         }
 
         escape_html(text) {
@@ -171,6 +188,12 @@ var codeInput = {
                 this.removeAttribute("name");
             }
     
+            textarea.setAttribute("onkeydown", "handleCodeSteps();");
+            textarea.setAttribute("onsubmit", "handleCodeSteps();");
+            textarea.setAttribute("draggable", "false");
+            textarea.setAttribute("ondragstart", "return false");
+
+
             textarea.setAttribute("oninput", "this.parentElement.update(this.value); this.parentElement.sync_scroll();");
             textarea.setAttribute("onscroll", "this.parentElement.sync_scroll();");
             this.append(textarea);
@@ -400,3 +423,104 @@ var codeInput = {
 }
 
 customElements.define("code-input", codeInput.CodeInput); // Set tag
+
+
+function handleCodeSteps(){
+
+    
+    var textBoxIn = document.getElementById("ci-internal");
+    var textBoxEx = document.getElementById("ci-external");
+    const rect = textBoxEx.getBoundingClientRect();
+    var steps = document.getElementsByClassName("code-steps");
+
+    for (let i = 0; i < steps.length; i++) {
+        
+        var elmnt = steps[i];
+        let word = elmnt.id;
+    
+        if (doElsCollide(elmnt, textBoxEx)) {
+
+            
+            var caretPos = textBoxIn.selectionStart;
+            
+            if (textBoxEx.value.indexOf(word) === -1){
+                textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(`\n${word}\n`.length)
+                //textBoxEx.value += `\n${word}\n`;
+            }
+            
+            // now you have a proper float for the font size (yes, it can be a float, not just an integer)
+            
+                    
+            
+           
+
+            
+
+
+            var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
+            var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
+
+            var charsBefore = 0
+            const newLines = textBoxEx.value.split("\n");
+            for (let i = 0; i < newLines.length; i++) {
+                if (newLines[i].indexOf(word) !== -1){
+                    heightPos = i + 1;
+                }
+            } 
+
+            for (let i = 0; i < newLines.length; i++) {
+                if (newLines[i].indexOf(word)!== -1){
+                    break;
+                }
+                charsBefore += newLines[i].length + 1;
+            }
+
+
+            var startPos = (textBoxEx.value.indexOf(word));
+            var endPos = (startPos + word.length) - charsBefore;
+
+            var top = (getOffset(textBoxEx).top + (heightPos * lineHeight))
+            var left = (getOffset(textBoxEx).left + (endPos * fontSize))
+    
+            if (top > rect.height || left > rect.width || left > rect.width){ 
+                elmnt.style.top = (getOffset(textBoxEx).top) + "px";
+                elmnt.style.left = (getOffset(textBoxEx).left) + "px";
+                handleCodeSteps();
+            }
+            
+            var elmntClone = elmnt.cloneNode()
+            
+            
+            //  elmnt.style.position = "fixed";
+
+            elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
+            elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize - 40)) + "px";
+            elmnt.ondragstart = function () { return false; };
+           
+            
+            
+
+            //  elmnt.outerHTML = elmnt.outerHTML.replace(`<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps" style="top: ${elmnt.style.top}; left: ${elmnt.style.left};">`, 
+            //  `<div id="@@@Step1@@@" style="position: absolute; top: ${(getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px"} left: ${(getOffset(textBoxEx).left + (7 * fontSize)) + "px"};" class="code-steps">`)
+            //  elmnt.outerHTML = elmnt.outerHTML.replace(`ondragstart="dragElement(this)"`, `ondragstart="return false"`)
+            
+            textBoxEx.value += `                                                        ${getOffset(textBoxEx).top}\n`
+            textBoxEx.value += `Height: ${getOffset(textBoxEx).top + (heightPos * lineHeight)}\n`
+            //  textBoxEx.value += `diffed: <div id="@@@Step1@@@" style="position: absolute; top: ${(getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px"} left: ${(getOffset(textBoxEx).left + (7 * fontSize)) + "px"};" class="code-steps">\n`
+            //  textBoxEx.value += `<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps" style="top: ${elmnt.style.top}; left: ${elmnt.style.left};">\n`
+            textBoxEx.value += `caretPos: ${caretPos} boxwidth: ${getOffset(textBoxEx).left} boxHeight: ${getOffset(textBoxEx).top} start: ${startPos} end: ${endPos} charsBefore: ${charsBefore} height: ${heightPos} fontise: ${fontSize} lineheight: ${lineHeight} totalHeight: ${elmnt.style.top} totalWidth: ${elmnt.style.left}\n`;
+            
+
+        
+            // var isSelected = selectTextareaWord(textBoxEx, "Step 1");
+            // e.target.appendChild(document.createTextNode(`${isSelected}`));
+        
+        }else{
+            if (textBoxEx.value.indexOf(word) !== -1){
+                
+                textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length)
+                //textBoxEx.value += `\n${word}\n`;
+            }
+        }
+    }
+}

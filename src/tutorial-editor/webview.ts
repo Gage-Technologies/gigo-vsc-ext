@@ -4,7 +4,7 @@ import { getNonce } from './util';
 
 export async function activateEditor(context: vscode.ExtensionContext) {
 	console.log("WE FUCKIN HERE!");
-	vscode.window.showInformationMessage(`WE FUCKIN HERE`);
+	
 	// Register our custom editor providers
 	context.subscriptions.push(CatScratchEditorProvider.register(context));
 	
@@ -38,6 +38,12 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 
 	private static readonly scratchCharacters = ['😸', '😹', '😺', '😻', '😼', '😽', '😾', '🙀', '😿', '🐱'];
 	public baseWorkspaceUri!: vscode.Uri;
+	public codeTourSteps: string[] = [];
+	public numOfSteps: number = 0;
+	public moveSVG: any;
+	public trashOpen = `<svg disabled="true" class="trash-icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+	<path class="trash-icon-path" d="M9 13v6c0 .552-.448 1-1 1s-1-.448-1-1v-6c0-.552.448-1 1-1s1 .448 1 1zm7-1c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm-4 0c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm4.333-8.623c-.882-.184-1.373-1.409-1.189-2.291l-5.203-1.086c-.184.883-1.123 1.81-2.004 1.625l-5.528-1.099-.409 1.958 19.591 4.099.409-1.958-5.667-1.248zm4.667 4.623v16h-18v-16h18zm-2 14v-12h-14v12h14z"/>
+	</svg>`;
 
 	constructor(
 		private readonly context: vscode.ExtensionContext
@@ -72,7 +78,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 
 		let fs = require('fs')
 
-
+		this.moveSVG =  webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
 		vscode.window.onDidChangeActiveColorTheme(() =>{
 			webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 			
@@ -127,13 +133,40 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
                     return;
 				case 'hello':
 					vscode.window.showInformationMessage(`${e.message}`);
+					return;
 				case 'updateFile':
 					this.text = e.message;
+					return
 				case "openCodeTourDialog":
 					vscode.window.showInformationMessage('openCodeTourDialog');
+					return;
 				case 'addCodeTour':
+					this.numOfSteps ++;
+
+					this.codeTourSteps.push(`
+					<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
+							<img id="@@@Step${this.numOfSteps}@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
+						
+
+								<div class="code-steps-inner">	
+									<span id="@@@Step${this.numOfSteps}@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
+								</div>
+								</br>
+								</br>
+								<label>File Path:</label>
+								<input class="file-path-box">
+								</input>
+								<label>Line Number:</label>
+								<input class="line-number-box">
+								</input>
+								<button class="save-step" onclick="saveStep()">Save</button>
+							</img>
+						</div>
+					`);
 
 					vscode.window.showInformationMessage('add code tour');
+
+					return;
 					// let tourName = document.fileName.replace('cscratch', 'tour');
 					// fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
 
@@ -184,7 +217,11 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 		const codeTourScript = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.js'));
 		const codeTourStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.css'));
 
-		const moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
+
+		const coordsUtil = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'textareaCoords.js'));
+
+		this.moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
+		const trashPng = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'trash.png'));
 
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
@@ -237,6 +274,8 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			<script src="${codeDeBounce}"></script>
 
 			<script src="${codeTourScript}"></script>
+
+			
 			
 			
 			<!--...-->
@@ -252,37 +291,70 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				)
 			);
 			</script>
+			<div class="storage-tray">
+				<button class="storage-tray-button" id="storage-tray-button">+</button>
+				</br>
+				</br>
+				<button class="trash">
+					<svg class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+						<path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>
+					</svg>
+
+					
+				</button>
+			</div>
 				${this.addCodeTourBtn}
 
 				</br>
 				</br>
+				
+					<div class="code-steps-box">
+						<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
+							<img id="@@@Step1@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
+						
 
-				<div class="code-steps-box">
-					<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
-						<img id="@@@Step1@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${moveSVG}" alt="My Happy SVG">
-					
-
-						<div class="code-steps-inner">	
-							<span id="@@@Step1@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
+								<div class="code-steps-inner">	
+									<span id="@@@Step1@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
+								</div>
+								</br>
+								</br>
+								<label>File Path:</label>
+								<input class="file-path-box">
+								</input>
+								<label>Line Number:</label>
+								<input class="line-number-box">
+								</input>
+								<button class="save-step" onclick="saveStep()">Save</button>
+							</img>
 						</div>
-						</br>
-						</br>
-						<label>File Path:</label>
-						<input class="file-path-box">
-						</input>
-						<label>Line Number:</label>
-						<input class="line-number-box">
-                        </input>
-						<button class="save-step" onclick="saveStep()">Save</button>
-					</img>
+
+						<div id="@@@Step2@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
+							<img id="@@@Step2@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
+						
+
+								<div class="code-steps-inner">	
+									<span id="@@@Step2@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
+								</div>
+								</br>
+								</br>
+								<label>File Path:</label>
+								<input class="file-path-box">
+								</input>
+								<label>Line Number:</label>
+								<input class="line-number-box">
+								</input>
+								<button class="save-step" onclick="saveStep()">Save</button>
+							</img>
+						</div>
 					</div>
 
-					
+						
 
-				</br>
-				</br>
-		
-				<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>				
+					</br>
+					</br>
+			
+					<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>		
+			
 
 				<script  nonce="${nonce}" src="${styleJS}" ></script>
 				<script type="module" nonce="${nonce}" src="${scriptUri}"></script>

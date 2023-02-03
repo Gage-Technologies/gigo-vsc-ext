@@ -99,8 +99,8 @@ class CatScratchEditorProvider {
                     Prism.highlightElement(e.message);
                     return;
                 case 'hello':
-                    vscode.window.showInformationMessage(`${e.message}`);
-                    return;
+                    vscode.window.showInformationMessage(e.message);
+                    break;
                 case 'updateFile':
                     this.text = e.message;
                     return;
@@ -131,6 +131,10 @@ class CatScratchEditorProvider {
 					`);
                     vscode.window.showInformationMessage('add code tour');
                     return;
+                case 'saveTourStep':
+                    console.log(`${e.message}`);
+                    vscode.window.showInformationMessage(`save code tour, fp: ${e.message}, ln: ${e.message.lineNumber}`);
+                    break;
                 // let tourName = document.fileName.replace('cscratch', 'tour');
                 // fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
             }
@@ -243,51 +247,46 @@ class CatScratchEditorProvider {
 
 					
 				</button>
+				
 			</div>
+			<div id="pop-container" class="pop-up-container">
+				<div id="add-pop" class="add-pop-up"></div>
+				<div class="arrow-left"></div>
+			</div>
+			
 				${this.addCodeTourBtn}
 
 				</br>
 				</br>
 				
 					<div class="code-steps-box">
-						<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
+						<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
 							<img id="@@@Step1@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
 						
 
-								<div class="code-steps-inner">	
-									<span id="@@@Step1@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
-								</div>
-								</br>
-								</br>
-								<label>File Path:</label>
-								<input class="file-path-box">
-								</input>
-								<label>Line Number:</label>
-								<input class="line-number-box">
-								</input>
-								<button class="save-step" onclick="saveStep()">Save</button>
 							</img>
-						</div>
 
-						<div id="@@@Step2@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
-							<img id="@@@Step2@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
-						
-
-								<div class="code-steps-inner">	
-									<span id="@@@Step2@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
-								</div>
-								</br>
-								</br>
+							<div class="code-steps-inner">	
+							<span id="@@@Step1@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
+							</div>
+							
+							<div id="file-path-div">
 								<label>File Path:</label>
-								<input class="file-path-box">
+								<input id="file-path" class="file-path-box">
 								</input>
+							</div>
+							<div id="line-number-div">
 								<label>Line Number:</label>
-								<input class="line-number-box">
+								<input id="line-number" class="line-number-box">
 								</input>
-								<button class="save-step" onclick="saveStep()">Save</button>
-							</img>
+							</div>
+                            
+							<button id="save-step-button" class="save-step" onclick="saveStep(this)">Save</button>
+							<button style="display: none;" id="edit-step-button" class="edit-step" onclick="editStep(this)">Edit</button>
 						</div>
 					</div>
+
+						
 
 						
 

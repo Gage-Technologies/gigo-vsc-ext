@@ -24,6 +24,7 @@
 .trash{
     display: flex;;
     border-radius: 18px;
+    z-index: 10;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -40,6 +41,54 @@
     filter: invert(100%) sepia(0%) saturate(7475%) hue-rotate(108deg) brightness(97%) contrast(109%);
 }
 
+.pop-up-container{
+    position: fixed;
+    top: 9%; /* Stay at the top */
+    left: 4%;
+    display: inline-flex;
+    width: 180px;
+    height: 180px;
+    z-index: 20;
+}
+
+
+.add-pop-up{
+    height: 250px; /* Full-height: remove this if you want "auto" height */
+    width: 200px; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 9; /* Stay on top */
+    left: 5%;
+    /* top: 10%;  */
+    /* left: 5%; */
+    float: left;
+    background-color: auto; /* Black */
+    gap: 10px;
+    
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background-color: red;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 16px 16px -16px, rgba(0, 0, 0, 0.14) 0px 16px 20px 0px, rgba(0, 0, 0, 0.12) 0px 8px 32px 0px;
+    backdrop-filter: blur(5px);
+    overflow: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
+}
+
+.arrow-left {
+    width: 40px;
+    height: 40px;
+   
+    z-index: 9;
+    
+    /* top: 13%; /* Stay at the top */
+    /* left: 4%; */
+    z-index: 10; /* Stay on top */
+    left: 0%;
+    border-top: 40px solid transparent;
+    border-bottom: 40px solid transparent; 
+    
+    border-right:40px solid red; 
+  }
 
 
 .trash-icon-open{
@@ -61,10 +110,9 @@
 }
 
 .code-steps-box{
-    width: 40px;
+    width: auto;
     height: 18em;
     border-radius: 18px;
-    float: left;
     display: flex;
     gap: 15px;
     opacity: 100%;
@@ -79,10 +127,20 @@
     box-shadow: inset 2px 2px 4px 5px rgba(0,0,0,0.3);
 } */
 
+.edit-step{
+    margin: 0;
+    border-radius: 18px;
+    width: 100%;
+    text-align: center;
+    height: 1em;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+}
+
 .code-steps{
-    z-index: 9;
+    z-index: 20;
     background-color: auto;
     backdrop-filter: blur(5px);
+    position: fixed;
     resize: true;
     opacity: 100%;
     border: 5px white;
@@ -91,7 +149,7 @@
     height: 30%;
     border-radius: 18px;
     text-align: center;
-    position: absolute;;
+ 
 
 
     cursor: move;

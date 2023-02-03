@@ -9,10 +9,83 @@ function addCodeTour(){
     });
 }
 
-function saveStep() {
+
+function editStep(){
+
+}
+
+function saveStep(button) {
+    var filePath = document.getElementById('file-path');
+    var lineNumber = document.getElementById('line-number');
+
+    var filePathDiv = document.getElementById('file-path-div');
+    var lineNumberDiv = document.getElementById('line-number-div');
+    
+
+    var codeStep = button.parentElement;
+
     vscode.postMessage({
-        type: 'saveTourStep'
+        type: 'hello',
+        message: `${codeStep.className}`,
     });
+
+    codeStep.style.position = 'absolute';
+    
+    vscode.postMessage({
+        type: 'hello',
+        message: `${filePath}`,
+    });
+    let mes = {
+        filePath: filePath.value,
+        lineNumber: lineNumber.value
+    };
+
+    filePathDiv.style.display = "none";
+    lineNumberDiv.style.display = "none";
+    button.style.display = "none";
+    codeStep.style.height = "5%";
+    
+
+    
+    vscode.postMessage({
+        type: 'saveTourStep',
+        message: `${JSON.stringify(mes)}`
+    });
+}
+
+//TODO IF WEIRD BEHAVIOR HAPPENS WITH MULTIPLES CHECK HERE
+function expandStep(step){
+    var editButton = document.getElementById('edit-step-button');
+    var stepButton = document.getElementById('save-step-button');
+    
+    if (stepButton.style.display !== "none"){
+       
+        vscode.postMessage({
+            type: 'hello',
+            message: `still on save`,
+        });
+        return;
+    }
+
+    vscode.postMessage({
+        type: 'hello',
+        message: `${step.style.height.value}`,
+    });
+ 
+
+    if (editButton.style.display === "none"){
+        step.style.height = "10%";
+        editButton.style.display = "inline-block";
+        
+        return;
+    }
+
+    var editButton = document.getElementById('edit-step-button');
+    step.style.height = "5%";
+    editButton.style.display = "none";
+  
+   
+   
 }
 
 var codeInput = {
@@ -426,7 +499,7 @@ customElements.define("code-input", codeInput.CodeInput); // Set tag
 
 
 function handleCodeSteps(){
-
+   
     
     var textBoxIn = document.getElementById("ci-internal");
     var textBoxEx = document.getElementById("ci-external");
@@ -434,12 +507,27 @@ function handleCodeSteps(){
     var steps = document.getElementsByClassName("code-steps");
 
     for (let i = 0; i < steps.length; i++) {
-        
         var elmnt = steps[i];
         let word = elmnt.id;
+
+        if (doElsCollide(document.getElementById("add-pop"), elmnt)) {
+            
+            if (textBoxEx.value.indexOf(word) !== -1){
+                
+                textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
+                
+                //textBoxEx.value += `\n${word}\n`;
+            }
+            return;
+        }
+        
+        
     
         if (doElsCollide(elmnt, textBoxEx)) {
-
+            vscode.postMessage({
+                type: 'hello',
+                message: 'inside move'
+            });
             
             var caretPos = textBoxIn.selectionStart;
             
@@ -518,7 +606,8 @@ function handleCodeSteps(){
         }else{
             if (textBoxEx.value.indexOf(word) !== -1){
                 
-                textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length)
+                textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
+                
                 //textBoxEx.value += `\n${word}\n`;
             }
         }

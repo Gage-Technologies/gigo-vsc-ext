@@ -144,27 +144,39 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 					this.numOfSteps ++;
 
 					this.codeTourSteps.push(`
-					<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps">
+					<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
 							<img id="@@@Step${this.numOfSteps}@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
 						
 
-								<div class="code-steps-inner">	
-									<span id="@@@Step${this.numOfSteps}@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
-								</div>
-								</br>
-								</br>
-								<label>File Path:</label>
-								<input class="file-path-box">
-								</input>
-								<label>Line Number:</label>
-								<input class="line-number-box">
-								</input>
-								<button class="save-step" onclick="saveStep()">Save</button>
 							</img>
+
+							<div class="code-steps-inner">	
+							<span id="@@@Step${this.numOfSteps}@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step ${this.numOfSteps}</b></span> 
+							</div>
+							
+							<div id="file-path-div">
+								<label>File Path:</label>
+								<input id="file-path" class="file-path-box">
+								</input>
+							</div>
+							<div id="line-number-div">
+								<label>Line Number:</label>
+								<input id="line-number" class="line-number-box">
+								</input>
+							</div>
+                            
+
+							
+
+
+							<button id="save-step-button" class="save-step" onclick="saveStep(this)">Save</button>
+							<button style="display: none;" id="edit-step-button" class="edit-step" onclick="editStep(this)">Edit</button>
 						</div>
 					`);
 
 					vscode.window.showInformationMessage('add code tour');
+					// webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+					
 
 					return;
 				case 'saveTourStep':
@@ -296,7 +308,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			);
 			</script>
 			<div class="storage-tray">
-				<button class="storage-tray-button" id="storage-tray-button">+</button>
+				<button class="storage-tray-button" id="storage-tray-button" onclick="addCodeTour()">+</button>
 				</br>
 				</br>
 				<button class="trash">
@@ -319,14 +331,14 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				</br>
 				
 					<div class="code-steps-box">
-						<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
-							<img id="@@@Step1@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
+							<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
+							<img  class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
 						
 
 							</img>
 
 							<div class="code-steps-inner">	
-							<span id="@@@Step1@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 1</b></span> 
+							<span  class="step-title" draggable="true" ondragstart="drag(event)"><b>Step ${this.numOfSteps}</b></span> 
 							</div>
 							
 							<div id="file-path-div">
@@ -339,7 +351,11 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 								<input id="line-number" class="line-number-box">
 								</input>
 							</div>
-                            
+							
+
+							
+
+
 							<button id="save-step-button" class="save-step" onclick="saveStep(this)">Save</button>
 							<button style="display: none;" id="edit-step-button" class="edit-step" onclick="editStep(this)">Edit</button>
 						</div>

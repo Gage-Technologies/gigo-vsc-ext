@@ -42,10 +42,12 @@
 }
 
 .pop-up-container{
+    
     position: fixed;
     top: 9%; /* Stay at the top */
     left: 4%;
-    display: inline-flex;
+    display: none;
+    /* display: inline-flex; */
     width: 180px;
     height: 180px;
     z-index: 20;

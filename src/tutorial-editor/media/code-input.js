@@ -4,29 +4,102 @@
 const vscode = acquireVsCodeApi();
 
 function addCodeTour(){
+
+    try{
+
+        var step = document.getElementById("@@@Step0@@@");
+        let stepClone = step.cloneNode(true);
+        stepClone.id = "@@@Step1@@@";
+
+        
+
+        var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
+
+        title.innerHTML = `<b>Step 1</b>`;
+        // stepClone.querySelector("#div.code-steps-inner > span > b")
+
+        vscode.postMessage({
+            type: 'hello',
+            message: `title ${title.innerHTML}`
+        });
+        // title.textContent = "Step 1";
+
+        
+
+        var popCon = document.getElementById("pop-container");
+        popCon.style.display = "inline-block";
+
+        stepClone.style.display = "inline-block";
+        step.parentElement.appendChild(stepClone);
+    
+    
+        vscode.postMessage({
+            type: 'hello',
+            message: `${stepClone}`
+        })
+    
+    }catch(e){
+        vscode.postMessage({
+            type: 'hello',
+            message: e
+        })
+    }
+   
+
     vscode.postMessage({
         type: 'addCodeTour'
     });
 }
 
 
-function editStep(){
-
-}
-
-function saveStep(button) {
-    var filePath = document.getElementById('file-path');
-    var lineNumber = document.getElementById('line-number');
-
-    var filePathDiv = document.getElementById('file-path-div');
-    var lineNumberDiv = document.getElementById('line-number-div');
-    
+function editStep(button){
 
     var codeStep = button.parentElement;
 
+    var filePath = codeStep.querySelector('#file-path');
+    var lineNumber = codeStep.querySelector('#line-number');
+
+    var filePathDiv = codeStep.querySelector('#file-path-div');
+    var lineNumberDiv = codeStep.querySelector('#line-number-div');
+
+    var saveButton = codeStep.querySelector('#save-step-button');
+    saveButton.style.display = 'inline-block';
+
+    
+
+
     vscode.postMessage({
         type: 'hello',
-        message: `${codeStep.className}`,
+        message: `edit step id: ${codeStep.id}`,
+    });
+
+
+    filePathDiv.style.display = "inline-block";
+    lineNumberDiv.style.display = "inline-block";
+    button.style.display = "inline-block";
+    codeStep.style.height = "30%";
+
+    button.style.display = "none";
+}
+
+function saveStep(button) {
+
+
+    var codeStep = button.parentElement;
+
+    var filePath = codeStep.querySelector('#file-path');
+    var lineNumber = codeStep.querySelector('#line-number');
+
+    var filePathDiv = codeStep.querySelector('#file-path-div');
+    var lineNumberDiv = codeStep.querySelector('#line-number-div');
+
+    var popUp = document.getElementById('pop-container');
+    
+
+
+    vscode.postMessage({
+        type: 'hello',
+        message: `save step id: ${codeStep.id}`,
     });
 
     codeStep.style.position = 'absolute';
@@ -44,6 +117,7 @@ function saveStep(button) {
     lineNumberDiv.style.display = "none";
     button.style.display = "none";
     codeStep.style.height = "5%";
+    popUp.style.display = "none";
     
 
     
@@ -55,17 +129,20 @@ function saveStep(button) {
 
 //TODO IF WEIRD BEHAVIOR HAPPENS WITH MULTIPLES CHECK HERE
 function expandStep(step){
-    var editButton = document.getElementById('edit-step-button');
-    var stepButton = document.getElementById('save-step-button');
+    
+    var editButton = step.querySelector('#edit-step-button');
+    var stepButton = step.querySelector('#save-step-button');
     
     if (stepButton.style.display !== "none"){
        
-        vscode.postMessage({
-            type: 'hello',
-            message: `still on save`,
-        });
+     
         return;
     }
+
+    vscode.postMessage({
+        type: 'hello',
+        message: `the id of the expanded step: ${step.id}`,
+    });
 
     vscode.postMessage({
         type: 'hello',

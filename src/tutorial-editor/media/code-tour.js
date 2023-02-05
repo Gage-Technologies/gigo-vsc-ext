@@ -23,10 +23,10 @@ function drop(ev) {
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   var popUp = document.getElementById("add-pop")
-    // if (doElsCollide(popUp, elmnt)) {
-    //     return;
-    // }
-    // elmnt.style.position = "absolute";
+    if (doElsCollide(popUp, elmnt)) {
+        return;
+    }
+    elmnt.style.position = "absolute";
     /* otherwise, move the DIV from anywhere inside the DIV:*/
     elmnt.onmousedown = dragMouseDown;
   

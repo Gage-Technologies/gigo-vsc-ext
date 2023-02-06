@@ -3,19 +3,29 @@
 // Based on a CSS-Tricks Post
 const vscode = acquireVsCodeApi();
 
-function addCodeTour(){
+function addCodeTour(button){
 
     try{
 
         var step = document.getElementById("@@@Step0@@@");
-        let stepClone = step.cloneNode(true);
-        stepClone.id = "@@@Step1@@@";
 
+        var tourNum = document.getElementById("tour-step-num");
         
+        tourNum.value = parseInt(tourNum.value) + 1;
+
+        vscode.postMessage({
+            type: 'hello',
+            message: `tourNum ${tourNum.value}`
+        });
+
+        let stepClone = step.cloneNode(true);
+        stepClone.id = `@@@Step${tourNum.value}@@@`;
+
+        stepClone.style.display = "inline-block";
 
         var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
 
-        title.innerHTML = `<b>Step 1</b>`;
+        title.innerHTML = `<b>Step ${tourNum.value}</b>`;
         // stepClone.querySelector("#div.code-steps-inner > span > b")
 
         vscode.postMessage({
@@ -27,7 +37,17 @@ function addCodeTour(){
         
 
         var popCon = document.getElementById("pop-container");
+        
+
+
         popCon.style.display = "inline-block";
+        popCon.style.display = "inline-block";
+
+
+        vscode.postMessage({
+            type: 'hello',
+            message: `displaying background add pop: ${popCon.style.display}`
+        });
 
         stepClone.style.display = "inline-block";
         step.parentElement.appendChild(stepClone);
@@ -51,6 +71,12 @@ function addCodeTour(){
     });
 }
 
+function deleteStep(elmnt){
+    vscode.postMessage({
+        type: 'deleteCodeTour',
+    });
+}
+
 
 function editStep(button){
 
@@ -58,9 +84,11 @@ function editStep(button){
 
     var filePath = codeStep.querySelector('#file-path');
     var lineNumber = codeStep.querySelector('#line-number');
+    
 
     var filePathDiv = codeStep.querySelector('#file-path-div');
     var lineNumberDiv = codeStep.querySelector('#line-number-div');
+    var descriptionDiv = codeStep.querySelector('#description-div');
 
     var saveButton = codeStep.querySelector('#save-step-button');
     saveButton.style.display = 'inline-block';
@@ -77,6 +105,7 @@ function editStep(button){
     filePathDiv.style.display = "inline-block";
     lineNumberDiv.style.display = "inline-block";
     button.style.display = "inline-block";
+    descriptionDiv.style.display = "inline-block";
     codeStep.style.height = "30%";
 
     button.style.display = "none";
@@ -89,11 +118,21 @@ function saveStep(button) {
 
     var filePath = codeStep.querySelector('#file-path');
     var lineNumber = codeStep.querySelector('#line-number');
+    var description = codeStep.querySelector('#description-input');
 
     var filePathDiv = codeStep.querySelector('#file-path-div');
     var lineNumberDiv = codeStep.querySelector('#line-number-div');
+    var descriptionDiv = codeStep.querySelector('#description-div');
 
     var popUp = document.getElementById('pop-container');
+
+    if (filePath.value === "" || lineNumber.value === "") {
+        vscode.postMessage({
+            type: 'hello',
+            message: "Please ensure that you filled in the mandatory fields!",
+        });
+        return;
+    }
     
 
 
@@ -102,22 +141,24 @@ function saveStep(button) {
         message: `save step id: ${codeStep.id}`,
     });
 
-    codeStep.style.position = 'absolute';
+    // codeStep.style.position = 'absolute';
     
     vscode.postMessage({
         type: 'hello',
         message: `${filePath}`,
     });
     let mes = {
-        filePath: filePath.value,
-        lineNumber: lineNumber.value
+        file: filePath.value,
+        line: lineNumber.value,
+        description: description.value,
     };
 
     filePathDiv.style.display = "none";
     lineNumberDiv.style.display = "none";
+    descriptionDiv.style.display = "none";
     button.style.display = "none";
     codeStep.style.height = "5%";
-    popUp.style.display = "none";
+    // popUp.style.display = "none";
     
 
     
@@ -582,29 +623,64 @@ function handleCodeSteps(){
     var textBoxEx = document.getElementById("ci-external");
     const rect = textBoxEx.getBoundingClientRect();
     var steps = document.getElementsByClassName("code-steps");
+    var trash = document.getElementById("trash");
 
     for (let i = 0; i < steps.length; i++) {
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `handling step ${i}`
+        // });
         var elmnt = steps[i];
         let word = elmnt.id;
 
-        if (doElsCollide(document.getElementById("add-pop"), elmnt)) {
+        // if (doElsCollide(document.getElementById("add-pop"), elmnt)) {
+        //     vscode.postMessage({
+        //         type: 'hello',
+        //         message: 'inside pop up'
+        //     });
             
-            if (textBoxEx.value.indexOf(word) !== -1){
+        //     if (textBoxEx.value.indexOf(word) !== -1){
                 
-                textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
+        //         textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
                 
-                //textBoxEx.value += `\n${word}\n`;
-            }
-            return;
+        //         //textBoxEx.value += `\n${word}\n`;
+        //     }
+        //     return;
+        // }
+
+
+        var icon = trash.querySelector(".trash-icon");
+
+        vscode.postMessage({
+            type: 'hello',
+            message: `inner html of trash: ${icon.innerHTML}`
+        });
+        
+        
+        if (doElsCollide(elmnt, trash)) {
+            var icon = trash.querySelector(".trash-icon");
+            vscode.postMessage({
+                type: 'hello',
+                message: `inner html of trash: ${icon.innerHTML}`
+            });
+        }else{
+            vscode.postMessage({
+                type: 'hello',
+                message: `not in trash`
+            });
         }
-        
-        
     
         if (doElsCollide(elmnt, textBoxEx)) {
             vscode.postMessage({
                 type: 'hello',
                 message: 'inside move'
             });
+
+            var popUp = document.getElementById("pop-container");
+
+            if (popUp.style.display !== "none") {
+                popUp.style.display = "none";
+            }
             
             var caretPos = textBoxIn.selectionStart;
             

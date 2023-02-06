@@ -69,9 +69,8 @@
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
     border-radius: 10px;
-    background-color: red;
+    background-color: var(--vscode-button-background);
     box-shadow: rgba(0, 0, 0, 0.2) 0px 16px 16px -16px, rgba(0, 0, 0, 0.14) 0px 16px 20px 0px, rgba(0, 0, 0, 0.12) 0px 8px 32px 0px;
-    backdrop-filter: blur(5px);
     overflow: hidden; /* Disable horizontal scroll */
     padding-top: 20px;
 }
@@ -79,8 +78,8 @@
 .arrow-left {
     width: 40px;
     height: 40px;
-   
-    z-index: 9;
+    display: none;;
+    /* z-index: 9; */
     
     /* top: 13%; /* Stay at the top */
     /* left: 4%; */
@@ -89,7 +88,7 @@
     border-top: 40px solid transparent;
     border-bottom: 40px solid transparent; 
     
-    border-right:40px solid red; 
+    border-right:40px solid var(--vscode-button-background); 
   }
 
 
@@ -104,6 +103,7 @@
 
 .storage-tray-button{
     border-radius: 18px;
+    background-color: var(button-color);
    
 }
 
@@ -139,6 +139,7 @@
 }
 
 .code-steps{
+    display: none;
     z-index: 20;
     background-color: auto;
     backdrop-filter: blur(5px);
@@ -185,6 +186,10 @@
 }
 
 .file-path-box{
+    border-radius: 10px;
+}
+
+.description-box{
     border-radius: 10px;
 }
 

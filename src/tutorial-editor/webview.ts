@@ -1,4 +1,5 @@
 import path = require('path');
+import { stringify } from 'querystring';
 import * as vscode from 'vscode';
 import { getNonce } from './util';
 
@@ -44,6 +45,8 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 	public trashOpen = `<svg disabled="true" class="trash-icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 	<path class="trash-icon-path" d="M9 13v6c0 .552-.448 1-1 1s-1-.448-1-1v-6c0-.552.448-1 1-1s1 .448 1 1zm7-1c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm-4 0c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm4.333-8.623c-.882-.184-1.373-1.409-1.189-2.291l-5.203-1.086c-.184.883-1.123 1.81-2.004 1.625l-5.528-1.099-.409 1.958 19.591 4.099.409-1.958-5.667-1.248zm4.667 4.623v16h-18v-16h18zm-2 14v-12h-14v12h14z"/>
 	</svg>`;
+	public tourFilePath: string = "";
+	public fullTour: any;
 
 	constructor(
 		private readonly context: vscode.ExtensionContext
@@ -85,7 +88,32 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			
 		});
 
-		
+		var files = document.fileName.split("/");
+		var fileName = files[files.length - 1];
+		var fileNoExt = fileName.split(".")[0];
+
+		console.log(`DOC NAME: ${fileNoExt}`);
+		this.tourFilePath = path.join(this.baseWorkspaceUri.fsPath, ".tours", `${fileNoExt}.tour`);
+
+		if (fs.existsSync(this.tourFilePath)) {
+			let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
+			let ts = JSON.parse(tour).steps;
+			this.numOfSteps = ts.length;
+			this.fullTour = JSON.parse(tour);
+			console.log("REGISTERED EXITS")
+		} else{
+			console.log("NOT REGISTERED EXITS")
+			var obj = {
+				$schema: "https://aka.ms/codetour-schema",
+				title: fileNoExt,
+				steps: [],
+				ref: "master",
+			};
+
+			this.fullTour = JSON.stringify(obj);
+
+			fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+		}
 
 		console.log("WE FUCKIN HERE!");
 		this.text = document.getText();
@@ -141,39 +169,6 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 					vscode.window.showInformationMessage('openCodeTourDialog');
 					return;
 				case 'addCodeTour':
-					this.numOfSteps ++;
-
-					this.codeTourSteps.push(`
-					<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
-							<img id="@@@Step${this.numOfSteps}@@@" class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
-						
-
-							</img>
-
-							<div class="code-steps-inner">	
-							<span id="@@@Step${this.numOfSteps}@@@" class="step-title" draggable="true" ondragstart="drag(event)"><b>Step ${this.numOfSteps}</b></span> 
-							</div>
-							
-							<div id="file-path-div">
-								<label>File Path:</label>
-								<input id="file-path" class="file-path-box">
-								</input>
-							</div>
-							<div id="line-number-div">
-								<label>Line Number:</label>
-								<input id="line-number" class="line-number-box">
-								</input>
-							</div>
-                            
-
-							
-
-
-							<button id="save-step-button" class="save-step" onclick="saveStep(this)">Save</button>
-							<button style="display: none;" id="edit-step-button" class="edit-step" onclick="editStep(this)">Edit</button>
-						</div>
-					`);
-
 					vscode.window.showInformationMessage('add code tour');
 					// webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 					
@@ -181,7 +176,20 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 					return;
 				case 'saveTourStep':
 					console.log(`${e.message}`)
-					vscode.window.showInformationMessage(`save code tour, fp: ${e.message}, ln: ${e.message.lineNumber}`);
+
+					let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
+					let ts = JSON.parse(tour);
+					this.numOfSteps++;
+
+					let parsedMsg = JSON.parse(e.message);
+					
+					parsedMsg.line = parseInt(parsedMsg.line);
+				
+					
+					ts.steps.push(parsedMsg);
+					this.fullTour = JSON.stringify(ts);
+					fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+					vscode.window.showInformationMessage(`save code tour, fp: ${e.message.file}, ln: ${e.message.line} desc: ${e.message.description}`);
 					break;
 					// let tourName = document.fileName.replace('cscratch', 'tour');
 					// fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
@@ -256,6 +264,8 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 	
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+				<input id="tour-step-num" name="tour-step-num" type="hidden" value="${this.numOfSteps}"></input>
+
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/default.css" integrity="sha512-HPYcuSKzZ/FwxsRKIiNX6imjfnr5+82poiPO+oXi9WCEEe2q1x2OOBpbF+6cRG+hwoEsBXfs7oQveu5yHbY64g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
@@ -308,11 +318,11 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			);
 			</script>
 			<div class="storage-tray">
-				<button class="storage-tray-button" id="storage-tray-button" onclick="addCodeTour()">+</button>
+				<button class="storage-tray-button" id="storage-tray-button" onclick="addCodeTour(this)">+</button>
 				</br>
 				</br>
-				<button class="trash">
-					<svg class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+				<button id="trash" class="trash">
+					<svg id="trash-icon" class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 						<path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>
 					</svg>
 
@@ -322,7 +332,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			</div>
 			<div id="pop-container" class="pop-up-container">
 				<div id="add-pop" class="add-pop-up"></div>
-				<div class="arrow-left"></div>
+				<div id="pop-arrow" class="arrow-left"></div>
 			</div>
 			
 				${this.addCodeTourBtn}
@@ -340,15 +350,19 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 							<div class="code-steps-inner">	
 							<span  class="step-title" draggable="true" ondragstart="drag(event)"><b>Step ${this.numOfSteps}</b></span> 
 							</div>
-							
 							<div id="file-path-div">
-								<label>File Path:</label>
+								<label>File Path*:</label>
 								<input id="file-path" class="file-path-box">
 								</input>
 							</div>
 							<div id="line-number-div">
-								<label>Line Number:</label>
+								<label>Line Number*:</label>
 								<input id="line-number" class="line-number-box">
+								</input>
+							</div>
+							<div id="description-div">
+								<label>Dsecription/Code:</label>
+								<input id="description-input" class="description-box">
 								</input>
 							</div>
 							

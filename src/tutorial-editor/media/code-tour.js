@@ -22,11 +22,12 @@ function drop(ev) {
 
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  var popUp = document.getElementById("add-pop")
-    if (doElsCollide(popUp, elmnt)) {
-        return;
-    }
-    elmnt.style.position = "absolute";
+  var saveButton = elmnt.querySelector("#save-step-button");
+  if (saveButton.style.display !== "none") {
+    
+    return;
+  }
+    // elmnt.style.position = "absolute";
     /* otherwise, move the DIV from anywhere inside the DIV:*/
     elmnt.onmousedown = dragMouseDown;
   
@@ -58,77 +59,24 @@ function dragElement(elmnt) {
     elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     e.preventDefault();
    
-    
+    var trash = document.getElementById("trash");
+    if (doElsCollide(elmnt, trash)) {
+      var icon = trash.querySelector("trash-icon");
+      console.log(icon);
+  
+    }
 
     
     
   }
 
   function closeDragElement() {
+    elmnt.style.position = "absolute";
     /* stop moving when mouse button is released:*/
     document.onmouseup = null;
     document.onmousemove = null;
     handleCodeSteps();
-    // var textBoxIn = document.getElementById("ci-internal");
-    // var textBoxEx = document.getElementById("ci-external");
     
-    
-    // if (doElsCollide(elmnt, textBoxIn)) {
-
-    //     let word = elmnt.id;
-        
-    //     if (textBoxEx.value.indexOf(word) === -1){
-    //         textBoxEx.value += `\n${word}\n`;
-    //     }
-
-        
-    //     // now you have a proper float for the font size (yes, it can be a float, not just an integer)
-        
-                
-        
-    //     var startPos, endPos, heightPos = selectTextareaWord(textBoxEx, word);
-
-    //     startPos = textBoxEx.value.indexOf(word);
-    //     endPos = word.length;
-
-    //     var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
-    //     var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
-
-    //     const newLines = textBoxEx.value.split("\n");
-    //     for (let i = 0; i < newLines.length; i++) {
-    //         if (newLines[i].indexOf(word) !== -1){
-    //             heightPos = i + 1;
-    //         }
-    //      } 
-  
-        
-    //      var elmntClone = elmnt.cloneNode()
-         
-         
-    //     //  elmnt.style.position = "fixed";
-
-    //      elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
-    //      elmnt.style.left = (getOffset(textBoxEx).left + (word.length * fontSize - 40)) + "px";
-    //      elmnt.ondragstart = function () { return false; };
-    //      elmnt.draggable = false;
-
-    //     //  elmnt.outerHTML = elmnt.outerHTML.replace(`<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps" style="top: ${elmnt.style.top}; left: ${elmnt.style.left};">`, 
-    //     //  `<div id="@@@Step1@@@" style="position: absolute; top: ${(getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px"} left: ${(getOffset(textBoxEx).left + (7 * fontSize)) + "px"};" class="code-steps">`)
-    //     //  elmnt.outerHTML = elmnt.outerHTML.replace(`ondragstart="dragElement(this)"`, `ondragstart="return false"`)
-         
-    //     textBoxEx.value += `                                                        ${getOffset(textBoxEx).top}\n`
-    //     textBoxEx.value += `Height: ${getOffset(textBoxEx).top + (heightPos * lineHeight)}\n`
-    //     //  textBoxEx.value += `diffed: <div id="@@@Step1@@@" style="position: absolute; top: ${(getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px"} left: ${(getOffset(textBoxEx).left + (7 * fontSize)) + "px"};" class="code-steps">\n`
-    //     //  textBoxEx.value += `<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps" style="top: ${elmnt.style.top}; left: ${elmnt.style.left};">\n`
-    //     textBoxEx.value += `boxwidth: ${getOffset(textBoxEx).left} boxHeight: ${getOffset(textBoxEx).top} start: ${startPos} end: ${endPos} height: ${heightPos} fontise: ${fontSize} lineheight: ${lineHeight} totalHeight: ${elmnt.style.top} totalWidth: ${elmnt.style.left}\n`;
-    //      return;
-
-    
-    //     // var isSelected = selectTextareaWord(textBoxEx, "Step 1");
-    //     // e.target.appendChild(document.createTextNode(`${isSelected}`));
-       
-    // }
-
   }
 }
 

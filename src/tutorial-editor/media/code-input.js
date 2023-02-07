@@ -1,5 +1,7 @@
 // CodeInput
 // by WebCoder49
+
+
 // Based on a CSS-Tricks Post
 const vscode = acquireVsCodeApi();
 
@@ -295,7 +297,16 @@ var codeInput = {
             this.plugin_evt("afterHighlight");
 
 
+            //TODO MY CODE FOR RESIZING BOX
+            var textarea = this.querySelector("textarea");
+            var pre = this.querySelector("pre");
             
+            console.log(getComputedStyle(this).height);
+            this.style.height = textarea.scrollHeight + "px";;
+            pre.style.height = textarea.scrollHeight + "px";
+            textarea.style.height = this.style.height;
+
+            /////////////////////////////////////////
             
 
             vscode.postMessage({
@@ -651,11 +662,26 @@ function handleCodeSteps(){
 
         var icon = trash.querySelector(".trash-icon");
 
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `inner html of trash: ${icon.innerHTML}`
+        // });
+        
         vscode.postMessage({
             type: 'hello',
-            message: `inner html of trash: ${icon.innerHTML}`
+            message: `does trash collide ${localToGlobal(trash).top}  ${localToGlobal(elmnt).top - window.scrollY}`
         });
         
+
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `does trash collide ${trash.offsetLeft} ${bounds.left}  ${trash.offsetTop} ${bounds.top}`
+        // });
+
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `does trash collide ${trash.offsetTop} ${elmnt.top} ${window.screenY} ${elmnt.offsetTop - window.scrollY}`
+        // });
         
         if (doElsCollide(elmnt, trash)) {
             var icon = trash.querySelector(".trash-icon");
@@ -663,6 +689,7 @@ function handleCodeSteps(){
                 type: 'hello',
                 message: `inner html of trash: ${icon.innerHTML}`
             });
+            return;
         }else{
             vscode.postMessage({
                 type: 'hello',
@@ -745,11 +772,11 @@ function handleCodeSteps(){
             //  `<div id="@@@Step1@@@" style="position: absolute; top: ${(getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px"} left: ${(getOffset(textBoxEx).left + (7 * fontSize)) + "px"};" class="code-steps">`)
             //  elmnt.outerHTML = elmnt.outerHTML.replace(`ondragstart="dragElement(this)"`, `ondragstart="return false"`)
             
-            textBoxEx.value += `                                                        ${getOffset(textBoxEx).top}\n`
-            textBoxEx.value += `Height: ${getOffset(textBoxEx).top + (heightPos * lineHeight)}\n`
-            //  textBoxEx.value += `diffed: <div id="@@@Step1@@@" style="position: absolute; top: ${(getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px"} left: ${(getOffset(textBoxEx).left + (7 * fontSize)) + "px"};" class="code-steps">\n`
-            //  textBoxEx.value += `<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps" style="top: ${elmnt.style.top}; left: ${elmnt.style.left};">\n`
-            textBoxEx.value += `caretPos: ${caretPos} boxwidth: ${getOffset(textBoxEx).left} boxHeight: ${getOffset(textBoxEx).top} start: ${startPos} end: ${endPos} charsBefore: ${charsBefore} height: ${heightPos} fontise: ${fontSize} lineheight: ${lineHeight} totalHeight: ${elmnt.style.top} totalWidth: ${elmnt.style.left}\n`;
+            // textBoxEx.value += `                                                        ${getOffset(textBoxEx).top}\n`
+            // textBoxEx.value += `Height: ${getOffset(textBoxEx).top + (heightPos * lineHeight)}\n`
+            // //  textBoxEx.value += `diffed: <div id="@@@Step1@@@" style="position: absolute; top: ${(getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px"} left: ${(getOffset(textBoxEx).left + (7 * fontSize)) + "px"};" class="code-steps">\n`
+            // //  textBoxEx.value += `<div id="@@@Step1@@@" draggable="true" ondragstart="dragElement(this)" class="code-steps" style="top: ${elmnt.style.top}; left: ${elmnt.style.left};">\n`
+            // textBoxEx.value += `caretPos: ${caretPos} boxwidth: ${getOffset(textBoxEx).left} boxHeight: ${getOffset(textBoxEx).top} start: ${startPos} end: ${endPos} charsBefore: ${charsBefore} height: ${heightPos} fontise: ${fontSize} lineheight: ${lineHeight} totalHeight: ${elmnt.style.top} totalWidth: ${elmnt.style.left}\n`;
             
 
         
@@ -765,4 +792,51 @@ function handleCodeSteps(){
             }
         }
     }
+}
+
+
+doElsCollide = function(el1, el2) {
+    el1.offsetBottom = el1.offsetTop + el1.offsetHeight;
+    el1.offsetRight = el1.offsetLeft + el1.offsetWidth;
+    el2.offsetBottom = el2.offsetTop + el2.offsetHeight;
+    el2.offsetRight = el2.offsetLeft + el2.offsetWidth;
+
+    // vscode.postMessage({
+    //     type: 'hello',
+    //     message: `${el2.id} ${(el1.offsetBottom)} ${(el2.offsetTop)} ${(el1.offsetTop > el2.offsetBottom)} ${(el1.offsetRight)} ${(el2.offsetLeft)} ${(el1.offsetLeft > el2.offsetRight)}`
+    // });
+    
+    return !((el1.offsetBottom < el2.offsetTop) ||
+             (el1.offsetTop > el2.offsetBottom) ||
+             (el1.offsetRight <= el2.offsetLeft) ||
+             (el1.offsetLeft > el2.offsetRight))
+};
+
+
+localToGlobal = function( _el ) {
+    var target = _el,
+    target_width = target.offsetWidth,
+    target_height = target.offsetHeight,
+    target_left = target.offsetLeft,
+    target_top = target.offsetTop,
+    gleft = 0,
+    gtop = 0,
+    rect = {};
+
+    var moonwalk = function( _parent ) {
+     if (!!_parent) {
+         gleft += _parent.offsetLeft;
+         gtop += _parent.offsetTop;
+         moonwalk( _parent.offsetParent );
+     } else {
+         return rect = {
+         top: target.offsetTop + gtop,
+         left: target.offsetLeft + gleft,
+         bottom: (target.offsetTop + gtop) + target_height,
+         right: (target.offsetLeft + gleft) + target_width
+         };
+     }
+ };
+     moonwalk( target.offsetParent );
+     return rect;
 }

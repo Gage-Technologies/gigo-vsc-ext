@@ -288,10 +288,11 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 
 				<title>Cat Scratch</title>
 			</head>
-			<body>
-			<div id="container" style="height: 100%"></div>
-			<body>
 			
+			<div id="container" style="height: 100%"></div>
+			<body id="body" style="overflow: scroll">
+			
+			<div id="page" class="page">
 			<script src="${codeIn}"></script>
 			<!--...-->
 			<script src="${codeAutoDetect}"></script>
@@ -335,10 +336,6 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				<div id="pop-arrow" class="arrow-left"></div>
 			</div>
 			
-				${this.addCodeTourBtn}
-
-				</br>
-				</br>
 				
 					<div class="code-steps-box">
 							<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
@@ -375,19 +372,15 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 						</div>
 					</div>
 
-						
-
-						
-
-					</br>
-					</br>
-			
-					<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>		
+				
+					<div class="input-container">
+						<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>
+					</div>
 			
 
 				<script  nonce="${nonce}" src="${styleJS}" ></script>
 				<script type="module" nonce="${nonce}" src="${scriptUri}"></script>
-				
+			</div>
 			</body>
 			</html>`;
 	}

@@ -60,10 +60,17 @@ function dragElement(elmnt) {
     e.preventDefault();
    
     var trash = document.getElementById("trash");
-    if (doElsCollide(elmnt, trash)) {
-      var icon = trash.querySelector("trash-icon");
+    var textBoxEx = document.getElementById("ci-external");
+    if (Math.abs(localToGlobal(trash).top - (localToGlobal(elmnt).top - window.scrollY)) < 50 && Math.abs(localToGlobal(trash).left - (localToGlobal(elmnt).left - window.scrollX)) < 50) {
+      
+      var icon = trash.querySelector(".trash-icon");
+      icon.innerHTML = `<path class="trash-icon-path" d="M9 13v6c0 .552-.448 1-1 1s-1-.448-1-1v-6c0-.552.448-1 1-1s1 .448 1 1zm7-1c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm-4 0c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm4.333-8.623c-.882-.184-1.373-1.409-1.189-2.291l-5.203-1.086c-.184.883-1.123 1.81-2.004 1.625l-5.528-1.099-.409 1.958 19.591 4.099.409-1.958-5.667-1.248zm4.667 4.623v16h-18v-16h18zm-2 14v-12h-14v12h14z"/>`
       console.log(icon);
   
+    }else{
+      var icon = trash.querySelector(".trash-icon");
+      icon.innerHTML = `<path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>`
+   
     }
 
     
@@ -80,17 +87,7 @@ function dragElement(elmnt) {
   }
 }
 
-doElsCollide = function(el1, el2) {
-    el1.offsetBottom = el1.offsetTop + el1.offsetHeight;
-    el1.offsetRight = el1.offsetLeft + el1.offsetWidth;
-    el2.offsetBottom = el2.offsetTop + el2.offsetHeight;
-    el2.offsetRight = el2.offsetLeft + el2.offsetWidth;
-    
-    return !((el1.offsetBottom < el2.offsetTop) ||
-             (el1.offsetTop > el2.offsetBottom) ||
-             (el1.offsetRight < el2.offsetLeft) ||
-             (el1.offsetLeft > el2.offsetRight))
-};
+
 
 
 function selectTextareaWord(tarea, word) {

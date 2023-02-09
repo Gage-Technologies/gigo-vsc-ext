@@ -30,10 +30,10 @@ function addCodeTour(button){
         title.innerHTML = `<b>Step ${tourNum.value}</b>`;
         // stepClone.querySelector("#div.code-steps-inner > span > b")
 
-        vscode.postMessage({
-            type: 'hello',
-            message: `title ${title.innerHTML}`
-        });
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `title ${title.innerHTML}`
+        // });
         // title.textContent = "Step 1";
 
         
@@ -46,19 +46,19 @@ function addCodeTour(button){
         popCon.style.display = "inline-block";
 
 
-        vscode.postMessage({
-            type: 'hello',
-            message: `displaying background add pop: ${popCon.style.display}`
-        });
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `displaying background add pop: ${popCon.style.display}`
+        // });
 
         stepClone.style.display = "inline-block";
         step.parentElement.appendChild(stepClone);
     
     
-        vscode.postMessage({
-            type: 'hello',
-            message: `${stepClone}`
-        })
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `${stepClone}`
+        // })
     
     }catch(e){
         vscode.postMessage({
@@ -98,10 +98,10 @@ function editStep(button){
     
 
 
-    vscode.postMessage({
-        type: 'hello',
-        message: `edit step id: ${codeStep.id}`,
-    });
+    // vscode.postMessage({
+    //     type: 'hello',
+    //     message: `edit step id: ${codeStep.id}`,
+    // });
 
 
     filePathDiv.style.display = "inline-block";
@@ -138,17 +138,17 @@ function saveStep(button) {
     
 
 
-    vscode.postMessage({
-        type: 'hello',
-        message: `save step id: ${codeStep.id}`,
-    });
+    // vscode.postMessage({
+    //     type: 'hello',
+    //     message: `save step id: ${codeStep.id}`,
+    // });
 
     // codeStep.style.position = 'absolute';
     
-    vscode.postMessage({
-        type: 'hello',
-        message: `${filePath}`,
-    });
+    // vscode.postMessage({
+    //     type: 'hello',
+    //     message: `${filePath}`,
+    // });
     let mes = {
         file: filePath.value,
         line: lineNumber.value,
@@ -182,15 +182,15 @@ function expandStep(step){
         return;
     }
 
-    vscode.postMessage({
-        type: 'hello',
-        message: `the id of the expanded step: ${step.id}`,
-    });
+    // vscode.postMessage({
+    //     type: 'hello',
+    //     message: `the id of the expanded step: ${step.id}`,
+    // });
 
-    vscode.postMessage({
-        type: 'hello',
-        message: `${step.style.height.value}`,
-    });
+    // vscode.postMessage({
+    //     type: 'hello',
+    //     message: `${step.style.height.value}`,
+    // });
  
 
     if (editButton.style.display === "none"){
@@ -627,6 +627,310 @@ var codeInput = {
 customElements.define("code-input", codeInput.CodeInput); // Set tag
 
 
+
+function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    var saveButton = elmnt.querySelector("#save-step-button");
+    if (saveButton.style.display !== "none") {
+      
+      return;
+    }
+      // elmnt.style.position = "absolute";
+      /* otherwise, move the DIV from anywhere inside the DIV:*/
+      elmnt.onmousedown = dragMouseDown;
+    
+  
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+     
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+
+        // document.addEventListener("mouseup", function() {
+        // closeDragElement(e);
+        // }, false);
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+    }
+  
+    function elementDrag(e) {
+      e = e || window.event;
+     
+      
+      
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      e.preventDefault();
+     
+      var trash = document.getElementById("trash");
+      var textBoxEx = document.getElementById("ci-external");
+      if (Math.abs(localToGlobal(trash).top - (localToGlobal(elmnt).top - window.scrollY)) < 50 && Math.abs(localToGlobal(trash).left - (localToGlobal(elmnt).left - window.scrollX)) < 50) {
+        
+        var icon = trash.querySelector(".trash-icon");
+        icon.innerHTML = `<path class="trash-icon-path" d="M9 13v6c0 .552-.448 1-1 1s-1-.448-1-1v-6c0-.552.448-1 1-1s1 .448 1 1zm7-1c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm-4 0c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm4.333-8.623c-.882-.184-1.373-1.409-1.189-2.291l-5.203-1.086c-.184.883-1.123 1.81-2.004 1.625l-5.528-1.099-.409 1.958 19.591 4.099.409-1.958-5.667-1.248zm4.667 4.623v16h-18v-16h18zm-2 14v-12h-14v12h14z"/>`
+        
+    
+      }else{
+        var icon = trash.querySelector(".trash-icon");
+        icon.innerHTML = `<path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>`
+     
+      }
+  
+      
+      
+    }
+  
+    function closeDragElement(e) {
+      elmnt.style.position = "absolute";
+      /* stop moving when mouse button is released:*/
+      document.onmouseup = null;
+      document.onmousemove = null;
+
+      var trash = document.getElementById("trash");
+      var textBoxEx = document.getElementById("ci-external");
+      if (Math.abs(localToGlobal(trash).top - (localToGlobal(elmnt).top - window.scrollY)) < 50 && Math.abs(localToGlobal(trash).left - (localToGlobal(elmnt).left - window.scrollX)) < 50) {
+        
+        var icon = trash.querySelector(".trash-icon");
+        icon.innerHTML = `<path class="trash-icon-path" d="M9 13v6c0 .552-.448 1-1 1s-1-.448-1-1v-6c0-.552.448-1 1-1s1 .448 1 1zm7-1c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm-4 0c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm4.333-8.623c-.882-.184-1.373-1.409-1.189-2.291l-5.203-1.086c-.184.883-1.123 1.81-2.004 1.625l-5.528-1.099-.409 1.958 19.591 4.099.409-1.958-5.667-1.248zm4.667 4.623v16h-18v-16h18zm-2 14v-12h-14v12h14z"/>`
+       
+
+        var deleteContainer = document.getElementById("delete-container");
+        deleteContainer.style.display = "inline-block";
+
+        var deleteButton = deleteContainer.querySelector(".delete-btn");
+        deleteButton.addEventListener("click", () =>{
+            return executeDelete(elmnt.id);
+        }, {once: true});
+
+        // deleteButton.removeEventListener("click", function() {
+        //     return executeDelete(elmnt.id);
+        // }, false);
+
+        icon.innerHTML = `<path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>`
+        e.stopPropagation();
+        return;
+    
+      }else{
+        var icon = trash.querySelector(".trash-icon");
+        icon.innerHTML = `<path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>`
+     
+      }
+
+
+      handleCodeSteps();
+      
+    }
+  }
+  
+  
+
+  function closeDeleteBox(){
+    var deleteContainer = document.getElementById("delete-container");
+    deleteContainer.style.display = "none";
+  }
+
+
+  function executeDelete(step){
+    var num = step.replaceAll("@", "");
+    var num = num.replace("Step", "");
+    console.log("num is: ", num)
+    var tourNum = document.getElementById("tour-step-num");
+    var tourNumLength = tourNum.value
+    var textBoxEx = document.getElementById("ci-external");
+    console.log("tour num iks: ", tourNumLength)
+
+     var stepObj = document.getElementById(step);
+     textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(step)) + textBoxEx.value.slice(textBoxEx.value.indexOf(step) + step.length);
+     stepObj.remove();
+
+    console.log("here we are")
+
+    tourNumLength = tourNumLength - 1;
+    tourNum.value = tourNumLength;
+
+    var deleteContainer = document.getElementById("delete-container");
+    deleteContainer.style.display = "none";
+
+    if (tourNumLength > 0) {
+        console.log("made it here: ", Number(num) + 1)
+        console.log("tour num length is: ", Number(tourNumLength))
+        for (let i = Number(num) + 1; i <= Number(tourNumLength) + 1; i++){
+            console.log("i guess we made it this far: ", i)
+            var id = `@@@Step${i}@@@`
+            var steps = document.getElementById(id);
+            console.log("steps are: ", steps)
+            console.log("element id is: ", id)
+            var title = steps.querySelector(".code-steps-inner").querySelector(".step-title");
+            title.innerHTML = `<b>Step ${i - 1}</b>`;
+            textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(steps.id)) + `@@@Step${i-1}@@@` +  textBoxEx.value.slice(textBoxEx.value.indexOf(steps.id) + steps.id.length);
+            steps.id = `@@@Step${i - 1}@@@`;
+        }
+    }
+
+    vscode.postMessage({
+        type: 'deleteTourStep',
+        message: num
+    });
+
+
+  }
+
+//   //exexcuteDelete takes in the id of the step to be deleted
+//   function executeDelete(step){
+//         console.log(`START OF EXECUTE DELETE`)
+//         //retrieve the total number of steps from the document
+//         var tourNum = document.getElementById("tour-step-num");
+//         vscode.postMessage({
+//             type: "hello",
+//             message: `tournum: ${tourNum.value} for step: ${step}`
+//         })
+//         // if (parseInt(tourNum.value) < 1){
+//         //     return;
+//         // }
+
+//         //retrieve the markdown text box for removing/editing the step marker
+//         var textBoxEx = document.getElementById("ci-external");
+
+//         //parse the step number from the step id
+//         var num = step.replaceAll("@", "");
+//         var num = num.replace("Step", "");
+//         vscode.postMessage({
+//             type: "hello",
+//             message: `step to be deleted: ${num}`
+//         })
+
+
+//         //decrement the number of total steps
+//         tourNum.value = parseInt(tourNum.value) - 1;
+
+//         console.log(`tourNum ${tourNum.value}`);
+
+//         //hide the delete pop up
+//         var deleteContainer = document.getElementById("delete-container");
+//         deleteContainer.style.display = "none";
+
+//         //todo figure out why it looks like it is grabbing the object below the one to be deleted
+//         //retrieve the actual object of the step from its id
+//         var stepObj = document.getElementById(step);
+//         console.log("step before obj: ", step);
+//         console.log("step obj: ", stepObj);
+//         //remove the marker from the markdown text box
+//         textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(step)) + textBoxEx.value.slice(textBoxEx.value.indexOf(step) + step.length);
+//         //remove the step object from the document
+//         stepObj.remove();
+
+//         //if there was more than 1 step present when delete was called 
+//         //edit the remaining steps accordingly
+//         if (tourNum.value > 0) {
+
+//             //create an array to store the number of steps this delete operation will affect
+//             var stepArr = [];
+//             console.log(`start ${tourNum.value} ned ${num}`);
+//             //iterate over all steps that are greater than the step that was deleted
+//             //and decrement their ids and titles
+//             for (var i = parseInt(tourNum.value) + 1; i > num; i--) {
+//                 console.log(`step ${i}\n`);
+//                 //retrieve step of the current index
+//                 var steps = document.getElementById(`@@@Step${i}@@@`);
+//                 console.log(steps);
+//                 //retrieve the step title
+//                 var title = steps.querySelector(".code-steps-inner").querySelector(".step-title");
+//                 //decrement the step title 
+//                 title.innerHTML = `<b>Step ${i - 1}</b>`;
+//                 //push the step to the array of edited steps
+//                 stepArr.push(steps);
+//             }
+
+
+//             //itearate over the array of edited steps and 
+//             for (var i = 0; i < stepArr.length; i++) {
+//                 var steps = stepArr[i];
+
+//                 //decrement the step number
+//                 var num = steps.id.replaceAll("@", "");
+//                 num = num.replace("Step", "");
+//                 num = parseInt(num) - 1;
+                
+//                 console.log(`setting step ${step.id} to  Step${num}`);
+
+//                 //change the marker in the markdown text box to reflect the changed number of the step
+//                 textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(steps.id)) + `@@@Step${num}@@@` +  textBoxEx.value.slice(textBoxEx.value.indexOf(steps.id) + steps.id.length);
+//                 //decrement id of step
+//                 step.id = `@@@Step${num}@@@`;
+//                 console.log(step);
+
+//             }
+//         }
+
+      
+        
+
+        
+        
+        
+       
+
+
+
+//         // vscode.postMessage({
+//         //     type: "deleteTourStep",
+//         //     message: ""
+//         // });
+//    }
+
+   
+  
+  
+  function selectTextareaWord(tarea, word) {
+      const words = tarea.value.split(" ");
+      const newLines = tarea.value.split("\n");
+      // calculate start/end
+      const startPos = tarea.value.indexOf(word),
+        endPos = startPos + word.length
+    
+      if (typeof(tarea.selectionStart) != "undefined") {
+        tarea.focus();
+        tarea.selectionStart = startPos;
+        tarea.selectionEnd = endPos;
+        return startPos, endPos, newLines.length;
+      }
+    
+      // IE
+      if (document.selection && document.selection.createRange) {
+        tarea.focus();
+        tarea.select();
+        var range = document.selection.createRange();
+        range.collapse(true);
+        range.moveEnd("character", endPos);
+        range.moveStart("character", startPos);
+        range.select();
+        return true;
+      }
+    
+      return false;
+    }
+  
+    function getOffset(el) {
+      const rect = el.getBoundingClientRect();
+      return {
+        left: rect.left + window.scrollX,
+        top: rect.top + window.scrollY
+      };
+    }
+  
+  
+  
+
+
 function handleCodeSteps(){
    
     
@@ -712,7 +1016,15 @@ function handleCodeSteps(){
             var caretPos = textBoxIn.selectionStart;
             
             if (textBoxEx.value.indexOf(word) === -1){
-                textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(`\n${word}\n`.length)
+                console.log(caretPos)
+
+
+                textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(caretPos)
+
+
+                console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
+                console.log("rest of string: ", textBoxEx.value.slice(`${word}`.length))
+                console.log(textBoxEx.value);
                 //textBoxEx.value += `\n${word}\n`;
             }
             
@@ -787,6 +1099,7 @@ function handleCodeSteps(){
             if (textBoxEx.value.indexOf(word) !== -1){
                 
                 textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
+                console.log(textBoxEx.value);
                 
                 //textBoxEx.value += `\n${word}\n`;
             }

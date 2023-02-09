@@ -150,6 +150,17 @@ class CatScratchEditorProvider {
                     break;
                 // let tourName = document.fileName.replace('cscratch', 'tour');
                 // fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
+                case 'deleteTourStep':
+                    var deletedStepNum = parseInt(e.message);
+                    vscode.window.showInformationMessage(`delete step: ${deletedStepNum} `);
+                    let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
+                    let tss = JSON.parse(tours);
+                    this.numOfSteps--;
+                    tss.steps = tss.steps.splice(deletedStepNum);
+                    vscode.window.showInformationMessage(`new steps: ${JSON.stringify(tss.steps.splice(deletedStepNum))} `);
+                    this.fullTour = JSON.stringify(tss);
+                    fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+                    break;
             }
         });
         updateWebview();
@@ -270,6 +281,15 @@ class CatScratchEditorProvider {
 				<div id="pop-arrow" class="arrow-left"></div>
 			</div>
 			
+
+					<div id="delete-container" class="delete-container">
+					   <b id="delete-prompt" class="delete-prompt" >Are you sure you want to delete?</b>
+					   </br>
+					   <div id="button-container" style="padding-top: 50%; display: flex; justify-content: center">
+					   <button id="delete-btn" class="delete-btn">Delete</button>
+					   <button id="cancel-btn" class="cancel-btn" onclick="closeDeleteBox()">Cancel</button>
+					   </div>
+					</div>
 				
 					<div class="code-steps-box">
 							<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">

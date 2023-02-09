@@ -122,6 +122,50 @@ body {
    
 }
 
+.delete-container{
+    z-index: 30;
+    position: fixed !important;
+    margin: 0;
+    border-radius: 18px;
+    width: 15%;
+    top: 10%;
+    left: 23.5%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 30%;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+    backdrop-filter: blur(5px);
+    padding: 10px;
+}
+
+.delete-prompt{
+    font-size: larger;
+    width: 10%;
+    border-radius: 18px;
+    padding: 10px;
+
+}
+
+.delete-btn{
+    border-radius: 18px 0 0 18px;
+    width: 30%;
+    height: 30%;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+    clip-path: inset(-18px 0px -18px -18px);
+   
+}
+
+.cancel-btn{
+    border-radius: 0 18px 18px 0;
+    width: 30%;
+    height: 30%;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+   
+    
+}
+
 .add-code-tour{
     border-radius: 18px;
 }

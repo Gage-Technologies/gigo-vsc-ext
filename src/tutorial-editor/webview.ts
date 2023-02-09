@@ -1,5 +1,6 @@
 import path = require('path');
 import { stringify } from 'querystring';
+import { cachedDataVersionTag } from 'v8';
 import * as vscode from 'vscode';
 import { getNonce } from './util';
 
@@ -77,16 +78,9 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 		webviewPanel.webview.options = {
 			enableScripts: true,
 		};
-		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+		
 
 		let fs = require('fs')
-
-		this.moveSVG =  webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
-		vscode.window.onDidChangeActiveColorTheme(() =>{
-			webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-			
-			
-		});
 
 		var files = document.fileName.split("/");
 		var fileName = files[files.length - 1];
@@ -115,7 +109,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
 		}
 
-		console.log("WE FUCKIN HERE!");
+		console.log(`text from load: ${document.getText()}`);
 		this.text = document.getText();
 		function updateWebview() {
 			webviewPanel.webview.postMessage({
@@ -124,6 +118,15 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			});
 		}
 
+		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+		this.moveSVG =  webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
+		vscode.window.onDidChangeActiveColorTheme(() =>{
+			webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+			
+			
+		});
+
+		
 		
 
 		// Hook up event handlers so that we can synchronize the webview with the text document.
@@ -139,6 +142,8 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				updateWebview();
 			}
 		});
+
+		
 
 		// Make sure we get rid of the listener when our editor is closed.
 		webviewPanel.onDidDispose(() => {
@@ -164,7 +169,14 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 					break;
 				case 'updateFile':
 					this.text = e.message;
-					return
+					vscode.window.showInformationMessage(e.message);
+					try{
+						fs.writeFileSync(document.fileName, this.text, 'utf-8');
+					}catch(err){
+						vscode.window.showInformationMessage(`error in file write ${err}`);
+					}
+					
+					return;
 				case "openCodeTourDialog":
 					vscode.window.showInformationMessage('openCodeTourDialog');
 					return;
@@ -219,7 +231,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 	 * Get the static html used for the editor webviews.
 	 */
 	private getHtmlForWebview(webview: vscode.Webview): string {
-
+		
 
 		let highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-dark.css"/>`;
 
@@ -264,7 +276,9 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
-
+		 
+		console.log(`text before render: ${this.text}`);
+		console.log(`steps befor load: ${JSON.stringify(this.fullTour.steps)}`);
 		return /* html */`
 			<!DOCTYPE html>
 			<html lang="en">
@@ -280,6 +294,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 				<input id="tour-step-num" name="tour-step-num" type="hidden" value="${this.numOfSteps}"></input>
+				<input id="tour-step-objs" name="tour-step-objs" type="hidden" value='${JSON.stringify(this.fullTour.steps)}'></input>
 
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/default.css" integrity="sha512-HPYcuSKzZ/FwxsRKIiNX6imjfnr5+82poiPO+oXi9WCEEe2q1x2OOBpbF+6cRG+hwoEsBXfs7oQveu5yHbY64g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -303,9 +318,12 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 
 				<title>Cat Scratch</title>
 			</head>
+
+			<script src="${codeTourScript}"></script>
+
 			
 			<div id="container" style="height: 100%"></div>
-			<body id="body" style="overflow: scroll">
+			<body id="body" style="overflow: scroll" >
 			
 			<div id="page" class="page">
 			<script src="${codeIn}"></script>
@@ -315,8 +333,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 			<script src="${codeComplete}"></script>
 			<script src="${codeDeBounce}"></script>
 
-			<script src="${codeTourScript}"></script>
-
+			
 			
 			
 			
@@ -362,14 +379,14 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 					</div>
 				
 					<div class="code-steps-box">
-							<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
+							<div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
 							<img  class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
 						
 
 							</img>
 
 							<div class="code-steps-inner">	
-							<span  class="step-title" draggable="true" ondragstart="drag(event)"><b>Step ${this.numOfSteps}</b></span> 
+							<span  class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 0</b></span> 
 							</div>
 							<div id="file-path-div">
 								<label>File Path*:</label>

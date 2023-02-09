@@ -57,12 +57,7 @@ class CatScratchEditorProvider {
         webviewPanel.webview.options = {
             enableScripts: true,
         };
-        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
         let fs = require('fs');
-        this.moveSVG = webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
-        vscode.window.onDidChangeActiveColorTheme(() => {
-            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-        });
         var files = document.fileName.split("/");
         var fileName = files[files.length - 1];
         var fileNoExt = fileName.split(".")[0];
@@ -86,7 +81,7 @@ class CatScratchEditorProvider {
             this.fullTour = JSON.stringify(obj);
             fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
         }
-        console.log("WE FUCKIN HERE!");
+        console.log(`text from load: ${document.getText()}`);
         this.text = document.getText();
         function updateWebview() {
             webviewPanel.webview.postMessage({
@@ -94,6 +89,11 @@ class CatScratchEditorProvider {
                 text: document.getText(),
             });
         }
+        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+        this.moveSVG = webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
+        vscode.window.onDidChangeActiveColorTheme(() => {
+            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+        });
         // Hook up event handlers so that we can synchronize the webview with the text document.
         //
         // The text document acts as our model, so we have to sync change in the document to our
@@ -128,6 +128,13 @@ class CatScratchEditorProvider {
                     break;
                 case 'updateFile':
                     this.text = e.message;
+                    vscode.window.showInformationMessage(e.message);
+                    try {
+                        fs.writeFileSync(document.fileName, this.text, 'utf-8');
+                    }
+                    catch (err) {
+                        vscode.window.showInformationMessage(`error in file write ${err}`);
+                    }
                     return;
                 case "openCodeTourDialog":
                     vscode.window.showInformationMessage('openCodeTourDialog');
@@ -195,6 +202,8 @@ class CatScratchEditorProvider {
         const trashPng = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'trash.png'));
         // Use a nonce to whitelist which scripts can be run
         const nonce = (0, util_1.getNonce)();
+        console.log(`text before render: ${this.text}`);
+        console.log(`steps befor load: ${JSON.stringify(this.fullTour.steps)}`);
         return /* html */ `
 			<!DOCTYPE html>
 			<html lang="en">
@@ -210,6 +219,7 @@ class CatScratchEditorProvider {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 				<input id="tour-step-num" name="tour-step-num" type="hidden" value="${this.numOfSteps}"></input>
+				<input id="tour-step-objs" name="tour-step-objs" type="hidden" value='${JSON.stringify(this.fullTour.steps)}'></input>
 
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/default.css" integrity="sha512-HPYcuSKzZ/FwxsRKIiNX6imjfnr5+82poiPO+oXi9WCEEe2q1x2OOBpbF+6cRG+hwoEsBXfs7oQveu5yHbY64g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -233,9 +243,12 @@ class CatScratchEditorProvider {
 
 				<title>Cat Scratch</title>
 			</head>
+
+			<script src="${codeTourScript}"></script>
+
 			
 			<div id="container" style="height: 100%"></div>
-			<body id="body" style="overflow: scroll">
+			<body id="body" style="overflow: scroll" >
 			
 			<div id="page" class="page">
 			<script src="${codeIn}"></script>
@@ -245,8 +258,7 @@ class CatScratchEditorProvider {
 			<script src="${codeComplete}"></script>
 			<script src="${codeDeBounce}"></script>
 
-			<script src="${codeTourScript}"></script>
-
+			
 			
 			
 			
@@ -292,14 +304,14 @@ class CatScratchEditorProvider {
 					</div>
 				
 					<div class="code-steps-box">
-							<div id="@@@Step${this.numOfSteps}@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
+							<div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
 							<img  class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
 						
 
 							</img>
 
 							<div class="code-steps-inner">	
-							<span  class="step-title" draggable="true" ondragstart="drag(event)"><b>Step ${this.numOfSteps}</b></span> 
+							<span  class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 0</b></span> 
 							</div>
 							<div id="file-path-div">
 								<label>File Path*:</label>

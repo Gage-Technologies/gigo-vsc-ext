@@ -5,6 +5,8 @@
 // Based on a CSS-Tricks Post
 const vscode = acquireVsCodeApi();
 
+window.addEventListener("load", loadCodeTours);
+
 function addCodeTour(button){
 
     try{
@@ -71,6 +73,137 @@ function addCodeTour(button){
     vscode.postMessage({
         type: 'addCodeTour'
     });
+}
+
+function loadCodeTours(){
+    console.log("inside load code tours");
+    try{
+        var steps = document.getElementById("tour-step-objs").value;
+        steps = JSON.parse(steps);
+        console.log(`this is the steps inside load code tours: ${steps[0]}`);
+        vscode.postMessage({
+            type: 'hello',
+            message: `in side load code tours ${steps}`
+        })
+    }catch(e){
+        console.log(e);
+    }
+    
+    console.log(`this is post message in load code tours length of steps: ${steps.length}`);
+    for (let i = 0; i < steps.length; i++) {
+
+        var step = document.getElementById("@@@Step0@@@");
+        
+
+        let stepClone = step.cloneNode(true);
+        stepClone.id = `@@@Step${i + 1}@@@`;
+
+        console.log(`this is the step in iter: ${stepClone.id}`);
+
+       
+
+        var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
+
+        title.innerHTML = `<b>Step ${i + 1}</b>`;
+
+        var filePath = stepClone.querySelector("#file-path-div").querySelector("#file-path");
+        filePath.value = steps[i].file;
+
+        var lineNumber = stepClone.querySelector("#line-number-div").querySelector("#line-number");
+        lineNumber.value = steps[i].line;
+
+        var description = stepClone.querySelector("#description-div").querySelector("#description-input");
+        description.value = steps[i].description;
+
+        stepClone.style.display = "inline-block";
+        step.parentElement.appendChild(stepClone);
+
+        var filePathDiv = stepClone.querySelector("#file-path-div")
+        var lineNumberDiv = stepClone.querySelector("#line-number-div")
+        var descriptionDiv = stepClone.querySelector("#description-div")
+        var saveButton = stepClone.querySelector('#save-step-button');
+        var textBoxEx = document.getElementById("ci-external");
+        var textBoxIn = document.getElementById("ci-internal");
+        var word = stepClone.id;
+        var elmnt = stepClone;
+
+        console.log(`this is the step in iter2: ${stepClone.id}`);
+
+        filePathDiv.style.display = "none";
+        lineNumberDiv.style.display = "none";
+        descriptionDiv.style.display = "none";
+        saveButton.style.display = "none";
+        stepClone.style.height = "5%";
+
+        var caretPos = textBoxIn.selectionStart;
+            
+        if (textBoxEx.value.indexOf(word) === -1){
+            console.log(caretPos)
+
+
+            textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(caretPos)
+
+
+            console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
+            console.log("rest of string: ", textBoxEx.value.slice(`${word}`.length))
+            console.log(textBoxEx.value);
+            //textBoxEx.value += `\n${word}\n`;
+        }
+        
+        // now you have a proper float for the font size (yes, it can be a float, not just an integer)
+        
+                
+        
+       
+
+        
+
+
+        var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
+        var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
+
+        var charsBefore = 0
+        const newLines = textBoxEx.value.split("\n");
+        for (let i = 0; i < newLines.length; i++) {
+            if (newLines[i].indexOf(word) !== -1){
+                heightPos = i + 1;
+            }
+        } 
+
+        for (let i = 0; i < newLines.length; i++) {
+            if (newLines[i].indexOf(word)!== -1){
+                break;
+            }
+            charsBefore += newLines[i].length + 1;
+        }
+
+        console.log(`postr newline calc`);
+        var startPos = (textBoxEx.value.indexOf(word));
+        var endPos = (startPos + word.length) - charsBefore;
+
+        var top = (getOffset(textBoxEx).top + (heightPos * lineHeight))
+        var left = (getOffset(textBoxEx).left + (endPos * fontSize))
+
+        // if (top > rect.height || left > rect.width || left > rect.width){ 
+        //     elmnt.style.top = (getOffset(textBoxEx).top) + "px";
+        //     elmnt.style.left = (getOffset(textBoxEx).left) + "px";
+        //     handleCodeSteps();
+        // }
+        
+        console.log(`postr newline calc2`);
+        
+        //  elmnt.style.position = "fixed";
+
+        elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
+        elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize - 40)) + "px";
+        elmnt.ondragstart = function () { return false; };
+       
+
+    }
+
+    // console.log(`load handle code steps`);
+    // handleCodeSteps();
+    // console.log(`after load handle code steps`);
 }
 
 function deleteStep(elmnt){
@@ -312,7 +445,7 @@ var codeInput = {
             vscode.postMessage({
                 type: 'updateFile',
                 message: `${text}`
-            })
+            });
 
             
 

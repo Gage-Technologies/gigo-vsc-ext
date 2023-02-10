@@ -79,12 +79,17 @@ function loadCodeTours(){
     console.log("inside load code tours");
     try{
         var steps = document.getElementById("tour-step-objs").value;
+        
         steps = JSON.parse(steps);
         console.log(`this is the steps inside load code tours: ${steps[0]}`);
         vscode.postMessage({
             type: 'hello',
             message: `in side load code tours ${steps}`
         })
+        // var tourPath = document.getElementById("tour-path").value;
+        // let tour = fs.readFileSync(tourPath, 'utf-8');
+        // let ts = JSON.parse(tour);
+        // var steps = ts.steps;
     }catch(e){
         console.log(e);
     }
@@ -151,14 +156,6 @@ function loadCodeTours(){
         }
         
         // now you have a proper float for the font size (yes, it can be a float, not just an integer)
-        
-                
-        
-       
-
-        
-
-
         var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
         var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
 
@@ -194,9 +191,12 @@ function loadCodeTours(){
         
         //  elmnt.style.position = "fixed";
 
-        elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
-        elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize - 40)) + "px";
-        elmnt.ondragstart = function () { return false; };
+        stepClone.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
+        stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize - 40)) + "px";
+        stepClone.style.position = "absolute";
+
+        console.log(`loading step: ${stepClone.id} into pos: ${stepClone.style.top}, ${stepClone.style.left}`);
+        // elmnt.ondragstart = function () { return false; };
        
 
     }
@@ -236,7 +236,7 @@ function editStep(button){
     //     message: `edit step id: ${codeStep.id}`,
     // });
 
-
+    // codeStep.style.position = "fixed";
     filePathDiv.style.display = "inline-block";
     lineNumberDiv.style.display = "inline-block";
     button.style.display = "inline-block";
@@ -258,6 +258,7 @@ function saveStep(button) {
     var filePathDiv = codeStep.querySelector('#file-path-div');
     var lineNumberDiv = codeStep.querySelector('#line-number-div');
     var descriptionDiv = codeStep.querySelector('#description-div');
+    var step = codeStep.id;
 
     var popUp = document.getElementById('pop-container');
 
@@ -269,6 +270,9 @@ function saveStep(button) {
         return;
     }
     
+
+    var num = step.replaceAll("@", "");
+    var num = num.replace("Step", "");
 
 
     // vscode.postMessage({
@@ -286,6 +290,7 @@ function saveStep(button) {
         file: filePath.value,
         line: lineNumber.value,
         description: description.value,
+        step: num
     };
 
     filePathDiv.style.display = "none";
@@ -333,9 +338,11 @@ function expandStep(step){
         return;
     }
 
+    editButton.style.display = "none";
+    console.log("closing edit button")
     var editButton = document.getElementById('edit-step-button');
     step.style.height = "5%";
-    editButton.style.display = "none";
+    
   
    
    
@@ -762,6 +769,7 @@ customElements.define("code-input", codeInput.CodeInput); // Set tag
 
 
 function dragElement(elmnt) {
+    console.log(`element being dragged: ${elmnt.id}`);
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     var saveButton = elmnt.querySelector("#save-step-button");
     if (saveButton.style.display !== "none") {
@@ -1147,6 +1155,8 @@ function handleCodeSteps(){
             }
             
             var caretPos = textBoxIn.selectionStart;
+
+            console.log(`moving step with id: ${word}`);
             
             if (textBoxEx.value.indexOf(word) === -1){
                 console.log(caretPos)
@@ -1196,19 +1206,23 @@ function handleCodeSteps(){
             var left = (getOffset(textBoxEx).left + (endPos * fontSize))
     
             if (top > rect.height || left > rect.width || left > rect.width){ 
+                console.log(`step: ${word} is outside the bounds of the window`)
                 elmnt.style.top = (getOffset(textBoxEx).top) + "px";
                 elmnt.style.left = (getOffset(textBoxEx).left) + "px";
                 handleCodeSteps();
             }
             
-            var elmntClone = elmnt.cloneNode()
+            // var elmntClone = elmnt.cloneNode()
             
             
             //  elmnt.style.position = "fixed";
 
             elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
             elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize - 40)) + "px";
-            elmnt.ondragstart = function () { return false; };
+
+           
+            console.log(`moving step with id: ${word} to pos: ${top}, ${left}`);
+            // elmnt.ondragstart = function () { return false; };
            
             
             

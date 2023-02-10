@@ -106,6 +106,10 @@ class CatScratchEditorProvider {
                 updateWebview();
             }
         });
+        webviewPanel.onDidChangeViewState(() => {
+            console.log(`code tours: ${this.codeTourSteps}`);
+            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+        });
         // Make sure we get rid of the listener when our editor is closed.
         webviewPanel.onDidDispose(() => {
             changeDocumentSubscription.dispose();
@@ -144,13 +148,23 @@ class CatScratchEditorProvider {
                     // webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
                     return;
                 case 'saveTourStep':
+                    // vscode.window.showInformationMessage(`saveTourStep tour num: ${this.numOfSteps}`);
                     console.log(`${e.message}`);
+                    console.log(`saveTourStep tour num: ${this.numOfSteps}`);
                     let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
                     let ts = JSON.parse(tour);
-                    this.numOfSteps++;
                     let parsedMsg = JSON.parse(e.message);
                     parsedMsg.line = parseInt(parsedMsg.line);
-                    ts.steps.push(parsedMsg);
+                    var stepNum = parseInt(parsedMsg.step);
+                    delete parsedMsg['step'];
+                    if (stepNum > this.numOfSteps) {
+                        this.numOfSteps++;
+                        ts.steps.push(parsedMsg);
+                    }
+                    else {
+                        ts.steps[stepNum - 1] = parsedMsg;
+                        console.log(`ts: ${JSON.stringify(ts)}`);
+                    }
                     this.fullTour = JSON.stringify(ts);
                     fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
                     vscode.window.showInformationMessage(`save code tour, fp: ${e.message.file}, ln: ${e.message.line} desc: ${e.message.description}`);
@@ -176,6 +190,9 @@ class CatScratchEditorProvider {
      * Get the static html used for the editor webviews.
      */
     getHtmlForWebview(webview) {
+        const fs = require('fs');
+        let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
+        this.fullTour = JSON.parse(tour);
         let highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-dark.css"/>`;
         if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Light) {
             highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.css"/>`;
@@ -219,6 +236,7 @@ class CatScratchEditorProvider {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 				<input id="tour-step-num" name="tour-step-num" type="hidden" value="${this.numOfSteps}"></input>
+				<input id="tour-path" name="tour-path" type="hidden" value="${this.tourFilePath}"></input>
 				<input id="tour-step-objs" name="tour-step-objs" type="hidden" value='${JSON.stringify(this.fullTour.steps)}'></input>
 
 				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />

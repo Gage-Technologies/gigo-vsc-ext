@@ -3,6 +3,52 @@
 /* First Published on CSS-Tricks.com */
 
 
+pre[class*="language-"].line-numbers {
+	position: relative;
+	padding-left: 8em;
+	counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+	position: relative;
+	white-space: inherit;
+}
+
+pre[class*="language-"] > code {
+	left: 2em;
+}
+
+.line-numbers .line-numbers-rows {
+	position: absolute;
+	pointer-events: none;
+	top: 0;
+	font-size: 100%;
+  left: -6em;
+	width: 5em; /* works for line-numbers below 1000 lines */
+	letter-spacing: -1px;
+	border-right: 1px solid #999;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
+}
+
+	.line-numbers-rows > span {
+		display: block;
+		counter-increment: linenumber;
+	}
+
+		.line-numbers-rows > span:before {
+			content: counter(linenumber);
+			color: #999;
+			display: block;
+			padding-right: 0.8em;
+			text-align: right;
+		}
+
+
 .input-container{
   height: fit-content;
   width: 100%;
@@ -34,10 +80,11 @@ code-input {
   white-space: pre;
 }
 
+
 code-input textarea, code-input:not(.code-input_pre-element-styled) pre code, code-input.code-input_pre-element-styled pre {
   /* Both elements need the same text and space styling so they are directly on top of each other */
   margin: 0px!important;
-  padding: var(--padding, 16px)!important;
+  padding: var(--padding, 20px)!important;
   border: 0;
   width: 100%;
   /* min-height: 800px; */
@@ -55,6 +102,7 @@ code-input textarea, code-input pre, code-input pre * {
 
 
 code-input textarea, code-input pre {
+  
   /* In the same place */
   position: absolute;
   top: 0;
@@ -84,7 +132,7 @@ code-input textarea {
 /* Can be scrolled */
 code-input textarea, code-input pre {
   overflow: hidden!important;
-
+  
   white-space: inherit;
   word-spacing: normal;
   word-break: normal;
@@ -93,6 +141,7 @@ code-input textarea, code-input pre {
 
 /* No resize on textarea; stop outline */
 code-input textarea {
+  left: 2.5em;
   resize: none;
   outline: none!important;
   background-color: transparent;

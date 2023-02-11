@@ -65,7 +65,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     public async executeStreakCheck(wsID: any, secret: any){
         //awair result from http function in GIGO
         let res = await axios.post(
-            "http://gigo.gage.intranet/api/internal/ws/streak-check", 
+            "http://gigo.gage.intranet/api/internal/v1/ext/streak-check", 
             {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 "workspace_id": wsID,

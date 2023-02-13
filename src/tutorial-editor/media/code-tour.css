@@ -75,6 +75,7 @@ body {
     position: fixed; /* Fixed Sidebar (stay in place on scroll) */
     z-index: 9; /* Stay on top */
     left: 5%;
+    backdrop-filter: blur(5px);
     /* top: 10%;  */
     /* left: 5%; */
     float: left;
@@ -85,20 +86,21 @@ body {
     -webkit-border-radius: 10px;
     border-radius: 10px;
     background-color: var(--vscode-button-background);
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 16px 16px -16px, rgba(0, 0, 0, 0.14) 0px 16px 20px 0px, rgba(0, 0, 0, 0.12) 0px 8px 32px 0px;
+    /* box-shadow: rgba(0, 0, 0, 0.2) 0px 16px 16px -16px, rgba(0, 0, 0, 0.14) 0px 16px 20px 0px, rgba(0, 0, 0, 0.12) 0px 8px 32px 0px; */
     overflow: hidden; /* Disable horizontal scroll */
     padding-top: 20px;
 }
 
 .arrow-left {
+    backdrop-filter: blur(5px);
     width: 40px;
     height: 40px;
-    display: none;;
+    /* display: none;; */
     /* z-index: 9; */
     
     /* top: 13%; /* Stay at the top */
     /* left: 4%; */
-    z-index: 10; /* Stay on top */
+    z-index: 9; /* Stay on top */
     left: 0%;
     border-top: 40px solid transparent;
     border-bottom: 40px solid transparent; 
@@ -190,15 +192,19 @@ body {
 } */
 
 .edit-step{
+    display: block;
     margin: 0;
     border-radius: 18px;
     width: 100%;
     text-align: center;
-    height: 1em;
+    height: 2em;
+    margin-top: 1em;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
 }
 
 .code-steps{
+    left: 7%;
+    top: 11%;
     display: none;
     z-index: 20;
     background-color: auto;
@@ -208,11 +214,11 @@ body {
     opacity: 100%;
     border: 5px white;
     outline: 5px white;
-    width: 10em;
-    height: 30%;
+    width: 12em;
+    height: 25%;
     border-radius: 18px;
     text-align: center;
- 
+    
 
 
     cursor: move;
@@ -280,7 +286,8 @@ body {
     border-radius: 18px;
     width: 100%;
     text-align: center;
-    height: 1em;
+    height: 2em;
+    margin-top: 1em;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
 }
 

@@ -344,9 +344,9 @@ class CatScratchEditorProvider {
 								</input>
 							</div>
 							<div id="description-div">
-								<label>Dsecription/Code:</label>
-								<input id="description-input" class="description-box">
-								</input>
+								<label>Description/Code:</label>
+								<textarea id="description-input" class="description-box">
+								</textarea>
 							</div>
 							
 

@@ -10,6 +10,19 @@ window.addEventListener("load", loadCodeTours);
 function addCodeTour(button){
 
     try{
+        
+        var popCon = document.getElementById("pop-container");
+        console.log(popCon.style.display);
+        if (popCon.style.display === "inline-block"){
+            var tourNum = document.getElementById("tour-step-num");
+
+            document.getElementById(`@@@Step${tourNum.value}@@@`).remove();
+            tourNum.value = parseInt(tourNum.value) - 1;
+            popCon.style.display = "none";
+            
+            return;
+        }
+        var randomColor = Math.floor(Math.random()*16777215).toString(16);
 
         var step = document.getElementById("@@@Step0@@@");
 
@@ -26,6 +39,9 @@ function addCodeTour(button){
         stepClone.id = `@@@Step${tourNum.value}@@@`;
 
         stepClone.style.display = "inline-block";
+
+        var innerStep = stepClone.querySelector(".code-steps-inner");
+        innerStep.style.backgroundColor = "#" + randomColor;
 
         var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
 
@@ -96,6 +112,7 @@ function loadCodeTours(){
     
     console.log(`this is post message in load code tours length of steps: ${steps.length}`);
     for (let i = 0; i < steps.length; i++) {
+        var randomColor = Math.floor(Math.random()*16777215).toString(16);
 
         var step = document.getElementById("@@@Step0@@@");
         
@@ -106,7 +123,8 @@ function loadCodeTours(){
         console.log(`this is the step in iter: ${stepClone.id}`);
 
        
-
+        var innerStep = stepClone.querySelector(".code-steps-inner");
+        innerStep.style.backgroundColor = "#" + randomColor;
         var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
 
         title.innerHTML = `<b>Step ${i + 1}</b>`;
@@ -138,7 +156,7 @@ function loadCodeTours(){
         lineNumberDiv.style.display = "none";
         descriptionDiv.style.display = "none";
         saveButton.style.display = "none";
-        stepClone.style.height = "5%";
+        stepClone.style.height = "3%";
 
         var caretPos = textBoxIn.selectionStart;
             
@@ -192,7 +210,7 @@ function loadCodeTours(){
         //  elmnt.style.position = "fixed";
 
         stepClone.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
-        stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize - 40)) + "px";
+        stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize)) + "px";
         stepClone.style.position = "absolute";
 
         console.log(`loading step: ${stepClone.id} into pos: ${stepClone.style.top}, ${stepClone.style.left}`);
@@ -241,7 +259,7 @@ function editStep(button){
     lineNumberDiv.style.display = "inline-block";
     button.style.display = "inline-block";
     descriptionDiv.style.display = "inline-block";
-    codeStep.style.height = "30%";
+    codeStep.style.height = "25%";
 
     button.style.display = "none";
 }
@@ -297,7 +315,8 @@ function saveStep(button) {
     lineNumberDiv.style.display = "none";
     descriptionDiv.style.display = "none";
     button.style.display = "none";
-    codeStep.style.height = "5%";
+    codeStep.style.height = "3%";
+    codeStep.style.zIndex = "20";
     // popUp.style.display = "none";
     
 
@@ -315,7 +334,6 @@ function expandStep(step){
     var stepButton = step.querySelector('#save-step-button');
     
     if (stepButton.style.display !== "none"){
-       
      
         return;
     }
@@ -332,7 +350,8 @@ function expandStep(step){
  
 
     if (editButton.style.display === "none"){
-        step.style.height = "10%";
+        step.style.zIndex = "25";
+        step.style.height = "8%";
         editButton.style.display = "inline-block";
         
         return;
@@ -341,8 +360,8 @@ function expandStep(step){
     editButton.style.display = "none";
     console.log("closing edit button")
     var editButton = document.getElementById('edit-step-button');
-    step.style.height = "5%";
-    
+    step.style.height = "3%";
+    step.style.zIndex = "20";
   
    
    
@@ -814,6 +833,8 @@ function dragElement(elmnt) {
      
       var trash = document.getElementById("trash");
       var textBoxEx = document.getElementById("ci-external");
+      var textBoxIn = document.getElementById("ci-internal");
+      console.log(textBoxIn.selectionStart, textBoxIn.selectionEnd);
       if (Math.abs(localToGlobal(trash).top - (localToGlobal(elmnt).top - window.scrollY)) < 50 && Math.abs(localToGlobal(trash).left - (localToGlobal(elmnt).left - window.scrollX)) < 50) {
         
         var icon = trash.querySelector(".trash-icon");
@@ -1153,6 +1174,7 @@ function handleCodeSteps(){
             if (popUp.style.display !== "none") {
                 popUp.style.display = "none";
             }
+
             
             var caretPos = textBoxIn.selectionStart;
 
@@ -1198,6 +1220,7 @@ function handleCodeSteps(){
                 charsBefore += newLines[i].length + 1;
             }
 
+            console.log(`top of textbox: ${rect.top} left of textbox: ${rect.left} height of textbox: ${rect.height} width of textbox: ${rect.width}`);
 
             var startPos = (textBoxEx.value.indexOf(word));
             var endPos = (startPos + word.length) - charsBefore;
@@ -1218,7 +1241,7 @@ function handleCodeSteps(){
             //  elmnt.style.position = "fixed";
 
             elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
-            elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize - 40)) + "px";
+            elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize)) + "px";
 
            
             console.log(`moving step with id: ${word} to pos: ${top}, ${left}`);

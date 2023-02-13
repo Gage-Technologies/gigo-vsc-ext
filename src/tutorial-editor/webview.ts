@@ -401,7 +401,7 @@ export class CatScratchEditorProvider implements vscode.CustomTextEditorProvider
 					</div>
 				
 					<div class="code-steps-box">
-							<div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" ondblclick="expandStep(this)" class="code-steps">
+							<div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" oncontextmenu="expandStep(event, this)" class="code-steps">
 							<img  class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
 						
 

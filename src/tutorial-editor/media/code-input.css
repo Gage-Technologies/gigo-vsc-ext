@@ -15,7 +15,12 @@ pre[class*="language-"].line-numbers > code {
 }
 
 pre[class*="language-"] > code {
-	left: 2em;
+	left: 3em;
+}
+
+#ci-internal{
+  left: 3.6em;
+  top: .5em;
 }
 
 .line-numbers .line-numbers-rows {
@@ -68,7 +73,7 @@ code-input {
   margin: 8px;
   width: calc(100% - 16px);
   height: 100px;
-  resize: both;
+  resize: none;
   overflow-y: hidden;
   background-color: transparent;
 

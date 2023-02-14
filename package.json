@@ -81,7 +81,7 @@
         "editor.semanticHighlighting.enabled": true,
         "selector": [
           {
-            "filenamePattern": "*.cscratch"
+            "filenamePattern": "*.md"
           }
         ]
       },

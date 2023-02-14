@@ -217,8 +217,8 @@ function loadCodeTours(){
         
         //  elmnt.style.position = "fixed";
 
-        stepClone.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
-        stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize)) + "px";
+        stepClone.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)+5) + "px";
+        stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
         stepClone.style.position = "absolute";
 
         console.log(`loading step: ${stepClone.id} into pos: ${stepClone.style.top}, ${stepClone.style.left}`);
@@ -466,6 +466,8 @@ var codeInput = {
                 text += " ";
             }
 
+            text = text.replace(/["]/g, `'`);
+
             // Update code
             result_element.innerHTML = this.escape_html(text);
             this.plugin_evt("beforeHighlight");
@@ -482,11 +484,15 @@ var codeInput = {
             var pre = this.querySelector("pre");
             
             console.log(getComputedStyle(this).height);
-            this.style.height = textarea.scrollHeight + "px";;
+            // this.style.height = textarea.scrollHeight  + "px";;
+            this.style.height = textarea.scrollHeight  + "px";;
             pre.style.height = textarea.scrollHeight + "px";
             textarea.style.height = this.style.height;
 
 
+            ////
+            // this.style.height =  textarea.scrollHeight + 10  + "px";
+            ///
             // alignCodeSteps();
             // handleCodeSteps();
             /////////////////////////////////////////
@@ -616,6 +622,7 @@ var codeInput = {
             this.transfer_event("selectionchange", this.querySelector("textarea"), null, this.onselectionchange);
 
             /* Add code from value attribute - useful for loading from backend */
+            console.log("loading default value into text area: ", value)
             this.update(value, this);
         }
         
@@ -1321,8 +1328,8 @@ function handleCodeSteps(elmnt){
         
         //  elmnt.style.position = "fixed";
 
-        elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
-        elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize)) + "px";
+        elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)+5) + "px";
+        elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
 
         
         console.log(`moving step with id: ${word} to pos: ${top}, ${left}`);
@@ -1454,8 +1461,8 @@ function alignCodeSteps(){
         
         //  elmnt.style.position = "fixed";
 
-        elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)) + "px";
-        elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize)) + "px";
+        elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)+5) + "px";
+        elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
         elmnt.style.position = "absolute";
 
        

@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CatScratchEditorProvider = exports.activateEditor = void 0;
+exports.TutorialEditorProvider = exports.activateEditor = void 0;
 const path = require("path");
 const vscode = require("vscode");
 const util_1 = require("./util");
 async function activateEditor(context) {
     console.log("WE FUCKIN HERE!");
     // Register our custom editor providers
-    context.subscriptions.push(CatScratchEditorProvider.register(context));
+    context.subscriptions.push(TutorialEditorProvider.register(context));
 }
 exports.activateEditor = activateEditor;
 /**
@@ -22,7 +22,7 @@ exports.activateEditor = activateEditor;
  * - Loading scripts and styles in a custom editor.
  * - Synchronizing changes between a text document and a custom editor.
  */
-class CatScratchEditorProvider {
+class TutorialEditorProvider {
     constructor(context) {
         this.context = context;
         this.addCodeTourBtn = `<button class="add-code-tour" onclick="addCodeTour()">Create Code Tour</button>`;
@@ -35,8 +35,8 @@ class CatScratchEditorProvider {
         this.text = "";
     }
     static register(context) {
-        const provider = new CatScratchEditorProvider(context);
-        const providerRegistration = vscode.window.registerCustomEditorProvider(CatScratchEditorProvider.viewType, provider);
+        const provider = new TutorialEditorProvider(context);
+        const providerRegistration = vscode.window.registerCustomEditorProvider(TutorialEditorProvider.viewType, provider);
         return providerRegistration;
     }
     /**
@@ -106,10 +106,10 @@ class CatScratchEditorProvider {
                 updateWebview();
             }
         });
-        webviewPanel.onDidChangeViewState(() => {
-            console.log(`code tours: ${this.codeTourSteps}`);
-            webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-        });
+        // webviewPanel.onDidChangeViewState(() => {
+        // 	console.log(`code tours: ${this.codeTourSteps}`)
+        // 	webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+        // })
         // Make sure we get rid of the listener when our editor is closed.
         webviewPanel.onDidDispose(() => {
             changeDocumentSubscription.dispose();
@@ -117,12 +117,6 @@ class CatScratchEditorProvider {
         // Receive message from the webview.
         webviewPanel.webview.onDidReceiveMessage(e => {
             switch (e.type) {
-                case 'add':
-                    this.addNewScratch(document);
-                    return;
-                case 'delete':
-                    this.deleteScratch(document, e.id);
-                    return;
                 case 'syntaxHighlight':
                     var Prism = require('prismjs');
                     Prism.highlightElement(e.message);
@@ -219,7 +213,8 @@ class CatScratchEditorProvider {
         const trashPng = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'trash.png'));
         // Use a nonce to whitelist which scripts can be run
         const nonce = (0, util_1.getNonce)();
-        console.log(`text before render: ${this.text}`);
+        var parsedText = this.text.replace(/["]/g, `'`);
+        console.log(`text before render: ${this.text.length}`);
         console.log(`steps befor load: ${JSON.stringify(this.fullTour.steps)}`);
         return /* html */ `
 			<!DOCTYPE html>
@@ -367,7 +362,7 @@ class CatScratchEditorProvider {
 
 				
 					<div class="input-container">
-						<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${this.text}"></code-input>
+						<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${parsedText}"></code-input>
 					</div>
 			
 
@@ -376,34 +371,6 @@ class CatScratchEditorProvider {
 			</div>
 			</body>
 			</html>`;
-    }
-    /**
-     * Add a new scratch to the current document.
-     */
-    addNewScratch(document) {
-        const json = this.getDocumentAsJson(document);
-        const character = CatScratchEditorProvider.scratchCharacters[Math.floor(Math.random() * CatScratchEditorProvider.scratchCharacters.length)];
-        vscode.window.showInformationMessage(`${character}`);
-        json.scratches = [
-            ...(Array.isArray(json.scratches) ? json.scratches : []),
-            {
-                id: (0, util_1.getNonce)(),
-                text: character,
-                created: Date.now(),
-            }
-        ];
-        return this.updateTextDocument(document, json);
-    }
-    /**
-     * Delete an existing scratch from a document.
-     */
-    deleteScratch(document, id) {
-        const json = this.getDocumentAsJson(document);
-        if (!Array.isArray(json.scratches)) {
-            return;
-        }
-        json.scratches = json.scratches.filter((note) => note.id !== id);
-        return this.updateTextDocument(document, json);
     }
     /**
      * Try to get a current document as json text.
@@ -431,7 +398,6 @@ class CatScratchEditorProvider {
         return vscode.workspace.applyEdit(edit);
     }
 }
-exports.CatScratchEditorProvider = CatScratchEditorProvider;
-CatScratchEditorProvider.viewType = 'catCustoms.catScratch';
-CatScratchEditorProvider.scratchCharacters = ['😸', '😹', '😺', '😻', '😼', '😽', '😾', '🙀', '😿', '🐱'];
+exports.TutorialEditorProvider = TutorialEditorProvider;
+TutorialEditorProvider.viewType = 'catCustoms.catScratch';
 //# sourceMappingURL=webview.js.map

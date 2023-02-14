@@ -172,7 +172,7 @@ function loadCodeTours(){
             console.log(caretPos)
 
 
-            textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(caretPos)
+            textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
 
 
             console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
@@ -826,6 +826,7 @@ function dragElement(elmnt) {
     console.log(`element being dragged: ${elmnt.id}`);
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     var saveButton = elmnt.querySelector("#save-step-button");
+    var isMoved = false;
     if (saveButton.style.display !== "none") {
       
       return;
@@ -836,6 +837,14 @@ function dragElement(elmnt) {
     
   
     function dragMouseDown(e) {
+        console.log("dragMouseDown is moved: ", isMoved);
+        isMoved = false;
+  
+
+      if (e.button === 2) {
+            return;
+      }
+
       e = e || window.event;
       e.preventDefault();
      
@@ -854,8 +863,8 @@ function dragElement(elmnt) {
     function elementDrag(e) {
       e = e || window.event;
      
-      
-      
+      console.log("is moved in elementDrag: ", isMoved);
+      isMoved = true;
       // calculate the new cursor position:
       pos1 = pos3 - e.clientX;
       pos2 = pos4 - e.clientY;
@@ -887,10 +896,15 @@ function dragElement(elmnt) {
     }
   
     function closeDragElement(e) {
+       
       elmnt.style.position = "absolute";
       /* stop moving when mouse button is released:*/
       document.onmouseup = null;
       document.onmousemove = null;
+
+      if (!isMoved) {
+        return;
+    }
 
       var trash = document.getElementById("trash");
       var textBoxEx = document.getElementById("ci-external");
@@ -933,6 +947,7 @@ function dragElement(elmnt) {
 
 
       handleCodeSteps(elmnt);
+      isMoved = false;
       
     }
   }
@@ -1248,8 +1263,8 @@ function handleCodeSteps(elmnt){
         console.log(caretPos)
 
 
-        console.log("adding word in handle: ", textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(caretPos));
-        textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(caretPos)
+        console.log("adding word in handle: ", textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos));
+        textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
 
 
         console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
@@ -1330,6 +1345,9 @@ function handleCodeSteps(elmnt){
     
         // var isSelected = selectTextareaWord(textBoxEx, "Step 1");
         // e.target.appendChild(document.createTextNode(`${isSelected}`));
+        textBoxIn.dispatchEvent(new KeyboardEvent('keydown', {'key':'Shift'} ));
+        textBoxIn.dispatchEvent(new KeyboardEvent( 'keyup' , {'key':'Shift'} ));
+
     
     }else{
         if (textBoxEx.value.indexOf(word) !== -1){
@@ -1391,7 +1409,7 @@ function alignCodeSteps(){
             console.log()
 
             console.log("adding word in align: ", textBoxEx.value.substring(0, caretPos), "for: ", word);
-            textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}\n` + textBoxEx.value.slice(caretPos)
+            textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
 
 
             console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)

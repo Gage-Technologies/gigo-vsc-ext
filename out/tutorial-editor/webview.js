@@ -312,7 +312,8 @@ class CatScratchEditorProvider {
 				<div id="add-pop" class="add-pop-up"></div>
 				<div id="pop-arrow" class="arrow-left"></div>
 			</div>
-			
+
+					
 
 					<div id="delete-container" class="delete-container">
 					   <b id="delete-prompt" class="delete-prompt" >Are you sure you want to delete?</b>
@@ -337,7 +338,7 @@ class CatScratchEditorProvider {
 							</img>
 
 							<div class="code-steps-inner">	
-							<span  class="step-title" draggable="true" ondragstart="drag(event)"><b>Step 0</b></span> 
+							<span  class="step-title"><b>Step 0</b></span> 
 							</div>
 							<div id="file-path-div">
 								<label>File Path*:</label>

@@ -35,8 +35,14 @@ body {
     overflow: hidden; /* Disable horizontal scroll */
     padding-top: 20px;
 }
+.hide{
+    display: none;
+    left: 10%;
+    top: 30%
+}
 
 .trash{
+    cursor: none;
     display: flex;;
     border-radius: 18px;
     z-index: 10;
@@ -46,7 +52,12 @@ body {
     height: 30px;
 }
 
+.trash:hover + .hide{
+    display: block;
+}
+
 .trash-icon{
+    cursor: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -122,6 +133,10 @@ body {
     border-radius: 18px;
     background-color: var(button-color);
    
+}
+
+.storage-tray-button:hover + .hide{
+    display: block;
 }
 
 .delete-container{

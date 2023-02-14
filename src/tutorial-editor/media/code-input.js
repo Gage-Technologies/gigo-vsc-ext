@@ -902,6 +902,13 @@ function dragElement(elmnt) {
 
         var deleteContainer = document.getElementById("delete-container");
         deleteContainer.style.display = "inline-block";
+        var tile = deleteContainer.querySelector(".code-steps-inner");
+        var stepTile = elmnt.querySelector(".code-steps-inner");
+        tile.style.backgroundColor = stepTile.style.backgroundColor;
+        var title = tile.querySelector(".step-title");
+        var stepTitle = elmnt.querySelector(".step-title");
+
+        title.innerHTML = stepTitle.innerHTML;
 
         var deleteButton = deleteContainer.querySelector(".delete-btn");
         deleteButton.addEventListener("click", () =>{

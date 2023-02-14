@@ -317,6 +317,12 @@ class CatScratchEditorProvider {
 					<div id="delete-container" class="delete-container">
 					   <b id="delete-prompt" class="delete-prompt" >Are you sure you want to delete?</b>
 					   </br>
+
+					   <div class="code-steps-inner">	
+							<span  class="step-title"><b>Step 0</b></span> 
+						</div>
+
+					   </br>
 					   <div id="button-container" style="padding-top: 50%; display: flex; justify-content: center">
 					   <button id="delete-btn" class="delete-btn">Delete</button>
 					   <button id="cancel-btn" class="cancel-btn" onclick="closeDeleteBox()">Cancel</button>
@@ -325,7 +331,7 @@ class CatScratchEditorProvider {
 				
 					<div class="code-steps-box">
 							<div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" oncontextmenu="expandStep(event, this)" class="code-steps">
-							<img  class="move-icon" draggable="true" ondragstart="drag(event)" src = "${this.moveSVG}" alt="My Happy SVG">
+							<img  class="move-icon"  src = "${this.moveSVG}" alt="My Happy SVG">
 						
 
 							</img>

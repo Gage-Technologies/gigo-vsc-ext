@@ -489,9 +489,13 @@ var codeInput = {
             pre.style.height = textarea.scrollHeight + "px";
             textarea.style.height = this.style.height;
 
+            // this.style.width = textarea.scrollWidth  + "px";;
+            // pre.style.width = textarea.scrollWidth + "px";
+            // textarea.style.width = this.style.width;
+
 
             ////
-            // this.style.height =  textarea.scrollHeight + 10  + "px";
+            this.style.height =  textarea.scrollHeight + 10  + "px";
             ///
             // alignCodeSteps();
             // handleCodeSteps();

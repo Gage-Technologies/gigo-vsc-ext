@@ -64,8 +64,6 @@ function activate(context) {
     logger.info.appendLine("Starting GIGO Session...");
     (0, sessionUpdate_1.activateTimeout)(context, cfg, logger);
     console.log("calling afk activation");
-    console.log("calling editor activation");
-    (0, webview_5.activateEditor)(context);
     logger.info.appendLine("Starting GIGO AFK Page...");
     //start afk using its local activation function
     (0, webview_1.activateAfkWebView)(context, cfg, logger);
@@ -75,6 +73,8 @@ function activate(context) {
     (0, webview_3.activateStreakWebView)(context, cfg, logger);
     logger.info.appendLine("Starting GIGO Code Teacher...");
     (0, webview_4.activateTeacherWebView)(context, logger);
+    console.log("calling editor activation");
+    (0, webview_5.activateEditor)(context);
     logger.info.appendLine("GIGO Extension Setup...");
 }
 exports.activate = activate;

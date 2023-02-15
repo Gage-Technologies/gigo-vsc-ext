@@ -90,9 +90,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log("calling afk activation");
 
-    console.log("calling editor activation");
-    activateEditor(context);
-
     logger.info.appendLine("Starting GIGO AFK Page...");
     //start afk using its local activation function
     activateAfkWebView(context, cfg, logger);
@@ -107,7 +104,8 @@ export function activate(context: vscode.ExtensionContext) {
     activateTeacherWebView(context, logger);
     
     
-   
+    console.log("calling editor activation");
+    activateEditor(context);
 
     logger.info.appendLine("GIGO Extension Setup...");
     

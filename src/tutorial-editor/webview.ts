@@ -2,7 +2,7 @@ import path = require('path');
 import { stringify } from 'querystring';
 import { cachedDataVersionTag } from 'v8';
 import * as vscode from 'vscode';
-import { getNonce } from './util';
+
 
 export async function activateEditor(context: vscode.ExtensionContext) {
 	console.log("WE FUCKIN HERE!");
@@ -118,7 +118,7 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 		}
 
 		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-		this.moveSVG =  webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
+		this.moveSVG =  webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'move_icon_2.svg'));
 		vscode.window.onDidChangeActiveColorTheme(() =>{
 			webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 			
@@ -318,35 +318,35 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 		console.log(this.context.extensionUri);
 		// Local path to script and css for the webview
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(
-			this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'catScratch.js'));
+			this.context.extensionUri, 'dist', 'tutorial-editor', 'catScratch.js'));
 
 		const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(
-			this.context.extensionUri, 'src','tutorial-editor', 'media', 'reset.css'));
+			this.context.extensionUri, 'dist','tutorial-editor', 'reset.css'));
 
 		const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(
-			this.context.extensionUri, 'src','tutorial-editor', 'media', 'vscode.css'));
+			this.context.extensionUri, 'dist','tutorial-editor', 'vscode.css'));
 
 		const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
-			this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'catScratch.css'));
+			this.context.extensionUri, 'dist', 'tutorial-editor', 'catScratch.css'));
 		const styleJS = webview.asWebviewUri(vscode.Uri.joinPath(
-			this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'style.js'));
+			this.context.extensionUri, 'dist', 'tutorial-editor', 'style.js'));
 
-		const codeIn = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-input.js'));
-		const codeAutoDetect = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'autodetect.min.js'));
-		const codeIndent= webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'indent.js'));
-		const codeComplete= webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'autocomplete.js'));
-		const codeCompleteStyle= webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'autocomplete.css'));
-		const codeInStyling = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-input.css'));
-		const codeDeBounce = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'debounce-update.js'));
+		const codeIn = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'code-input.js'));
+		const codeAutoDetect = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'autodetect.min.js'));
+		const codeIndent= webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'indent.js'));
+		const codeComplete= webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'autocomplete.js'));
+		const codeCompleteStyle= webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'autocomplete.css'));
+		const codeInStyling = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'code-input.css'));
+		const codeDeBounce = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'debounce-update.js'));
 
-		const codeTourScript = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.js'));
-		const codeTourStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'code-tour.css'));
+		const codeTourScript = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'code-tour.js'));
+		const codeTourStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'code-tour.css'));
 
 
-		const coordsUtil = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'textareaCoords.js'));
+		const coordsUtil = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'textareaCoords.js'));
 
-		this.moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'move_icon_2.svg'));
-		const trashPng = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'src', 'tutorial-editor', 'media', 'trash.png'));
+		this.moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'move_icon_2.svg'));
+		const trashPng = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor',  'trash.png'));
 
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
@@ -544,4 +544,14 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 
 		return vscode.workspace.applyEdit(edit);
 	}
+}
+
+
+export function getNonce() {
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	for (let i = 0; i < 32; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
 }

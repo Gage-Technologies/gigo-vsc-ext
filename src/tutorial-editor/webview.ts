@@ -197,6 +197,65 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 					var stepNum = parseInt(parsedMsg.step);
 					delete parsedMsg['step'];
 
+
+					console.log('before all checking steps')
+					if (parsedMsg.line < 1) {
+						console.log('incorrect value passed for parsedMsg.line: ', parsedMsg.line);
+						vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number is greater than 0.`);
+						return;
+					}	
+
+					console.log("before do exist check")
+					var doExist = false;
+
+					try{
+						doExist = fs.existsSync(path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
+
+					}catch(e){
+						console.log(e);
+					}
+
+					
+					console.log("after do exist")
+
+					if (!doExist) {
+						console.log("does exist: ", doExist, " file path: ", path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
+						vscode.window.showInformationMessage(`Incorrect file path for step. Please ensure that the file exists and is the relative path to the file.`);
+						return;
+					}
+
+					console.log("after file check")
+
+					const readline = require('readline');
+					
+					var fileP = path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file);
+					var linesCount = 0;
+					var rl = readline.createInterface({
+					input: fs.createReadStream(fileP),
+					output: process.stdout,
+					terminal: false
+					});
+						rl.on('line', function (line: any) {
+						linesCount++; // on each linebreak, add +1 to 'linesCount'
+					});
+						rl.on('close', function () {
+						console.log(linesCount); // print the result when the 'close' event is called
+					});
+
+
+					console.log(`than number of lines in file ${linesCount}`);
+
+
+					if (parsedMsg > linesCount){
+						console.log(`number of lines in pass ${parsedMsg.line} is greater than number of lines in file ${linesCount}`);
+						vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number exists in file.`);
+                        return;
+					}
+
+
+					console.log("after line num check")
+
+
 					if (stepNum > this.numOfSteps) {
 						this.numOfSteps++;
 						ts.steps.push(parsedMsg);
@@ -205,6 +264,10 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 						console.log(`ts: ${JSON.stringify(ts)}`);
                     }
 					
+
+					
+
+
 				
 					
 					

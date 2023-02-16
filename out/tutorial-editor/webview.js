@@ -22,9 +22,16 @@ exports.activateEditor = activateEditor;
  * - Synchronizing changes between a text document and a custom editor.
  */
 class TutorialEditorProvider {
+    static register(context) {
+        const provider = new TutorialEditorProvider(context);
+        const options = { suppportsMultipleEditorsPerDocument: false, webviewOptions: { enableScripts: true, retainContextWhenHidden: true } };
+        const providerRegistration = vscode.window.registerCustomEditorProvider(TutorialEditorProvider.viewType, provider, options);
+        return providerRegistration;
+    }
     constructor(context) {
         this.context = context;
         this.addCodeTourBtn = `<button class="add-code-tour" onclick="addCodeTour()">Create Code Tour</button>`;
+        this.updateCounter = 0;
         this.codeTourSteps = [];
         this.numOfSteps = 0;
         this.trashOpen = `<svg disabled="true" class="trash-icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -32,11 +39,6 @@ class TutorialEditorProvider {
 	</svg>`;
         this.tourFilePath = "";
         this.text = "";
-    }
-    static register(context) {
-        const provider = new TutorialEditorProvider(context);
-        const providerRegistration = vscode.window.registerCustomEditorProvider(TutorialEditorProvider.viewType, provider);
-        return providerRegistration;
     }
     /**
      * Called when our custom editor is opened.
@@ -54,8 +56,18 @@ class TutorialEditorProvider {
         this.baseWorkspaceUri.fsPath.replace("file://", "");
         // Setup initial content for the webview
         webviewPanel.webview.options = {
-            enableScripts: true,
+            enableScripts: true
         };
+        // const panel = vscode.window.createWebviewPanel(
+        // 	'catCoding',
+        // 	'Cat Coding',
+        // 	vscode.ViewColumn.One,
+        // 	{
+        // 	  enableScripts: true,
+        // 	  retainContextWhenHidden: true
+        // 	}
+        //   );
+        // webviewPanel.options.retainContextWhenHidden = true;
         let fs = require('fs');
         var files = document.fileName.split("/");
         var fileName = files[files.length - 1];
@@ -124,14 +136,19 @@ class TutorialEditorProvider {
                     vscode.window.showInformationMessage(e.message);
                     break;
                 case 'updateFile':
+                    this.updateCounter++;
                     this.text = e.message;
-                    vscode.window.showInformationMessage(e.message);
+                    vscode.window.showInformationMessage(`${e.message.length}`);
                     try {
                         fs.writeFileSync(document.fileName, this.text, 'utf-8');
                     }
                     catch (err) {
                         vscode.window.showInformationMessage(`error in file write ${err}`);
                     }
+                    // if (this.updateCounter >= 30){
+                    // 	webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+                    // 	this.updateCounter = 0;
+                    // }
                     return;
                 case "openCodeTourDialog":
                     vscode.window.showInformationMessage('openCodeTourDialog');
@@ -202,18 +219,18 @@ class TutorialEditorProvider {
                     }
                     this.fullTour = JSON.stringify(ts);
                     fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
-                    vscode.window.showInformationMessage(`save code tour, fp: ${e.message.file}, ln: ${e.message.line} desc: ${e.message.description}`);
+                    // vscode.window.showInformationMessage(`save code tour, fp: ${e.message.file}, ln: ${e.message.line} desc: ${e.message.description}`);
                     break;
                 // let tourName = document.fileName.replace('cscratch', 'tour');
                 // fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
                 case 'deleteTourStep':
                     var deletedStepNum = parseInt(e.message);
-                    vscode.window.showInformationMessage(`delete step: ${deletedStepNum} `);
+                    // vscode.window.showInformationMessage(`delete step: ${deletedStepNum} `);
                     let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
                     let tss = JSON.parse(tours);
                     this.numOfSteps--;
                     tss.steps = tss.steps.splice(deletedStepNum);
-                    vscode.window.showInformationMessage(`new steps: ${JSON.stringify(tss.steps.splice(deletedStepNum))} `);
+                    // vscode.window.showInformationMessage(`new steps: ${JSON.stringify(tss.steps.splice(deletedStepNum))} `);
                     this.fullTour = JSON.stringify(tss);
                     fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
                     break;

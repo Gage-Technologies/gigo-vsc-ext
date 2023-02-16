@@ -1206,10 +1206,10 @@ function handleCodeSteps(elmnt){
     //     message: `inner html of trash: ${icon.innerHTML}`
     // });
     
-    vscode.postMessage({
-        type: 'hello',
-        message: `does trash collide ${localToGlobal(trash).top}  ${localToGlobal(elmnt).top - window.scrollY}`
-    });
+    // vscode.postMessage({
+    //     type: 'hello',
+    //     message: `does trash collide ${localToGlobal(trash).top}  ${localToGlobal(elmnt).top - window.scrollY}`
+    // });
     
 
     // vscode.postMessage({
@@ -1224,23 +1224,23 @@ function handleCodeSteps(elmnt){
     
     if (doElsCollide(elmnt, trash)) {
         var icon = trash.querySelector(".trash-icon");
-        vscode.postMessage({
-            type: 'hello',
-            message: `inner html of trash: ${icon.innerHTML}`
-        });
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `inner html of trash: ${icon.innerHTML}`
+        // });
         return;
     }else{
-        vscode.postMessage({
-            type: 'hello',
-            message: `not in trash`
-        });
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: `not in trash`
+        // });
     }
 
     if (doElsCollide(elmnt, textBoxEx)) {
-        vscode.postMessage({
-            type: 'hello',
-            message: 'inside move'
-        });
+        // vscode.postMessage({
+        //     type: 'hello',
+        //     message: 'inside move'
+        // });
 
         var popUp = document.getElementById("pop-container");
 

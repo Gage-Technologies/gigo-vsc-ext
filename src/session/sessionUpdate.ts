@@ -40,10 +40,15 @@ export async function activateTimeout(context: vscode.ExtensionContext, cfg: any
         while(true){
             //if the user is afk wait 100ms before checking again
             if (!isAFK){
+                console.log("checking if we go")
                 //determine time remaining before user is considered inactive
                 let currentTimeRemaining = nextTimeStamp - (Date.now()/1000);
                 //if user has less than or equal to 3 minutes remaining break from loop 
-                if (currentTimeRemaining <= 180){
+                // if (currentTimeRemaining <= 180){
+                //     break;
+                // }
+                if (currentTimeRemaining <= 630) {
+                    console.log("checking activity")
                     break;
                 }
             }
@@ -99,6 +104,7 @@ async function renewPopup(): Promise<boolean>{
             logger.info.appendLine("Session: User is active.");
             vscode.window.showInformationMessage("Welcome back");
             isRenewed = true;
+            console.log("setting renewed status inside conditional: ", isRenewed)
             return true;
         }
         //if the user has not been active dip1674382421ay 'are you still there' message
@@ -107,6 +113,7 @@ async function renewPopup(): Promise<boolean>{
             vscode.window.showInformationMessage("Welcome back");
             logger.info.appendLine("Session: User is active.");
             isRenewed = true;
+            console.log("setting renewed status inside popup: ", isRenewed)
             return true;
         });
         
@@ -214,6 +221,7 @@ export async function executeAfkCheck(wsID: any, secret: any, addMin: any){
 //activityCallback is called upon user interaction and sets states to user active
 function activityCallback() {
     if (!userHasBeenActive){
+        console.log("activity registered at ", Date.now());
         vscode.window.showInformationMessage("Welcome back");
         logger.info.appendLine("Session: User is active.");
     }

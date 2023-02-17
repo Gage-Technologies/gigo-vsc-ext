@@ -2,7 +2,7 @@ import axios from 'axios';
 import { runInThisContext } from 'vm';
 import * as vscode from 'vscode';
 import { Uri, Webview } from 'vscode';
-import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
+
 
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
@@ -10,8 +10,8 @@ export async function activateStreakWebView(context: vscode.ExtensionContext, cf
     //register afk provider by calling class constructor
     const provider = new StreakWebViewprovider(context.extensionUri, logger);
 
-    let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
-    console.log(res);
+    // let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
+    // console.log(res);
     
 
     //push and regsitser necessary commands

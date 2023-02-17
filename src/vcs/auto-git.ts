@@ -419,12 +419,12 @@ class AutoGit implements vscode.Disposable {
 				console.log('[Auto-Git] [OK]: Workspace found: ' + vscode.workspace.workspaceFolders[0].uri.fsPath);
 				this.workspace = vscode.workspace.workspaceFolders[0].uri;
 				
-				this.homedir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit');
-				this.logsdir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/logs');
+				this.homedir = path.join(this.workspace.fsPath, '.gigo/autogit');
+				this.logsdir = path.join(this.workspace.fsPath, '.gigo/autogit/logs');
 				//this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
-				this.gitdir = this.workspace.fsPath.concat(path.sep + '.git');
-                console.log("auto git dir: " + this.gitdir);
-				this.gitcfg = this.workspace.fsPath.concat(path.sep + '.git/config');
+				this.gitdir = path.join(this.workspace.fsPath, '.git');
+                console.log("auto git dir: " + this.workspace.fsPath);
+				this.gitcfg = path.join(this.workspace.fsPath, '.git/config');
 
 				return true;
 			} else {

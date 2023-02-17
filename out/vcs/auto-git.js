@@ -25,7 +25,9 @@ class AutoGit {
             this.setup();
             vscode.window.showInformationMessage('Auto-Git initialized.');
             this.logger.info.appendLine("AutoGit: Auto-Git initialized.");
+            console.log("AutoGit: Auto-Git initialized.");
         }
+        console.log("auto git config: ", this.cfg);
         // try {
         //     //ensure that config exists
         //     fs.statSync(this.cfg);
@@ -173,6 +175,7 @@ class AutoGit {
     }
     //start() functions as main loop for auto-git extension
     start() {
+        console.log("Starting auto-git extension");
         //loads auto-git config into json object
         // var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
         var cfg = this.cfg;
@@ -343,13 +346,16 @@ class AutoGit {
     //checkGit() validates that the current workspace is a git repo
     checkGit() {
         try {
+            console.log("autogit checkGit dir: ", this.gitdir);
             fs.statSync(this.gitdir);
+            console.log("autogit checkGit cfg: ", this.gitcfg);
             fs.statSync(this.gitcfg);
-            this.logger.appendLine("AutoGit: Workspace is a git repository.");
+            this.logger.info.appendLine("AutoGit: Workspace is a git repository.");
             console.log('[Auto-Git] [OK]: Workspace is a git repository.');
             return true;
         }
         catch (err) {
+            console.log(err);
             this.logger.error.appendLine("AutoGit Failed: Workspace is not a git reposiory, disabling extension");
             console.log('[Auto-Git] [Error]: Workspace is not a git repository, disabling extension.');
             return false;
@@ -364,8 +370,9 @@ class AutoGit {
                 this.workspace = vscode.workspace.workspaceFolders[0].uri;
                 this.homedir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit');
                 this.logsdir = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/logs');
-                // this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
+                //this.cfg = this.workspace.fsPath.concat(path.sep + '.gigo/autogit/autogit.json');
                 this.gitdir = this.workspace.fsPath.concat(path.sep + '.git');
+                console.log("auto git dir: " + this.gitdir);
                 this.gitcfg = this.workspace.fsPath.concat(path.sep + '.git/config');
                 return true;
             }

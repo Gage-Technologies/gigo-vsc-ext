@@ -33,10 +33,16 @@ async function activateTimeout(context, cfg, sysLogger) {
         while (true) {
             //if the user is afk wait 100ms before checking again
             if (!isAFK) {
+                // logger.info.appendLine("Session: User is not afk, time remaining: " + (nextTimeStamp - (Date.now()/1000)));
+                // console.log("checking if we go time remaining: " + (nextTimeStamp - (Date.now()/1000)));
                 //determine time remaining before user is considered inactive
                 let currentTimeRemaining = nextTimeStamp - (Date.now() / 1000);
                 //if user has less than or equal to 3 minutes remaining break from loop 
+                // if (currentTimeRemaining <= 180){
+                //     break;
+                // }
                 if (currentTimeRemaining <= 180) {
+                    console.log("checking activity");
                     break;
                 }
             }
@@ -80,8 +86,9 @@ async function renewPopup() {
         //if the user has been active display welcome back message, break from loop, and return true
         if (exports.userHasBeenActive) {
             logger.info.appendLine("Session: User is active.");
-            vscode.window.showInformationMessage("Welcome back");
+            // // vscode.window.showInformationMessage("Welcome back");
             isRenewed = true;
+            console.log("setting renewed status inside conditional: ", isRenewed);
             return true;
         }
         //if the user has not been active dip1674382421ay 'are you still there' message
@@ -90,6 +97,7 @@ async function renewPopup() {
             vscode.window.showInformationMessage("Welcome back");
             logger.info.appendLine("Session: User is active.");
             isRenewed = true;
+            console.log("setting renewed status inside popup: ", isRenewed);
             return true;
         });
         //wait for 1 minute before checking again
@@ -97,6 +105,10 @@ async function renewPopup() {
         //reduce time remaining by 1 minute
         timeRemaining = timeRemaining - 60;
     }
+    // if (isRenewed){
+    //     vscode.window.showInformationMessage("Welcome back");
+    //     return true;
+    // }
     //time remaining is 0 and user has not been active, return false
     return false;
 }
@@ -174,6 +186,7 @@ exports.executeAfkCheck = executeAfkCheck;
 //activityCallback is called upon user interaction and sets states to user active
 function activityCallback() {
     if (!exports.userHasBeenActive) {
+        console.log("activity registered at ", Date.now());
         vscode.window.showInformationMessage("Welcome back");
         logger.info.appendLine("Session: User is active.");
     }

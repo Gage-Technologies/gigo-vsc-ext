@@ -8,8 +8,8 @@ const vscode_1 = require("vscode");
 async function activateStreakWebView(context, cfg, logger) {
     //register afk provider by calling class constructor
     const provider = new StreakWebViewprovider(context.extensionUri, logger);
-    let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
-    console.log(res);
+    // let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
+    // console.log(res);
     //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(StreakWebViewprovider.viewType, provider));
 }

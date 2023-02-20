@@ -40,14 +40,15 @@ export async function activateTimeout(context: vscode.ExtensionContext, cfg: any
         while(true){
             //if the user is afk wait 100ms before checking again
             if (!isAFK){
-                console.log("checking if we go")
+                // logger.info.appendLine("Session: User is not afk, time remaining: " + (nextTimeStamp - (Date.now()/1000)));
+                // console.log("checking if we go time remaining: " + (nextTimeStamp - (Date.now()/1000)));
                 //determine time remaining before user is considered inactive
                 let currentTimeRemaining = nextTimeStamp - (Date.now()/1000);
                 //if user has less than or equal to 3 minutes remaining break from loop 
                 // if (currentTimeRemaining <= 180){
                 //     break;
                 // }
-                if (currentTimeRemaining <= 630) {
+                if (currentTimeRemaining <= 180) {
                     console.log("checking activity")
                     break;
                 }
@@ -102,7 +103,7 @@ async function renewPopup(): Promise<boolean>{
         //if the user has been active display welcome back message, break from loop, and return true
         if (userHasBeenActive){
             logger.info.appendLine("Session: User is active.");
-            vscode.window.showInformationMessage("Welcome back");
+            // // vscode.window.showInformationMessage("Welcome back");
             isRenewed = true;
             console.log("setting renewed status inside conditional: ", isRenewed)
             return true;
@@ -122,6 +123,11 @@ async function renewPopup(): Promise<boolean>{
         //reduce time remaining by 1 minute
         timeRemaining = timeRemaining - 60;
     }
+
+    // if (isRenewed){
+    //     vscode.window.showInformationMessage("Welcome back");
+    //     return true;
+    // }
 
     //time remaining is 0 and user has not been active, return false
     return false;

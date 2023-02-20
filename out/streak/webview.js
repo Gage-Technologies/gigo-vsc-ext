@@ -32,7 +32,7 @@ class StreakWebViewprovider {
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
     async executeStreakCheck(wsID, secret) {
         //awair result from http function in GIGO
-        let res = await axios_1.default.post("http://gigo.gage.intranet/api/internal/v1/ext/streak-check", {
+        let res = await axios_1.default.post("http://gigo.gage.intranet/internal/v1/ext/streak-check", {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             "workspace_id": wsID,
             "secret": secret,

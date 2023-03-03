@@ -61,6 +61,45 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         
     }
 
+
+    public websocketStreakCheck(wsID: any, secret: any) {
+        var WebSocketClient = require('websocket').client;
+
+        var client = new WebSocketClient();
+
+        client.on('connectFailed', function(error: any) {
+            console.log('Connect Error: ' + error.toString());
+        });
+
+        let logger = this.logger;
+
+        client.on('connect', function(connection: any) {
+            console.log('WebSocket Client Connected');
+            logger.info('WebSocket Client Connected')
+            connection.on('error', function(error: any) {
+                console.log("Connection Error: " + error.toString());
+                logger.error("Connection Error: " + error.toString())
+            });
+            connection.on('close', function() {
+                console.log('echo-protocol Connection Closed');
+                logger.error('echo-protocol Connection Closed');
+            });
+            connection.on('message', function(message: any) {
+                if (message.type === 'utf8') {
+                    if (message.utf8Data === "PING"){
+                        client.send("PONG");
+                    }
+                    console.log("Received: '" + message.utf8Data + "'");
+                    logger.info("Received: '" + message.utf8Data + "'");
+                }
+            });
+
+        
+        });
+
+        client.connect(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`, 'echo-protocol');
+    }
+
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
     public async executeStreakCheck(wsID: any, secret: any){
         //awair result from http function in GIGO

@@ -10,6 +10,8 @@ async function activateStreakWebView(context, cfg, logger) {
     const provider = new StreakWebViewprovider(context.extensionUri, logger);
     // let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
     // console.log(res);
+    logger.info.appendLine("Streak: starting streak websocket");
+    provider.websocketStreakCheck(cfg.workspace_id_string, cfg.secret);
     //push and regsitser necessary commands
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(StreakWebViewprovider.viewType, provider));
 }
@@ -29,6 +31,27 @@ class StreakWebViewprovider {
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
     }
+    // public websocketStreakCheck(wsID: any, secret: any){
+    //     const WebSocket = require('isomorphic-ws');
+    //     const ws = new WebSocket(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`);
+    //     ws.onerror = function error(err: any){
+    //         console.log('Streak Websocket: failed, err: ', err);
+    //     };
+    //     ws.onopen = function open() {
+    //     console.log('Streak Websocket: connected');
+    //     // ws.send(Date.now());
+    //     ws.send('PONG');
+    //     };
+    //     ws.onclose = function close() {
+    //     console.log('Streak Websocket: disconnected');
+    //     };
+    //     ws.onmessage = function incoming(data: any) {
+    //     console.log(`Streak Websocket: Roundtrip time: ${Date.now() - data.data} ms`);
+    //     setTimeout(function timeout() {
+    //         ws.send(Date.now());
+    //     }, 500);
+    //     };
+    // }
     websocketStreakCheck(wsID, secret) {
         var WebSocketClient = require('websocket').client;
         var client = new WebSocketClient();
@@ -36,16 +59,17 @@ class StreakWebViewprovider {
             console.log('Connect Error: ' + error.toString());
         });
         let logger = this.logger;
+        logger.info.appendLine("Streak: inside streak websocket");
         client.on('connect', function (connection) {
             console.log('WebSocket Client Connected');
-            logger.info('WebSocket Client Connected');
+            logger.info.appendLine('WebSocket Client Connected');
             connection.on('error', function (error) {
                 console.log("Connection Error: " + error.toString());
-                logger.error("Connection Error: " + error.toString());
+                logger.error.appendLine("Connection Error: " + error.toString());
             });
             connection.on('close', function () {
                 console.log('echo-protocol Connection Closed');
-                logger.error('echo-protocol Connection Closed');
+                logger.error.appendLine('echo-protocol Connection Closed');
             });
             connection.on('message', function (message) {
                 if (message.type === 'utf8') {
@@ -53,11 +77,12 @@ class StreakWebViewprovider {
                         client.send("PONG");
                     }
                     console.log("Received: '" + message.utf8Data + "'");
-                    logger.info("Received: '" + message.utf8Data + "'");
+                    logger.info.appendLine("Received: '" + message.utf8Data + "'");
                 }
             });
         });
-        client.connect(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`, 'echo-protocol');
+        logger.info.appendLine("Streak: calling websocket");
+        client.connect(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`);
     }
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
     async executeStreakCheck(wsID, secret) {
@@ -75,7 +100,7 @@ class StreakWebViewprovider {
             return -1;
         }
         console.log(JSON.stringify(res));
-        this.logger.info(JSON.stringify(res));
+        this.logger.info.appendLine(JSON.stringify(res));
         vscode.window.showInformationMessage(`${JSON.stringify(res)}`);
         this.isOnFire = res.data.is_on_fire;
         this.activeDays = res.data.streak_week_days;

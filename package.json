@@ -3,7 +3,7 @@
   "displayName": "GIGO Developer Extension",
   "description": "GIGO developer extension integrates a remote VSCode program into the GIGO ecosystem and provides convienence features for GIGO developers.",
   "publisher": "gage",
-  "version": "0.1.22",
+  "version": "0.1.33",
   "engines": {
     "vscode": "^1.75.1"
   },

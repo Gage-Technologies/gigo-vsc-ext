@@ -3,7 +3,7 @@ import { runInThisContext } from 'vm';
 import * as vscode from 'vscode';
 import { Uri, Webview } from 'vscode';
 
-
+var messageData: any;
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 export async function activateStreakWebView(context: vscode.ExtensionContext, cfg: any, logger: any) {
@@ -14,6 +14,7 @@ export async function activateStreakWebView(context: vscode.ExtensionContext, cf
     // console.log(res);
     logger.info.appendLine("Streak: starting streak websocket")
     provider.websocketStreakCheck(cfg.workspace_id_string, cfg.secret)
+    provider.renewStats();
 
     //push and regsitser necessary commands
     context.subscriptions.push(
@@ -33,8 +34,27 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     public streakAnim: any;
     public streakNum: any;
 
-    public activeDays: number[] = []
+    public activeDays!: any;
+    public activeDaysHTML: string = `
+    <div class="weekday"><span>M</span></div>
+    <div class="separator">-</div>
+    <div class="weekday"><span>T</span></div>
+    <div class="separator">-</div>
+    <div class="weekday"><span>W</span></div>
+    <div class="separator">-</div>
+    <div class="weekday"><span>T</span></div>
+    <div class="separator">-</div>
+    <div class="weekday"><span>F</span></div>
+    <div class="separator">-</div>
+    <div class="weekday"><span>S</span></div>
+    <div class="separator">-</div>
+    <div class="weekday"><span>S</span></div>`;
+
+
+    public weekDays: string[] =["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
     public isOnFire: boolean = false;
+    public dayOfTheWeek: string = "";
    
 
     public static readonly viewType = 'gigo.streakView';
@@ -50,7 +70,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     ) {
 
         this.logger = sysLogger;
-        this.activeDays = [1,2];
+        // this.activeDays = [1,2];
 
         this.streakAnim = `<div class="streakAnim">
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
@@ -122,6 +142,17 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                     }
                     console.log("Received: '" + message.utf8Data + "'");
                     logger.info.appendLine("Received: '" + message.utf8Data + "'");
+
+                    if (message.utf8Data !== 'Socket connected successfully'){
+                        try{
+                            messageData = JSON.parse(message.utf8Data);
+                        }catch(err){
+                            console.log(message.utf8Data)
+                            console.log("Streak: failed to parse message intio json, err: ", err, " message: ", message.utf8Data)
+                        }
+                    }
+                   
+                    
                 }
             });
 
@@ -131,6 +162,39 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         logger.info.appendLine("Streak: calling websocket");
 
         client.connect(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`);
+    }
+
+
+    public async renewStats(){
+
+        while(true){
+
+            try{
+                this.isOnFire = messageData.streak_active;
+                this.activeDays = messageData.week_in_review;
+                this.streakNum = messageData.current_streak;
+                this.dayOfTheWeek = messageData.current_day_of_week;
+
+                console.log("Streak: set params{ isOnFire: ", messageData.streak_active, " weekInReview: ", messageData.week_in_review, " streakNum: ", messageData.current_streak, " current day of week: ", messageData.current_day_of_week);
+                if (this._view) {
+
+                    if(this._view.visible){
+                        this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
+                        //this._getCurrentPage(this._view.webview);
+                        await this._getHtmlForWebview(this._view.webview, "");
+                    }
+                  
+                }
+        
+
+            }catch(err){
+                console.log("Streak: failed to set variables from message, err: ", err)
+            }
+                            
+            //wait for 1 minute before checking again
+            await new Promise(f => setTimeout(f, 1000));
+        }
+       
     }
 
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
@@ -353,16 +417,87 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     //to just render the next and last group page controls
     private async _getHtml(webview: vscode.Webview, group: string) {
 
+            var streakNumHtml = `<span class="streakNumber">
+            ${this.streakNum}
+        
+            </span>`;
+
+
             if (this.isOnFire){
                 this.streakAnim = `<div class="streakAnimOnFire">
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
                 <lottie-player src="https://lottie.host/943c92a4-fc4d-42d7-b9f5-fd5f2f2783bd/PgLfoB1v2G.json" background="transparent" speed="1" loop autoplay></lottie-player>
                 </div>`;
+
+                streakNumHtml = `<span class="streakNumberOnFire">
+                            ${this.streakNum}
+                           
+                            </span>`;
+            }
+
+
+            console.log("Streak: active days: ", this.activeDays);
+           
+            if (this.activeDays){
+                this.activeDaysHTML = ``
+                console.log("this day of the week: ", this.dayOfTheWeek);
+                
+                for (let day in this.weekDays){
+                    let dayString = this.weekDays[day]
+                    console.log("Streak iter day initial: ", dayString)
+                    console.log("Streak iterating iter day : ", dayString, " streak active value: ", this.activeDays[dayString]);
+                    if (this.dayOfTheWeek === dayString){
+                        console.log("Streak iter on today: ", dayString)
+
+                        if (this.activeDays[dayString]){
+                            
+                            this.activeDaysHTML += `<div class="weekday weekdayActive"><span>${dayString.charAt(0)}</span></div>`
+                        }else{
+                            this.activeDaysHTML += `<div class="weekday weekdayToday"><span>${dayString.charAt(0)}</span></div>`
+                        }
+
+                        if (dayString !== "Sunday"){
+
+                           
+                            this.activeDaysHTML += `<div class="separator">-</div>`;
+                            
+
+                            
+                        }
+
+                    }else{
+
+                        if (this.activeDays[dayString]){
+                        
+                            this.activeDaysHTML += `<div class="weekday weekdayActive"><span>${dayString.charAt(0)}</span></div>`
+
+                        }else{
+                            this.activeDaysHTML += `<div class="weekday"><span>${dayString.charAt(0)}</span></div>`
+                        }
+                       
+
+                        if (dayString !== "Sunday"){
+
+                            if (this.activeDays[dayString]){
+                                this.activeDaysHTML += `<div class="separator separatorActive">-</div>`;
+
+                            }else{
+                                this.activeDaysHTML += `<div class="separator">-</div>`;
+                            }
+
+                            
+                        }
+                    }
+
+                   
+                       
+                }
+                console.log("Streak week html: ", this.activeDaysHTML)
             }
 
 
             // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-            const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'teacher', 'buttons_teacher.js'));
+            // const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'teacher', 'buttons_teacher.js'));
             const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'streak', 'main_streak.css'));
 
 
@@ -408,10 +543,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                     
                     ${this.streakAnim}
                 
-                    <span class="streakNumber">
-                        190
-                       
-                    </span>
+                    ${streakNumHtml}
                         
                         
                 </div>
@@ -422,19 +554,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                     <br/>
                     <br/>
                     <div class="weekdays" >
-                        <div class="weekday"><span>M</span></div>
-                        <div class="separator">-</div>
-                        <div class="weekday weekdayActive"><span>T</span></div>
-                        <div class="separator separatorActive">-</div>
-                        <div class="weekday  weekdayActive"><span>W</span></div>
-                        <div class="separator">-</div>
-                        <div class="weekday"><span>T</span></div>
-                        <div class="separator">-</div>
-                        <div class="weekday weekdayActive"><span>F</span></div>
-                        <div class="separator">-</div>
-                        <div class="weekday weekdayToday"><span>S</span></div>
-                        <div class="separator">-</div>
-                        <div class="weekday"><span>S</span></div>
+                        ${this.activeDaysHTML}
                     </div>
 
                 </div>
@@ -458,8 +578,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                     --shiki-token-link: #EE0000;
                 }
                 </style>
-                        
-            <script nonce="${nonce}" src="${scriptUri}"></script>
+                    
            
 			</html>`;
             }

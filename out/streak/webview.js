@@ -4,6 +4,7 @@ exports.activateStreakWebView = void 0;
 const axios_1 = require("axios");
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
+const explosion_1 = require("./explosion");
 var messageData;
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 async function activateStreakWebView(context, cfg, logger) {
@@ -22,6 +23,7 @@ exports.activateStreakWebView = activateStreakWebView;
 class StreakWebViewprovider {
     constructor(_extensionUri, sysLogger) {
         this._extensionUri = _extensionUri;
+        this.decorations = [];
         this.activeDaysHTML = `
     <div class="weekday"><span>M</span></div>
     <div class="separator">-</div>
@@ -39,6 +41,105 @@ class StreakWebViewprovider {
         this.weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         this.isOnFire = false;
         this.dayOfTheWeek = "";
+        this.explode = (editor, left = false) => {
+            console.log("inside explode");
+            // To give the explosions space, only explode every X strokes
+            // Where X is the configured explosion frequency
+            // This counter resets if the user does not type for 1 second.
+            // clearTimeout(this.counterTimeout);
+            // this.counterTimeout = setTimeout(() => {
+            //     this.keystrokeCounter = -1;
+            // }, 1000);
+            // if (++this.keystrokeCounter % this.config["explosions.frequency"] !== 0) {
+            //     return;
+            // }
+            const cursorPosition = editor.selection.active;
+            // The delta is greater to the left than to the right because otherwise the gif doesn't appear
+            const delta = left ? -2 : 1;
+            // const newRange = new vscode.Range(
+            //     cursorPosition.with(cursorPosition.line, cursorPosition.character),
+            //     // Value can't be negative
+            //     cursorPosition.with(cursorPosition.line, Math.max(0, cursorPosition.character + delta))
+            // );
+            var start = Math.floor(Math.random() * cursorPosition.line - 1);
+            var end = Math.floor(Math.random() * cursorPosition.line - 1);
+            if (start < 1) {
+                start = 1;
+            }
+            if (end < 1) {
+                end = 1;
+            }
+            console.log("start and end: ", start, end);
+            const newRange = new vscode.Range(editor.document.lineAt(start).range.start, 
+            // Value can't be negative
+            editor.document.lineAt(end).range.end);
+            // Dispose excess explosions
+            // while(this.activeDecorations.length >= this.config["explosions.maxExplosions"]) {
+            //     this.activeDecorations.shift().dispose();
+            // }
+            // A new decoration is used each time because otherwise adjacent
+            // gifs will all be identical. This helps them be at least a little
+            // offset.
+            const decoration = this.getExplosionDecoration(newRange.start);
+            if (!decoration) {
+                return;
+            }
+            this.decorations.push(decoration);
+            editor.setDecorations(decoration, [newRange]);
+        };
+        this.getExplosionDecoration = (position) => {
+            const explosion = (0, explosion_1.getExplosion)();
+            if (!explosion) {
+                return null;
+            }
+            return this.createExplosionDecorationType(explosion, position);
+        };
+        this.createExplosionDecorationType = (explosion, editorPosition) => {
+            // subtract 1 ch to account for the character and divide by two to make it centered
+            // Use Math.floor to skew to the right which especially helps when deleting chars
+            // const leftValue = Math.floor((10 - 1) / 2);
+            const leftValue = Math.floor(Math.random() * (30 - 1 + 1) + 1);
+            console.log("left value: ", leftValue);
+            // By default, the top of the gif will be at the top of the text.
+            // Setting the top to a negative value will raise it up.
+            // The default gifs are "tall" and the bottom halves are empty.
+            // Lowering them makes them appear in a more natural position,
+            // but limiting the top to the line number keeps it from going
+            // off the top of the editor
+            const topValue = 10 * .25;
+            const explosionUrl = explosion;
+            const backgroundCss = this.getBackgroundCssSettings(vscode_1.Uri.joinPath(this._extensionUri, 'dist', 'streak', 'ezgif.com-crop.gif'));
+            console.log(vscode.Uri.joinPath(this._extensionUri, 'dist', 'streak', 'ezgif.com-crop.gif').fsPath);
+            const defaultCss = {
+                position: 'absolute',
+                ["margin-left"]: `-${leftValue}ch`,
+                loop: 'once',
+                width: `10ch`,
+                height: `10rem`,
+                display: `inline-block`,
+                ['z-index']: 1,
+                ['pointer-events']: 'none',
+            };
+            const backgroundCssString = this.objectToCssString(backgroundCss);
+            const defaultCssString = this.objectToCssString(defaultCss);
+            const customCssString = this.objectToCssString({});
+            // return vscode.window.createTextEditorDecorationType(<vscode.DecorationRenderOptions>{
+            //     before: {
+            //         contentText: '',
+            //         textDecoration: `none; ${defaultCssString} ${backgroundCssString} ${customCssString}`,
+            //     },
+            //     textDecoration: `none; position: relative;`,
+            //     rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+            // });
+            return vscode.window.createTextEditorDecorationType({
+                before: {
+                    contentText: '',
+                    textDecoration: `none; ${defaultCssString} ${backgroundCssString} ${customCssString}`,
+                },
+                textDecoration: `none; position: relative;`,
+                rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+            });
+        };
         this.logger = sysLogger;
         // this.activeDays = [1,2];
         this.streakAnim = `<div class="streakAnim">
@@ -112,11 +213,18 @@ class StreakWebViewprovider {
     }
     async renewStats() {
         while (true) {
+            console.log("display explode");
+            this.explode(vscode.window.activeTextEditor, false);
+            console.log("past explode");
             try {
+                let wasFire = this.isOnFire;
                 this.isOnFire = messageData.streak_active;
                 this.activeDays = messageData.week_in_review;
                 this.streakNum = messageData.current_streak;
                 this.dayOfTheWeek = messageData.current_day_of_week;
+                // if (!wasFire && this.isOnFire){
+                //     this.explode(vscode.window.activeTextEditor, false);
+                // }
                 console.log("Streak: set params{ isOnFire: ", messageData.streak_active, " weekInReview: ", messageData.week_in_review, " streakNum: ", messageData.current_streak, " current day of week: ", messageData.current_day_of_week);
                 if (this._view) {
                     if (this._view.visible) {
@@ -155,6 +263,37 @@ class StreakWebViewprovider {
         this.activeDays = res.data.streak_week_days;
         this.streakNum = res.data.current_streak_num;
         return;
+    }
+    getBackgroundCssSettings(explosion) {
+        return {
+            'background-repeat': 'no-repeat',
+            'background-size': 'contain',
+            'background-image': `url("${explosion}")`,
+            'width': `600px`,
+            'height': `600px`,
+            'top': `10%`,
+            'left': `40%`,
+            // 'filter': `invert(53%) sepia(18%) saturate(5540%) hue-rotate(353deg) brightness(104%) contrast(101%);`
+        };
+    }
+    getMaskCssSettings(explosion) {
+        return {
+            'background-color': 'currentColor',
+            '-webkit-mask-repeat': 'no-repeat',
+            '-webkit-mask-size': 'contain',
+            '-webkit-mask-image': `url("${explosion}")`,
+            filter: 'saturate(150%)',
+        };
+    }
+    objectToCssString(settings) {
+        let value = '';
+        const cssString = Object.keys(settings).map(setting => {
+            value = settings[setting];
+            if (typeof value === 'string' || typeof value === 'number') {
+                return `${setting}: ${value};`;
+            }
+        }).join(' ');
+        return cssString;
     }
     // //_getCurrentPage retrieves the number of the current page from the configfile
     // private _getCurrentPage(webview: vscode.Webview) {

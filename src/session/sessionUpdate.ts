@@ -124,10 +124,11 @@ async function renewPopup(): Promise<boolean>{
         timeRemaining = timeRemaining - 60;
     }
 
-    // if (isRenewed){
-    //     vscode.window.showInformationMessage("Welcome back");
-    //     return true;
-    // }
+    if (isRenewed){
+        console.log("renewed varibale setb outside function")
+        vscode.window.showInformationMessage("Welcome back");
+        return true;
+    }
 
     //time remaining is 0 and user has not been active, return false
     return false;

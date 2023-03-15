@@ -172,7 +172,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         while(true){
             console.log("display explode")
-            this.explode(vscode.window.activeTextEditor, false);
+            // this.explode(vscode.window.activeTextEditor, false);
             console.log("past explode")
             try{
                 let wasFire = this.isOnFire
@@ -183,9 +183,10 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
                 
 
-                // if (!wasFire && this.isOnFire){
-                //     this.explode(vscode.window.activeTextEditor, false);
-                // }
+                if (!wasFire && this.isOnFire){
+                    console.log("displaying notification streak wasFire: ", wasFire, " isOnFire: ", this.isOnFire)
+                    this.explode(vscode.window.activeTextEditor, false);
+                }
 
                 console.log("Streak: set params{ isOnFire: ", messageData.streak_active, " weekInReview: ", messageData.week_in_review, " streakNum: ", messageData.current_streak, " current day of week: ", messageData.current_day_of_week);
                 if (this._view) {
@@ -202,6 +203,13 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
             }catch(err){
                 console.log("Streak: failed to set variables from message, err: ", err)
             }
+
+
+            await new Promise(f => setTimeout(f, 4000));
+            for (let d in this.decorations){
+                this.decorations[d].dispose();
+            }
+            
                             
             //wait for 1 minute before checking again
             await new Promise(f => setTimeout(f, 1000));
@@ -265,9 +273,16 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         //     cursorPosition.with(cursorPosition.line, Math.max(0, cursorPosition.character + delta))
         // );
 
+        console.log("cursor position: ", editor.visibleRanges[0])
 
-        var start = Math.floor(Math.random() * cursorPosition.line - 1);
-        var end = Math.floor(Math.random() * cursorPosition.line - 1);
+        // var start = Math.floor(Math.random() * cursorPosition.line - 1);
+        // var end = Math.floor(Math.random() * cursorPosition.line - 1);
+
+        var start = editor.visibleRanges[0].start.line;
+        var end = editor.visibleRanges[0].end.line  - 5;
+        
+        
+
 
         if (start < 1){
             start = 1
@@ -283,7 +298,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         const newRange = new vscode.Range(
             editor.document.lineAt(start).range.start,
             // Value can't be negative
-            editor.document.lineAt(end).range.end
+            editor.document.lineAt(end).range.start
         );
 
         // Dispose excess explosions
@@ -291,17 +306,23 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         //     this.activeDecorations.shift().dispose();
         // }
 
+        
+
         // A new decoration is used each time because otherwise adjacent
         // gifs will all be identical. This helps them be at least a little
         // offset.
-        const decoration = this.getExplosionDecoration(newRange.start);
+        // const decoration = this.getExplosionDecoration(newRange.start);
+        const decoration = this.getExplosionDecoration(newRange.end);
         if (!decoration) {
             return;
         }
 
+        console.log("anim placement: ", newRange.end)
+
 
         this.decorations.push(decoration);
        
+        // editor.setDecorations(decoration, [newRange]);
         editor.setDecorations(decoration, [newRange]);
 
 
@@ -311,6 +332,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     private getExplosionDecoration = (position: vscode.Position): any => {
         const explosion = getExplosion();
 
+        console.log("animation range: ", position)
         if (!explosion) {
             return null;
         }
@@ -339,8 +361,8 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         const explosionUrl = explosion;
 
-        const backgroundCss = this.getBackgroundCssSettings(Uri.joinPath(this._extensionUri, 'dist', 'streak', 'ezgif.com-crop.gif'));
-        console.log(vscode.Uri.joinPath(this._extensionUri, 'dist', 'streak', 'ezgif.com-crop.gif').fsPath)
+        const backgroundCss = this.getBackgroundCssSettings("http://gigo.gage.intranet/static/ext/streak-notif.gif");
+        console.log("http://gigo.gage.intranet/static/ext/streak-notif.gif");
 
         const defaultCss = {
             position: 'absolute',

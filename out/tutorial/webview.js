@@ -210,7 +210,7 @@ class TutorialWebViewprovider {
                     }
                 });
                 //get path to tutorial
-                let tuitotialPaths = this.baseWorkspaceUri.fsPath + "/.tutorials/";
+                let tuitotialPaths = this.baseWorkspaceUri.fsPath + "/.gigo" + "/.tutorials/";
                 //get all README files from file path and push to markdown array
                 fs.readdir(tuitotialPaths, (err, files) => {
                     files.forEach((f) => {

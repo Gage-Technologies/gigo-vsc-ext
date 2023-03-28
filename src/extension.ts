@@ -79,11 +79,15 @@ export function activate(context: vscode.ExtensionContext) {
         baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
         baseWorkspaceUri.fsPath.replace("file://", "");
         let tourPath = path.join(baseWorkspaceUri.fsPath, ".gigo", ".tours");
+        let tutorialPath = baseWorkspaceUri.fsPath + "/.gigo" + "/.tutorials";
 
 		if (!fs.existsSync(tourPath)) {
             fs.mkdirSync(tourPath);
         }
 
+        if (!fs.existsSync(tutorialPath)){
+            fs.mkdirSync(tutorialPath);
+        }
     }
     
 

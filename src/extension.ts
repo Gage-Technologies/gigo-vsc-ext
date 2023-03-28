@@ -66,13 +66,25 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log("after output channels: ", logger.error)
     
+    let fs = require('fs');
 
     var cfg = getCfg();
     if (cfg === null) {
         console.log('ERROR: CONFIGURATION FILE IS MISSING OR INCOMPLETE!');
     }
 
+    var baseWorkspaceUri!: vscode.Uri;
 
+    if (vscode.workspace.workspaceFolders !== undefined){
+        baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        baseWorkspaceUri.fsPath.replace("file://", "");
+        let tourPath = path.join(baseWorkspaceUri.fsPath, ".gigo", ".tours");
+
+		if (!fs.existsSync(tourPath)) {
+            fs.mkdirSync(tourPath);
+        }
+
+    }
     
 
 

@@ -131,7 +131,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                         try {
                             if (this.codeTour) {
                                 const codeTourApi = this.codeTour.exports;
-                                let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
+                                let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.gigo/.tours/tutorial-${message.text}.tour`);
                                 codeTourApi.startTourByUri(uri);
                             }
 
@@ -146,7 +146,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             const step = message.step;
                             if (this.codeTour) {
                                 const codeTourApi = this.codeTour.exports;
-                                let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
+                                let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.gigo/.tours/tutorial-${message.text}.tour`);
                                 try {
                                     await codeTourApi.endCurrentTour();
                                 } catch (err) {
@@ -308,7 +308,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         var numberPattern = /\d+/g;;
      
         
-        let tourPaths = this.baseWorkspaceUri.fsPath + "/.tours/";
+        let tourPaths = this.baseWorkspaceUri.fsPath + "/.gigo" + "/.tours/";
         fs.readdir(tourPaths, (err: any, files: any) => {
             files.forEach((f: any) => {
                 if (f.endsWith(".tour") && f.indexOf("tutorial-")!== -1){

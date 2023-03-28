@@ -11,6 +11,7 @@ const webview_2 = require("./tutorial/webview");
 const webview_3 = require("./streak/webview");
 const webview_4 = require("./teacher/webview");
 const webview_5 = require("./tutorial-editor/webview");
+const path = require("path");
 let autoGit;
 //let tutorial: Tutorial;
 //activate function registers all listed commands and initializes some classes on startup
@@ -50,9 +51,19 @@ function activate(context) {
     logger.error = errors;
     logger.info = debug;
     console.log("after output channels: ", logger.error);
+    let fs = require('fs');
     var cfg = getCfg();
     if (cfg === null) {
         console.log('ERROR: CONFIGURATION FILE IS MISSING OR INCOMPLETE!');
+    }
+    var baseWorkspaceUri;
+    if (vscode.workspace.workspaceFolders !== undefined) {
+        baseWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        baseWorkspaceUri.fsPath.replace("file://", "");
+        let tourPath = path.join(baseWorkspaceUri.fsPath, ".gigo", ".tours");
+        if (!fs.existsSync(tourPath)) {
+            fs.mkdirSync(tourPath);
+        }
     }
     logger.info.appendLine("Starting GIGO Autogit...");
     //registser autoGit command using its local activation function

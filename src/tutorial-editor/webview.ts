@@ -100,7 +100,7 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 		var fileNoExt = fileName.split(".")[0];
 
 		console.log(`DOC NAME: ${fileNoExt}`);
-		this.tourFilePath = path.join(this.baseWorkspaceUri.fsPath, ".tours", `${fileNoExt}.tour`);
+		this.tourFilePath = path.join(this.baseWorkspaceUri.fsPath, ".gigo", ".tours", `${fileNoExt}.tour`);
 
 		if (fs.existsSync(this.tourFilePath)) {
 			let tour = fs.readFileSync(this.tourFilePath, 'utf-8');

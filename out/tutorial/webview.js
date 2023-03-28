@@ -96,7 +96,7 @@ class TutorialWebViewprovider {
                     try {
                         if (this.codeTour) {
                             const codeTourApi = this.codeTour.exports;
-                            let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
+                            let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.gigo/.tours/tutorial-${message.text}.tour`);
                             codeTourApi.startTourByUri(uri);
                         }
                     }
@@ -110,7 +110,7 @@ class TutorialWebViewprovider {
                         const step = message.step;
                         if (this.codeTour) {
                             const codeTourApi = this.codeTour.exports;
-                            let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
+                            let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.gigo/.tours/tutorial-${message.text}.tour`);
                             try {
                                 await codeTourApi.endCurrentTour();
                             }
@@ -238,7 +238,7 @@ class TutorialWebViewprovider {
         var ctArr = [];
         var numberPattern = /\d+/g;
         ;
-        let tourPaths = this.baseWorkspaceUri.fsPath + "/.tours/";
+        let tourPaths = this.baseWorkspaceUri.fsPath + "/.gigo" + "/.tours/";
         fs.readdir(tourPaths, (err, files) => {
             files.forEach((f) => {
                 if (f.endsWith(".tour") && f.indexOf("tutorial-") !== -1) {

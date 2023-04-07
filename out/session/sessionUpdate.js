@@ -120,7 +120,7 @@ async function executeLiveCheck(wsID, secret) {
     for (let i = 0; i < 3; i++) {
         try {
             //await result from http function in GIGO
-            let res = await axios_1.default.post("http://gigo.gage.intranet/internal/v1/ext/live-check", {
+            let res = await axios_1.default.post("https://api.gigo.dev/internal/v1/ext/live-check", {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 "workspace_id": wsID,
                 "secret": secret
@@ -144,7 +144,7 @@ async function executeAfkCheck(wsID, secret, addMin) {
     for (let i = 0; i < 3; i++) {
         try {
             //awair result from http function in GIGO
-            let res = await axios_1.default.post("http://gigo.gage.intranet/internal/v1/ext/afk", {
+            let res = await axios_1.default.post("https://api.gigo.dev/internal/v1/ext/afk", {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 "workspace_id": wsID,
                 "secret": secret,

@@ -89,7 +89,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     // public websocketStreakCheck(wsID: any, secret: any){
     //     const WebSocket = require('isomorphic-ws');
 
-    //     const ws = new WebSocket(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`);
+    //     const ws = new WebSocket(`wss://api.gigo.dev/internal/v1/ext/streak-check/${wsID}/${secret}`);
 
     //     ws.onerror = function error(err: any){
     //         console.log('Streak Websocket: failed, err: ', err);
@@ -164,7 +164,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         logger.info.appendLine("Streak: calling websocket");
 
-        client.connect(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`);
+        client.connect(`wss://api.gigo.dev/internal/v1/ext/streak-check/${wsID}/${secret}`);
     }
 
 
@@ -221,7 +221,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     public async executeStreakCheck(wsID: any, secret: any){
         //awair result from http function in GIGO
         let res = await axios.post(
-            "http://gigo.gage.intranet/internal/v1/ext/streak-check", 
+            "https://api.gigo.dev/internal/v1/ext/streak-check", 
             {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 "workspace_id": wsID,
@@ -361,8 +361,8 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         const explosionUrl = explosion;
 
-        const backgroundCss = this.getBackgroundCssSettings("http://gigo.gage.intranet/static/ext/streak-notif.gif");
-        console.log("http://gigo.gage.intranet/static/ext/streak-notif.gif");
+        const backgroundCss = this.getBackgroundCssSettings("https://api.gigo.dev/static/ext/streak-notif.gif");
+        console.log("https://api.gigo.dev/static/ext/streak-notif.gif");
 
         const defaultCss = {
             position: 'absolute',

@@ -72,7 +72,7 @@
 
 
 // async function refreshRoutine(wsID: any, secret: any){
-//     let res = await fetch("http://gigo.gage.intranet/api/internal/ws/live-check", {
+//     let res = await fetch("https://api.gigo.dev/api/internal/ws/live-check", {
 //         method: 'POST',
 //         body: JSON.stringify({
 //             "coder_id": wsID,

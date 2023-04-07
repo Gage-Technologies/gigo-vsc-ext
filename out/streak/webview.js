@@ -115,8 +115,8 @@ class StreakWebViewprovider {
             // off the top of the editor
             const topValue = 10 * .25;
             const explosionUrl = explosion;
-            const backgroundCss = this.getBackgroundCssSettings("http://gigo.gage.intranet/static/ext/streak-notif.gif");
-            console.log("http://gigo.gage.intranet/static/ext/streak-notif.gif");
+            const backgroundCss = this.getBackgroundCssSettings("https://api.gigo.dev/static/ext/streak-notif.gif");
+            console.log("https://api.gigo.dev/static/ext/streak-notif.gif");
             const defaultCss = {
                 position: 'absolute',
                 ["margin-left"]: `-${leftValue}ch`,
@@ -158,7 +158,7 @@ class StreakWebViewprovider {
     }
     // public websocketStreakCheck(wsID: any, secret: any){
     //     const WebSocket = require('isomorphic-ws');
-    //     const ws = new WebSocket(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`);
+    //     const ws = new WebSocket(`wss://api.gigo.dev/internal/v1/ext/streak-check/${wsID}/${secret}`);
     //     ws.onerror = function error(err: any){
     //         console.log('Streak Websocket: failed, err: ', err);
     //     };
@@ -216,7 +216,7 @@ class StreakWebViewprovider {
             });
         });
         logger.info.appendLine("Streak: calling websocket");
-        client.connect(`ws://gigo.gage.intranet/internal/v1/ext/streak-check/${wsID}/${secret}`);
+        client.connect(`wss://api.gigo.dev/internal/v1/ext/streak-check/${wsID}/${secret}`);
     }
     async renewStats() {
         while (true) {
@@ -256,7 +256,7 @@ class StreakWebViewprovider {
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
     async executeStreakCheck(wsID, secret) {
         //awair result from http function in GIGO
-        let res = await axios_1.default.post("http://gigo.gage.intranet/internal/v1/ext/streak-check", {
+        let res = await axios_1.default.post("https://api.gigo.dev/internal/v1/ext/streak-check", {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             "workspace_id": wsID,
             "secret": secret,

@@ -117,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
     activateStreakWebView(context, cfg, logger);
 
     logger.info.appendLine("Starting GIGO Code Teacher...");
-    activateTeacherWebView(context, logger);
+    activateTeacherWebView(context, cfg, logger);
     
     
     console.log("calling editor activation");

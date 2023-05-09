@@ -87,7 +87,7 @@ function activate(context) {
     logger.info.appendLine("Starting GIGO Streak...");
     (0, webview_3.activateStreakWebView)(context, cfg, logger);
     logger.info.appendLine("Starting GIGO Code Teacher...");
-    (0, webview_4.activateTeacherWebView)(context, logger);
+    (0, webview_4.activateTeacherWebView)(context, cfg, logger);
     console.log("calling editor activation");
     (0, webview_5.activateEditor)(context);
     logger.info.appendLine("GIGO Extension Setup...");

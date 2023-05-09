@@ -13,8 +13,8 @@ export async function activateStreakWebView(context: vscode.ExtensionContext, cf
 
     // let res = await provider.executeStreakCheck(cfg.workspace_id_string, cfg.secret);
     // console.log(res);
-    logger.info.appendLine("Streak: starting streak websocket")
-    provider.websocketStreakCheck(cfg.workspace_id_string, cfg.secret)
+    logger.info.appendLine("Streak: starting streak websocket");
+    provider.websocketStreakCheck(cfg.workspace_id_string, cfg.secret);
     provider.renewStats();
 
     //push and regsitser necessary commands
@@ -54,9 +54,9 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     <div class="weekday"><span>S</span></div>`;
 
 
-    public weekDays: string[] =["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    public weekDays: string[] =["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-    public isOnFire: boolean = false;
+    public isOnFire: boolean = true;
     public dayOfTheWeek: string = "";
    
 
@@ -114,25 +114,29 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     //     };
     // }
 
+    // checking websocket connection to recieve information from messages
     public websocketStreakCheck(wsID: any, secret: any) {
-        
+
+        // establish new websocket client
         var WebSocketClient = require('websocket').client;
 
         var client = new WebSocketClient();
 
+        // handle if client connection fails
         client.on('connectFailed', function(error: any) {
             console.log('Connect Error: ' + error.toString());
         });
 
         let logger = this.logger;
-        logger.info.appendLine("Streak: inside streak websocket")
+        logger.info.appendLine("Streak: inside streak websocket");
 
+        // handle websocket connection 
         client.on('connect', function(connection: any) {
             console.log('WebSocket Client Connected');
-            logger.info.appendLine('WebSocket Client Connected')
+            logger.info.appendLine('WebSocket Client Connected');
             connection.on('error', function(error: any) {
                 console.log("Connection Error: " + error.toString());
-                logger.error.appendLine("Connection Error: " + error.toString())
+                logger.error.appendLine("Connection Error: " + error.toString());
             });
             connection.on('close', function() {
                 console.log('echo-protocol Connection Closed');
@@ -150,8 +154,8 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                         try{
                             messageData = JSON.parse(message.utf8Data);
                         }catch(err){
-                            console.log(message.utf8Data)
-                            console.log("Streak: failed to parse message intio json, err: ", err, " message: ", message.utf8Data)
+                            console.log(message.utf8Data);
+                            console.log("Streak: failed to parse message intio json, err: ", err, " message: ", message.utf8Data);
                         }
                     }
                    
@@ -165,29 +169,34 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         logger.info.appendLine("Streak: calling websocket");
 
         client.connect(`wss://api.gigo.dev/internal/v1/ext/streak-check/${wsID}/${secret}`);
+
     }
 
 
+    // checks every minute to handle any stat changes 
     public async renewStats(){
 
         while(true){
-            console.log("display explode")
+            console.log("display explode");
             // this.explode(vscode.window.activeTextEditor, false);
-            console.log("past explode")
+            console.log("past explode");
+
+            // update stats with the message recieved from websocket
             try{
-                let wasFire = this.isOnFire
+                let wasFire = this.isOnFire;
                 this.isOnFire = messageData.streak_active;
                 this.activeDays = messageData.week_in_review;
                 this.streakNum = messageData.current_streak;
                 this.dayOfTheWeek = messageData.current_day_of_week;
 
                 
-
+                // if user currently has an active streak and hit the mark to keep it going, trigger explosion
                 if (!wasFire && this.isOnFire){
-                    console.log("displaying notification streak wasFire: ", wasFire, " isOnFire: ", this.isOnFire)
+                    console.log("displaying notification streak wasFire: ", wasFire, " isOnFire: ", this.isOnFire);
                     this.explode(vscode.window.activeTextEditor, false);
                 }
 
+                // update user's streak stats
                 console.log("Streak: set params{ isOnFire: ", messageData.streak_active, " weekInReview: ", messageData.week_in_review, " streakNum: ", messageData.current_streak, " current day of week: ", messageData.current_day_of_week);
                 if (this._view) {
 
@@ -201,17 +210,18 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         
 
             }catch(err){
-                console.log("Streak: failed to set variables from message, err: ", err)
+                console.log("Streak: failed to set variables from message, err: ", err);
             }
 
 
+            // wait 4 seconds to remove new decorations after successful streak day
             await new Promise(f => setTimeout(f, 4000));
             for (let d in this.decorations){
                 this.decorations[d].dispose();
             }
             
                             
-            //wait for 1 minute before checking again
+            //wait for 1 second before checking again
             await new Promise(f => setTimeout(f, 1000));
         }
        
@@ -219,7 +229,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
     //executeAfkCheck will execute a call to get an afk session timestamp from the http function in GIGO
     public async executeStreakCheck(wsID: any, secret: any){
-        //awair result from http function in GIGO
+        //await result from http function in GIGO
         let res = await axios.post(
             "https://api.gigo.dev/internal/v1/ext/streak-check", 
             {
@@ -238,10 +248,14 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
             return -1;
         }
 
+        // display result to console
         console.log(JSON.stringify(res));
+        // append the result to the logger
         this.logger.info.appendLine(JSON.stringify(res));
-        vscode.window.showInformationMessage(`${JSON.stringify(res)}`)
+        // display the result in the VS Code editor
+        vscode.window.showInformationMessage(`${JSON.stringify(res)}`);
 
+        // assign variables to corresponding result variables
         this.isOnFire = res.data.is_on_fire;
         this.activeDays = res.data.streak_week_days;
         this.streakNum = res.data.current_streak_num;
@@ -249,9 +263,10 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         return; 
     }
 
-
+    // explosion animation for when streak is hit
     private explode = (editor: vscode.TextEditor | any, left = false) => {
-        console.log("inside explode")
+        console.log("inside explode");
+
         // To give the explosions space, only explode every X strokes
         // Where X is the configured explosion frequency
         // This counter resets if the user does not type for 1 second.
@@ -264,37 +279,39 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         //     return;
         // }
 
+        // set the cursor position
         const cursorPosition = editor.selection.active;
         // The delta is greater to the left than to the right because otherwise the gif doesn't appear
         const delta = left ? -2 : 1;
+
         // const newRange = new vscode.Range(
         //     cursorPosition.with(cursorPosition.line, cursorPosition.character),
         //     // Value can't be negative
         //     cursorPosition.with(cursorPosition.line, Math.max(0, cursorPosition.character + delta))
         // );
 
-        console.log("cursor position: ", editor.visibleRanges[0])
+        console.log("cursor position: ", editor.visibleRanges[0]);
 
         // var start = Math.floor(Math.random() * cursorPosition.line - 1);
         // var end = Math.floor(Math.random() * cursorPosition.line - 1);
 
+        // start and end of current line in use
         var start = editor.visibleRanges[0].start.line;
         var end = editor.visibleRanges[0].end.line  - 5;
-        
-        
 
-
+        // prevents any negative values
         if (start < 1){
-            start = 1
+            start = 1;
         }
 
         if (end < 1){
             end = 1;
         }
 
-        console.log("start and end: ", start, end)
+        console.log("start and end: ", start, end);
 
 
+        // load new range 
         const newRange = new vscode.Range(
             editor.document.lineAt(start).range.start,
             // Value can't be negative
@@ -317,28 +334,29 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
             return;
         }
 
-        console.log("anim placement: ", newRange.end)
+        console.log("anim placement: ", newRange.end);
 
-
+        // append decoration with new range to current decorations array
         this.decorations.push(decoration);
        
         // editor.setDecorations(decoration, [newRange]);
         editor.setDecorations(decoration, [newRange]);
 
 
-    }
+    };
+
 
 
     private getExplosionDecoration = (position: vscode.Position): any => {
         const explosion = getExplosion();
 
-        console.log("animation range: ", position)
+        console.log("animation range: ", position);
         if (!explosion) {
             return null;
         }
 
         return this.createExplosionDecorationType(explosion, position);
-    }
+    };
 
 
 
@@ -349,7 +367,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         // const leftValue = Math.floor((10 - 1) / 2);
 
         const leftValue = Math.floor(Math.random() * (30 - 1 + 1) + 1);
-        console.log("left value: ", leftValue)
+        console.log("left value: ", leftValue);
 
         // By default, the top of the gif will be at the top of the text.
         // Setting the top to a negative value will raise it up.
@@ -625,12 +643,13 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     //to just render the next and last group page controls
     private async _getHtml(webview: vscode.Webview, group: string) {
 
+
             var streakNumHtml = `<span class="streakNumber">
             ${this.streakNum}
         
             </span>`;
 
-
+            // displays fire animation for an active streak
             if (this.isOnFire){
                 this.streakAnim = `<div class="streakAnimOnFire">
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
@@ -646,22 +665,23 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
             console.log("Streak: active days: ", this.activeDays);
            
+            // checks for the users active days where a streak was continued and displays accordingly 
             if (this.activeDays){
-                this.activeDaysHTML = ``
+                this.activeDaysHTML = ``;
                 console.log("this day of the week: ", this.dayOfTheWeek);
                 
                 for (let day in this.weekDays){
-                    let dayString = this.weekDays[day]
-                    console.log("Streak iter day initial: ", dayString)
+                    let dayString = this.weekDays[day];
+                    console.log("Streak iter day initial: ", dayString);
                     console.log("Streak iterating iter day : ", dayString, " streak active value: ", this.activeDays[dayString]);
                     if (this.dayOfTheWeek === dayString){
-                        console.log("Streak iter on today: ", dayString)
+                        console.log("Streak iter on today: ", dayString);
 
                         if (this.activeDays[dayString]){
                             
-                            this.activeDaysHTML += `<div class="weekday weekdayActive"><span>${dayString.charAt(0)}</span></div>`
+                            this.activeDaysHTML += `<div class="weekday weekdayActive"><span>${dayString.charAt(0)}</span></div>`;
                         }else{
-                            this.activeDaysHTML += `<div class="weekday weekdayToday"><span>${dayString.charAt(0)}</span></div>`
+                            this.activeDaysHTML += `<div class="weekday weekdayToday"><span>${dayString.charAt(0)}</span></div>`;
                         }
 
                         if (dayString !== "Sunday"){
@@ -677,10 +697,10 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
                         if (this.activeDays[dayString]){
                         
-                            this.activeDaysHTML += `<div class="weekday weekdayActive"><span>${dayString.charAt(0)}</span></div>`
+                            this.activeDaysHTML += `<div class="weekday weekdayActive"><span>${dayString.charAt(0)}</span></div>`;
 
                         }else{
-                            this.activeDaysHTML += `<div class="weekday"><span>${dayString.charAt(0)}</span></div>`
+                            this.activeDaysHTML += `<div class="weekday"><span>${dayString.charAt(0)}</span></div>`;
                         }
                        
 
@@ -700,7 +720,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                    
                        
                 }
-                console.log("Streak week html: ", this.activeDaysHTML)
+                console.log("Streak week html: ", this.activeDaysHTML);
             }
 
 

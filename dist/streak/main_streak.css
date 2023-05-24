@@ -61,6 +61,19 @@ body {
 	/* bring your own prefixes */
 	/* transform: translate(-50%, -50%); */
 }
+
+.noStreak{
+	font-size: 5vw;
+	font-weight: bold;
+	opacity: 15%;
+	font-family: Helvetica, arial, sans-serif;
+	/* position: fixed; */
+	
+	/* top: 55%; */
+	/* left: 45%; */
+	/* bring your own prefixes */
+	/* transform: translate(-50%, -50%); */
+}
   
 
 .streakIcon{

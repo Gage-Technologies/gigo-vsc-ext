@@ -527,12 +527,18 @@ class TutorialWebViewprovider {
 				<link href="${styleVSCodeUri}" rel="stylesheet">
 				<link href="${styleMainUri}" rel="stylesheet">
 				<title>GIGO AFK Session</title>
+
 			</head>
             ${codeTourButton}
-            <div id="big">
-                ${mds[index]}
-            </div>
+            <style>
+            body {
+            min-width: 200px;
+            }
+            </style>
 			<body>
+            <div id="big">
+            ${mds[index]}
+            </div>
                 <br/>
                 <br/>
                 <div id="nextButton">

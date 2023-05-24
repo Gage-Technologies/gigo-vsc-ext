@@ -9,7 +9,6 @@ import { activateAfkWebView } from './afk/webview';
 import { activateTimeout } from './session/sessionUpdate';
 import { activateTutorialWebView } from './tutorial/webview';
 import {activateStreakWebView} from './streak/webview';
-import { activateTeacherWebView } from './teacher/webview';
 import { activateEditor } from './tutorial-editor/webview';
 import { openStdin } from 'process';
 import path = require('path');
@@ -116,8 +115,8 @@ export function activate(context: vscode.ExtensionContext) {
     logger.info.appendLine("Starting GIGO Streak...");
     activateStreakWebView(context, cfg, logger);
 
-    logger.info.appendLine("Starting GIGO Code Teacher...");
-    activateTeacherWebView(context, cfg, logger);
+    // logger.info.appendLine("Starting GIGO Code Teacher...");
+    // activateTeacherWebView(context, cfg, logger);
     
     
     console.log("calling editor activation");

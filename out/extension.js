@@ -9,8 +9,7 @@ const webview_1 = require("./afk/webview");
 const sessionUpdate_1 = require("./session/sessionUpdate");
 const webview_2 = require("./tutorial/webview");
 const webview_3 = require("./streak/webview");
-const webview_4 = require("./teacher/webview");
-const webview_5 = require("./tutorial-editor/webview");
+const webview_4 = require("./tutorial-editor/webview");
 const path = require("path");
 let autoGit;
 //let tutorial: Tutorial;
@@ -86,10 +85,10 @@ function activate(context) {
     (0, webview_2.activateTutorialWebView)(context, logger);
     logger.info.appendLine("Starting GIGO Streak...");
     (0, webview_3.activateStreakWebView)(context, cfg, logger);
-    logger.info.appendLine("Starting GIGO Code Teacher...");
-    (0, webview_4.activateTeacherWebView)(context, cfg, logger);
+    // logger.info.appendLine("Starting GIGO Code Teacher...");
+    // activateTeacherWebView(context, cfg, logger);
     console.log("calling editor activation");
-    (0, webview_5.activateEditor)(context);
+    (0, webview_4.activateEditor)(context);
     logger.info.appendLine("GIGO Extension Setup...");
 }
 exports.activate = activate;

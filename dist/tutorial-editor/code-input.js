@@ -1165,11 +1165,15 @@ function dragElement(elmnt) {
 
 function handleCodeSteps(elmnt){
    
-    
+    // get bottom text box
     var textBoxIn = document.getElementById("ci-internal");
+    // get top text box
     var textBoxEx = document.getElementById("ci-external");
+
+    // get rectangle of top text box
     const rect = textBoxEx.getBoundingClientRect();
    
+    // retrieve the trash icon and code steps
     var steps = document.getElementsByClassName("code-steps");
     var trash = document.getElementById("trash");
 
@@ -1179,8 +1183,12 @@ function handleCodeSteps(elmnt){
     //     message: `handling step ${i}`
     // });
     // var elmnt = steps[i];
+
+
+    // get the id of the code tour being moved
     let word = elmnt.id;
 
+    // get the rectangle of the code tour being moved
     var elPos = elmnt.getBoundingClientRect();
 
     // if (doElsCollide(document.getElementById("add-pop"), elmnt)) {
@@ -1199,6 +1207,7 @@ function handleCodeSteps(elmnt){
     // }
 
 
+    // get the icon for the trash
     var icon = trash.querySelector(".trash-icon");
 
     // vscode.postMessage({
@@ -1222,6 +1231,8 @@ function handleCodeSteps(elmnt){
     //     message: `does trash collide ${trash.offsetTop} ${elmnt.top} ${window.screenY} ${elmnt.offsetTop - window.scrollY}`
     // });
     
+
+    // check if the code is over the trash icon
     if (doElsCollide(elmnt, trash)) {
         var icon = trash.querySelector(".trash-icon");
         // vscode.postMessage({
@@ -1236,32 +1247,42 @@ function handleCodeSteps(elmnt){
         // });
     }
 
+
+    // check if the code tour is still in the top box
     if (doElsCollide(elmnt, textBoxEx)) {
         // vscode.postMessage({
         //     type: 'hello',
         //     message: 'inside move'
         // });
 
+        // ensure that code tour bay is closed
         var popUp = document.getElementById("pop-container");
-
         if (popUp.style.display !== "none") {
             popUp.style.display = "none";
         }
 
+        // get the line height of the text box
         var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
 
         /////
         console.log(`line number: ${(elPos.top - rect.top) / lineHeight}`);
+
+        // do some math to get the caret position with the line height
         var lineNumber = (elPos.top - rect.top) / lineHeight;
         var newCaretPos = textBoxEx.value.split('\n', Math.round(lineNumber)).join('\n').length;
         console.log(`newCaretPos: ${newCaretPos} for ${elmnt.id}`);
         
         // var caretPos = textBoxIn.selectionStart;
 
+
+        // set new caret position
         var caretPos = newCaretPos;
 
         console.log(`moving step with id: ${word}`);
         
+
+        // ensure that the @@@Step#@@@ only exists once in the text box
+        // by replacing the old @@@Step#@@@ with the empty string
         if (textBoxEx.value.indexOf(word) !== -1){
             console.log(`replacing ${word} in handle code steps`);
             // textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
@@ -1275,6 +1296,9 @@ function handleCodeSteps(elmnt){
 
 
         console.log("adding word in handle: ", textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos));
+
+
+        // add the @@@Step#@@@ to the text box at the line number of the code tour box
         textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
 
 
@@ -1290,22 +1314,31 @@ function handleCodeSteps(elmnt){
 
         
 
-
+        // retrieving the font and line height of the box
         var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
         var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
 
+        // setting variable for the # of chars before the @@@Step#@@@
         var charsBefore = 0
+
+        // setting variable for the # of lines in the text box
         const newLines = textBoxEx.value.split("\n");
+
+        // iterate over every line in the text box
         for (let i = 0; i < newLines.length; i++) {
+            // if the line contains the @@@Step#@@@
             if (newLines[i].indexOf(word) !== -1){
+                // set the height of the element to the line number of the @@@Step#@@@ in the text box
                 heightPos = i + 1;
             }
         } 
 
+        // iterate over every line in the text box
         for (let i = 0; i < newLines.length; i++) {
             if (newLines[i].indexOf(word)!== -1){
                 break;
             }
+            //add the number of characters before the @@@Step#@@@ to the charsBefore variable
             charsBefore += newLines[i].length + 1;
         }
 
@@ -1314,12 +1347,20 @@ function handleCodeSteps(elmnt){
         console.log(`top of elmnt: ${elPos.top} left of elmnt: ${elPos.left} height of elmnt: ${elPos.height} width of elmnt: ${elPos.width}`);
 
 
+        // determine the start position of the @@@Step#@@@ in the text box
         var startPos = (textBoxEx.value.indexOf(word));
+
+        // determine the end position of the @@@Step#@@@ in the text box by using the length of the @@@Step#@@@
+        // and the number of chars before the @@@Step#@@@
         var endPos = (startPos + word.length) - charsBefore;
 
+
+        // calculate the top and left position of the code tour box
         var top = (getOffset(textBoxEx).top + (heightPos * lineHeight))
         var left = (getOffset(textBoxEx).left + (endPos * fontSize))
 
+
+        // ensure that the code tour box is within the bounds of the text box
         if (top > rect.height || left > rect.width || left > rect.width){ 
             console.log(`step: ${word} is outside the bounds of the window`)
             elmnt.style.top = (getOffset(textBoxEx).top) + "px";
@@ -1332,6 +1373,7 @@ function handleCodeSteps(elmnt){
         
         //  elmnt.style.position = "fixed";
 
+        // set the final values of the code tour box
         elmnt.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)+5) + "px";
         elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
 

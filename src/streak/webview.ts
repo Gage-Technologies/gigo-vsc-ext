@@ -56,7 +56,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
     public weekDays: string[] =["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-    public isOnFire: boolean = true;
+    public isOnFire: boolean = false;
     public dayOfTheWeek: string = "";
    
 
@@ -644,23 +644,31 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     private async _getHtml(webview: vscode.Webview, group: string) {
 
 
-            var streakNumHtml = `<span class="streakNumber">
-            ${this.streakNum}
-        
+            var streakNumHtml = `<span class="noStreak">
+            No Current Streak
             </span>`;
+
+
+            if (this.streakNum !== undefined && this.streakNum > 0) {
+                var streakNumHtml = `<span class="streakNumber">
+                ${this.streakNum}
+                </span>`;
+            }
 
             // displays fire animation for an active streak
             if (this.isOnFire){
+                if (this.streakNum !== undefined && this.streakNum > 0) {
                 this.streakAnim = `<div class="streakAnimOnFire">
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
                 <lottie-player src="https://lottie.host/943c92a4-fc4d-42d7-b9f5-fd5f2f2783bd/PgLfoB1v2G.json" background="transparent" speed="1" loop autoplay></lottie-player>
                 </div>`;
-
+            
                 streakNumHtml = `<span class="streakNumberOnFire">
                             ${this.streakNum}
                            
                             </span>`;
             }
+        }
 
 
             console.log("Streak: active days: ", this.activeDays);
@@ -715,7 +723,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
                             
                         }
-                    }
+                    } 
 
                    
                        
@@ -820,11 +828,6 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
 
 }
-
-
-
-
-
 
 function getNonce() {
     let text = '';

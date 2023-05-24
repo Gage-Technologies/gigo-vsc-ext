@@ -39,7 +39,7 @@ class StreakWebViewprovider {
     <div class="separator">-</div>
     <div class="weekday"><span>S</span></div>`;
         this.weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        this.isOnFire = true;
+        this.isOnFire = false;
         this.dayOfTheWeek = "";
         // explosion animation for when streak is hit
         this.explode = (editor, left = false) => {
@@ -468,20 +468,26 @@ class StreakWebViewprovider {
     //takes in a group string to determine whether to render the whole page or
     //to just render the next and last group page controls
     async _getHtml(webview, group) {
-        var streakNumHtml = `<span class="streakNumber">
-            ${this.streakNum}
-        
+        var streakNumHtml = `<span class="noStreak">
+            No Current Streak
             </span>`;
+        if (this.streakNum !== undefined && this.streakNum > 0) {
+            var streakNumHtml = `<span class="streakNumber">
+                ${this.streakNum}
+                </span>`;
+        }
         // displays fire animation for an active streak
         if (this.isOnFire) {
-            this.streakAnim = `<div class="streakAnimOnFire">
+            if (this.streakNum !== undefined && this.streakNum > 0) {
+                this.streakAnim = `<div class="streakAnimOnFire">
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
                 <lottie-player src="https://lottie.host/943c92a4-fc4d-42d7-b9f5-fd5f2f2783bd/PgLfoB1v2G.json" background="transparent" speed="1" loop autoplay></lottie-player>
                 </div>`;
-            streakNumHtml = `<span class="streakNumberOnFire">
+                streakNumHtml = `<span class="streakNumberOnFire">
                             ${this.streakNum}
                            
                             </span>`;
+            }
         }
         console.log("Streak: active days: ", this.activeDays);
         // checks for the users active days where a streak was continued and displays accordingly 

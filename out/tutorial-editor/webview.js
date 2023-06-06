@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNonce = exports.TutorialEditorProvider = exports.activateEditor = void 0;
 const path = require("path");
 const vscode = require("vscode");
+const yaml = require("js-yaml");
 async function activateEditor(context) {
     console.log("WE FUCKIN HERE!");
     // Register our custom editor providers
@@ -155,75 +156,80 @@ class TutorialEditorProvider {
                     return;
                 case 'addCodeTour':
                     vscode.window.showInformationMessage('add code tour');
-                    // webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+                // webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+                case "cursorPosition":
+                    this.cursorPos = e.message;
+                    return;
+                case "tourStepButton":
+                    console.log("button", +e.message, "was clicked");
                     return;
                 case 'saveTourStep':
-                    // vscode.window.showInformationMessage(`saveTourStep tour num: ${this.numOfSteps}`);
-                    console.log(`${e.message}`);
-                    console.log(`saveTourStep tour num: ${this.numOfSteps}`);
-                    let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
-                    let ts = JSON.parse(tour);
-                    let parsedMsg = JSON.parse(e.message);
-                    parsedMsg.line = parseInt(parsedMsg.line);
-                    var stepNum = parseInt(parsedMsg.step);
-                    delete parsedMsg['step'];
-                    console.log('before all checking steps');
-                    if (parsedMsg.line < 1) {
-                        console.log('incorrect value passed for parsedMsg.line: ', parsedMsg.line);
-                        vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number is greater than 0.`);
-                        return;
-                    }
-                    console.log("before do exist check");
-                    var doExist = false;
-                    try {
-                        doExist = fs.existsSync(path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
-                    }
-                    catch (e) {
-                        console.log(e);
-                    }
-                    console.log("after do exist");
-                    if (!doExist) {
-                        console.log("does exist: ", doExist, " file path: ", path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
-                        vscode.window.showInformationMessage(`Incorrect file path for step. Please ensure that the file exists and is the relative path to the file.`);
-                        return;
-                    }
-                    console.log("after file check");
-                    const readline = require('readline');
-                    var fileP = path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file);
-                    var linesCount = 0;
-                    var rl = readline.createInterface({
-                        input: fs.createReadStream(fileP),
-                        output: process.stdout,
-                        terminal: false
-                    });
-                    rl.on('line', function (line) {
-                        linesCount++; // on each linebreak, add +1 to 'linesCount'
-                    });
-                    rl.on('close', function () {
-                        console.log(linesCount); // print the result when the 'close' event is called
-                    });
-                    console.log(`than number of lines in file ${linesCount}`);
-                    if (parsedMsg > linesCount) {
-                        console.log(`number of lines in pass ${parsedMsg.line} is greater than number of lines in file ${linesCount}`);
-                        vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number exists in file.`);
-                        return;
-                    }
-                    console.log("after line num check");
-                    if (stepNum > this.numOfSteps) {
-                        this.numOfSteps++;
-                        ts.steps.push(parsedMsg);
-                    }
-                    else {
-                        ts.steps[stepNum - 1] = parsedMsg;
-                        console.log(`ts: ${JSON.stringify(ts)}`);
-                    }
-                    this.fullTour = JSON.stringify(ts);
-                    fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+                    webviewPanel.webview.postMessage({ type: 'placeStep' });
+                    // // vscode.window.showInformationMessage(`saveTourStep tour num: ${this.numOfSteps}`);
+                    // console.log(`${e.message}`)
+                    // console.log(`saveTourStep tour num: ${this.numOfSteps}`)
+                    // let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
+                    // let ts = JSON.parse(tour);
+                    // let parsedMsg = JSON.parse(e.message);
+                    // parsedMsg.line = parseInt(parsedMsg.line);
+                    // var stepNum = parseInt(parsedMsg.step);
+                    // delete parsedMsg['step'];
+                    // console.log('before all checking steps')
+                    // if (parsedMsg.line < 1) {
+                    //     console.log('incorrect value passed for parsedMsg.line: ', parsedMsg.line);
+                    //     vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number is greater than 0.`);
+                    //     return;
+                    // }
+                    // console.log("before do exist check")
+                    // var doExist = false;
+                    // try {
+                    //     doExist = fs.existsSync(path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
+                    // } catch (e) {
+                    //     console.log(e);
+                    // }
+                    // console.log("after do exist")
+                    // if (!doExist) {
+                    //     console.log("does exist: ", doExist, " file path: ", path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
+                    //     vscode.window.showInformationMessage(`Incorrect file path for step. Please ensure that the file exists and is the relative path to the file.`);
+                    //     return;
+                    // }
+                    // console.log("after file check")
+                    // const readline = require('readline');
+                    // var fileP = path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file);
+                    // var linesCount = 0;
+                    // var rl = readline.createInterface({
+                    //     input: fs.createReadStream(fileP),
+                    //     output: process.stdout,
+                    //     terminal: false
+                    // });
+                    // rl.on('line', function (line: any) {
+                    //     linesCount++; // on each linebreak, add +1 to 'linesCount'
+                    // });
+                    // rl.on('close', function () {
+                    //     console.log(linesCount); // print the result when the 'close' event is called
+                    // });
+                    // console.log(`than number of lines in file ${linesCount}`);
+                    // if (parsedMsg > linesCount) {
+                    //     console.log(`number of lines in pass ${parsedMsg.line} is greater than number of lines in file ${linesCount}`);
+                    //     vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number exists in file.`);
+                    //     return;
+                    // }
+                    // console.log("after line num check")
+                    // if (stepNum > this.numOfSteps) {
+                    //     this.numOfSteps++;
+                    //     ts.steps.push(parsedMsg);
+                    // } else {
+                    //     ts.steps[stepNum - 1] = parsedMsg;
+                    //     console.log(`ts: ${JSON.stringify(ts)}`);
+                    // }
+                    // this.fullTour = JSON.stringify(ts);
+                    // fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
                     // vscode.window.showInformationMessage(`save code tour, fp: ${e.message.file}, ln: ${e.message.line} desc: ${e.message.description}`);
                     break;
                 // let tourName = document.fileName.replace('cscratch', 'tour');
                 // fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
                 case 'deleteTourStep':
+                    console.log('deleteTour');
                     var deletedStepNum = parseInt(e.message);
                     // vscode.window.showInformationMessage(`delete step: ${deletedStepNum} `);
                     let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
@@ -267,169 +273,302 @@ class TutorialEditorProvider {
         const codeTourScript = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'code-tour.js'));
         const codeTourStyle = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'code-tour.css'));
         const coordsUtil = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'textareaCoords.js'));
+        // Get the current theme name from VS Code settings
+        const currentTheme = vscode.workspace.getConfiguration().get("workbench.colorTheme");
+        // Create a uri for the current theme CSS file
+        const uri = vscode.Uri.file(path.join(vscode.env.appRoot, "extensions", "vscode-resource", "themes", `${currentTheme}.css`));
+        // Read the contents of the CSS file
+        const css = vscode.workspace.fs.readFile(uri);
+        // Convert the CSS to a string
+        const cssString = css.toString();
         this.moveSVG = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'move_icon_2.svg'));
         const trashPng = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'trash.png'));
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
         var parsedText = this.text.replace(/["]/g, `'`);
+        const parsedTextEscaped = parsedText.replace(/`/g, '\\`');
+        let vsTheme = 'vs';
+        if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark) {
+            vsTheme = 'vs-dark';
+        }
+        const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-1.yaml");
+        const fileContents = fs.readFileSync(filePath, 'utf8');
+        const tourData = yaml.load(fileContents);
+        const tourDataStr = JSON.stringify(tourData);
+        this.numOfSteps = tourData.steps.length;
+        console.log("fuck this shit", tourData);
         console.log(`text before render: ${this.text.length}`);
         console.log(`steps befor load: ${JSON.stringify(this.fullTour.steps)}`);
         return /* html */ `
-			<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
 
-				<!--
-				Use a content security policy to only allow loading images from https or from our extension directory,
-				and only allow scripts that have a specific nonce.
-				-->
-				<meta http-equiv="Content-Security-Policy" default-src * 'unsafe-inline' 'unsafe-eval'; script-src ${webview.cspSource} img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';>
-	
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <!--
+            Use a content security policy to only allow loading images from https or from our extension directory,
+            and only allow scripts that have a specific nonce.
+            -->
+            <meta http-equiv="Content-Security-Policy" default-src * 'unsafe-inline' 'unsafe-eval'; script-src ${webview.cspSource} img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';>
 
-				<input id="tour-step-num" name="tour-step-num" type="hidden" value="${this.numOfSteps}"></input>
-				<input id="tour-path" name="tour-path" type="hidden" value="${this.tourFilePath}"></input>
-				<input id="tour-step-objs" name="tour-step-objs" type="hidden" value='${JSON.stringify(this.fullTour.steps)}'></input>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/default.css" integrity="sha512-HPYcuSKzZ/FwxsRKIiNX6imjfnr5+82poiPO+oXi9WCEEe2q1x2OOBpbF+6cRG+hwoEsBXfs7oQveu5yHbY64g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <input id="tour-step-num" name="tour-step-num" type="hidden" value="${this.numOfSteps}"></input>
+            <input id="tour-path" name="tour-path" type="hidden" value="${this.tourFilePath}"></input>
+            <input id="tour-step-objs" name="tour-step-objs" type="hidden" value='${JSON.stringify(this.fullTour.steps)}'></input>
+
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/default.css" integrity="sha512-HPYcuSKzZ/FwxsRKIiNX6imjfnr5+82poiPO+oXi9WCEEe2q1x2OOBpbF+6cRG+hwoEsBXfs7oQveu5yHbY64g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-markdown.js"></script>
-				<link href="${styleResetUri}" rel="stylesheet" />
-				<link href="${styleVSCodeUri}" rel="stylesheet" />
-				<link href="${styleMainUri}" rel="stylesheet" />
-				<link href="${codeInStyling}" rel="stylesheet" />
-				<link href="${codeCompleteStyle}" rel="stylesheet" />
-				<link href="${codeTourStyle}" rel="stylesheet" />
+            <link href="${styleResetUri}" rel="stylesheet" />
+            <link href="${styleVSCodeUri}" rel="stylesheet" />
+            <link href="${styleMainUri}" rel="stylesheet" />
+            <link href="${codeInStyling}" rel="stylesheet" />
+            <link href="${codeCompleteStyle}" rel="stylesheet" />
+            <link href="${codeTourStyle}" rel="stylesheet" />
 
-				<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-				
+            <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+            
 
-				${highlightStyle}
+            ${highlightStyle}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/components/prism-core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
 
-				<title>Cat Scratch</title>
-			</head>
+            <title>Cat Scratch</title>
+        </head>
 
-			<script src="${codeTourScript}"></script>
+        <script src="${codeTourScript}"></script>
 
-			
-			<div id="container" style="height: 100%"></div>
-			<body class="line-numbers" id="body" style="overflow: scroll" >
-			
-			<div id="page" class="page">
-			<script src="${codeIn}"></script>
-			<!--...-->
-			<script src="${codeAutoDetect}"></script>
-			<script src="${codeIndent}"></script>
-			<script src="${codeComplete}"></script>
-			<script src="${codeDeBounce}"></script>
+        
+        <div id="container" style="height: 100%"></div>
+        <body class="line-numbers" id="body" style="overflow: scroll" >
+        
+        <div id="page" class="page">
+        <script src="${codeIn}"></script>
+        <!--...-->
+        <script src="${codeAutoDetect}"></script>
+        <script src="${codeIndent}"></script>
+        <script src="${codeComplete}"></script>
+        <script src="${codeDeBounce}"></script>
 
-			
-			
-			
-			
-			<!--...-->
-			<script>
-			codeInput.registerTemplate("code-input", 
-				codeInput.templates.prism(
-				Prism, 
-				[
-					
-					
-					new codeInput.plugins.Indent()
-				]
-				)
-			);
-			</script>
-			<div class="storage-tray">
-				<button class="storage-tray-button" id="storage-tray-button" onclick="addCodeTour(this)">+</button>
-				</br>
-				</br>
-				<button id="trash" class="trash">
-					<svg id="trash-icon" class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-						<path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>
-					</svg>
+        
+        
+        
+        
+        <!--...-->
+        <script>
+        codeInput.registerTemplate("code-input", 
+            codeInput.templates.prism(
+            Prism, 
+            [
+                
+                
+                new codeInput.plugins.Indent()
+            ]
+            )
+        );
+        </script>
+        <div class="storage-tray">
+            <button class="storage-tray-button" id="storage-tray-button" onclick="addCodeTour(this)">+</button>
+            </br>
+            </br>
+            <button id="trash" class="trash">
+                <svg id="trash-icon" class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>
+                </svg>
 
-					
-				</button>
-				
-			</div>
-			<div id="pop-container" class="pop-up-container">
-				<div id="add-pop" class="add-pop-up"></div>
-				<div id="pop-arrow" class="arrow-left"></div>
-			</div>
+                
+            </button>
+            
+        </div>
+        <div id="pop-container" class="pop-up-container">
+            <div id="add-pop" class="add-pop-up"></div>
+            <div id="pop-arrow" class="arrow-left"></div>
+        </div>
 
-					
+                
 
-					<div id="delete-container" class="delete-container">
-					   <b id="delete-prompt" class="delete-prompt" >Are you sure you want to delete?</b>
-					   </br>
+                <div id="delete-container" class="delete-container">
+                   <b id="delete-prompt" class="delete-prompt" >Are you sure you want to delete?</b>
+                   </br>
 
-					   <div class="code-steps-inner">	
-							<span  class="step-title"><b>Step 0</b></span> 
-						</div>
+                   <div class="code-steps-inner">	
+                        <span  class="step-title"><b>Step 0</b></span> 
+                    </div>
 
-					   </br>
-					   <div id="button-container" style="padding-top: 50%; display: flex; justify-content: center">
-					   <button id="delete-btn" class="delete-btn">Delete</button>
-					   <button id="cancel-btn" class="cancel-btn" onclick="closeDeleteBox()">Cancel</button>
-					   </div>
-					</div>
-				
-					<div class="code-steps-box">
-							<div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" oncontextmenu="expandStep(event, this)" class="code-steps">
-							<img  class="move-icon"  src = "${this.moveSVG}" alt="My Happy SVG">
-						
+                   </br>
+                   <div id="button-container" style="padding-top: 50%; display: flex; justify-content: center">
+                   <button id="delete-btn" class="delete-btn">Delete</button>
+                   <button id="cancel-btn" class="cancel-btn" onclick="closeDeleteBox()">Cancel</button>
+                   </div>
+                </div>
+            
+                <div class="code-steps-box">
+                        <div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" oncontextmenu="expandStep(event, this)" class="code-steps">
+                        <div class="code-steps-inner">	
+                        <span  class="step-title"><b>Step 0</b></span> 
+                        </div>
+                        <div id="file-path-div">
+                            <label>File Path*:</label>
+                            <input id="file-path" class="file-path-box">
+                            </input>
+                        </div>
+                        <div id="line-number-div">
+                            <label>Line Number*:</label>
+                            <input id="line-number" class="line-number-box">
+                            </input>
+                        </div>
+                        <div id="description-div">
+                            <label>Description/Code:</label>
+                            <textarea id="description-input" class="description-box">
+                            </textarea>
+                        </div>
+                        
 
-							</img>
-
-							<div class="code-steps-inner">	
-							<span  class="step-title"><b>Step 0</b></span> 
-							</div>
-							<div id="file-path-div">
-								<label>File Path*:</label>
-								<input id="file-path" class="file-path-box">
-								</input>
-							</div>
-							<div id="line-number-div">
-								<label>Line Number*:</label>
-								<input id="line-number" class="line-number-box">
-								</input>
-							</div>
-							<div id="description-div">
-								<label>Description/Code:</label>
-								<textarea id="description-input" class="description-box">
-								</textarea>
-							</div>
-							
-
-							
+                        
 
 
-							<button id="save-step-button" class="save-step" onclick="saveStep(this)">Save</button>
-							<button style="display: none;" id="edit-step-button" class="edit-step" onclick="editStep(this)">Edit</button>
-						</div>
-					</div>
+                        <button id="save-step-button" class="save-step" onclick="saveStep(this)">Save</button>
+                        <button style="display: none;" id="edit-step-button" class="edit-step" onclick="editStep(this)">Edit</button>
+                    </div>
+                </div>
 
-				
-					<div class="input-container">
-						<code-input id="ci-external" lang="Markdown" style="letter-spacing: inherit;" value="${parsedText}"></code-input>
-					</div>
-			
+            
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Monaco Editor</title>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs/loader.js"></script>
+                <style>
+                    html, body, #container {
+                        width: 100%;
+                        height: 100%;
+                        margin: 0;
+                        padding-left: 20px;
+                        overflow: hidden;
+                    },
+                    .custom-button {
+                        background-color: blue;
+                        color: white;
+                        border: 2px solid black;
+                        border-radius: 5px;
+                        padding: 5px 10px;
+                    }
+                </style>
+               
+            </head>
+            
+            <body>
+            <div id="container"></div>
+            <script>
+            require.config({
+                paths: {
+                    'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.30.1/min/vs'
+                }
+            });
+      
+            require(['vs/editor/editor.main'], function() {
+                const editor = monaco.editor.create(document.getElementById('container'), {
+                    value: \`${parsedTextEscaped}\`,
+                    language: 'markdown',
+                    theme: '${vsTheme}',
+                    scrollBeyondLastLine: false,
+                });
 
-				<script  nonce="${nonce}" src="${styleJS}" ></script>
-				<script type="module" nonce="${nonce}" src="${scriptUri}"></script>
-			</div>
-			</body>
-			</html>`;
+            
+                const parsedYaml = ${tourDataStr};
+
+                
+                
+
+                parsedYaml.steps.forEach(step => {
+                    const button = document.createElement('button');
+                    button.classList.add('tour-button-style')
+                    button.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                    button.textContent = 'Step ' + step.step_number;
+                    button.addEventListener('click', () => {
+                        vscode.postMessage({
+                            type: 'tourStepButton',
+                            message: step.step_number
+                        });
+                      });
+                    const lineTop = editor.getTopForLineNumber(step.line_number);
+                    button.style.top = lineTop + 'px';
+                    editor.onDidScrollChange(() => {
+                        const scrollInfo = editor.getScrollTop();
+                        button.style.top = (lineTop - scrollInfo) + 'px';
+                      });
+
+                    editor.getDomNode().appendChild(button);
+                })
+                
+        
+                function postUpdatedContent() {
+                    const updatedContent = editor.getValue();
+                    vscode.postMessage({
+                        type: 'updateFile',
+                        message: updatedContent
+                    });
+                }
+        
+                editor.onDidChangeModelContent(function(e) {
+                    postUpdatedContent();
+                });
+        
+                window.addEventListener('message', event => {
+                    const message = event.data;
+                    if (message.type === 'placeStep') {
+                        const button = document.createElement('button');
+                        const cursorPosition = editor.getPosition();
+    
+                        console.log("place step");
+                        
+                        const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
+                        button.style.top = lineTop + 'px';
+                        
+                        
+                        editor.onDidScrollChange(() => {
+                          const scrollInfo = editor.getScrollTop();
+                          button.style.top = (lineTop - scrollInfo) + 'px';
+                        });
+
+                        button.classList.add('tour-button-style')
+                        button.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                        button.textContent = 'Step ' + ${this.numOfSteps + 1};
+                        button.addEventListener('click', () => {
+                        vscode.postMessage({
+                            type: 'tourStepButton',
+                            message: ${this.numOfSteps + 1}
+                        });
+                      });
+                        button.style.top = lineTop + 'px';
+                        editor.onDidScrollChange(() => {
+                            const scrollInfo = editor.getScrollTop();
+                            button.style.top = (lineTop - scrollInfo) + 'px';
+                        });
+
+                        editor.getDomNode().appendChild(button);
+                    }
+                });
+            });
+            </script>
+        </body>
+
+            <script  nonce="${nonce}" src="${styleJS}" ></script>
+            <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
+        </div>
+        </body>
+        </html>`;
     }
+    // editor.executeEdits('', [{
+    //     range: new monaco.Range(cursorPosition.lineNumber, cursorPosition.column, cursorPosition.lineNumber, cursorPosition.column),
+    //     text: '@@@example@@@'
+    // }]);
     /**
      * Try to get a current document as json text.
      */

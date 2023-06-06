@@ -260,7 +260,15 @@ body {
 }
 
 
-
+.tour-button-style {
+    position: absolute;
+    z-index: 1;
+    border-radius: 15px;
+    padding: 1px 1px;
+    width: 150px;
+    left: 66px;
+    color: white;
+  }
 
 
 .code-steps:-moz-drag-over{

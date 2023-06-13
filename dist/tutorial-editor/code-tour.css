@@ -103,9 +103,8 @@ body {
 }
 
 .arrow-left {
-    backdrop-filter: blur(5px);
-    width: 40px;
-    height: 40px;
+    width: 4px;
+    height: 4px;
     /* display: none;; */
     /* z-index: 9; */
     
@@ -113,10 +112,10 @@ body {
     /* left: 4%; */
     z-index: 9; /* Stay on top */
     left: 0%;
-    border-top: 40px solid transparent;
-    border-bottom: 40px solid transparent; 
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent; 
     
-    border-right:40px solid var(--vscode-button-background); 
+    border-right:10px solid var(--vscode-button-background); 
   }
 
 
@@ -227,13 +226,14 @@ body {
 
 .code-steps{
    
-    left: 7%;
+    left: 130px;
+    position: absolute;
     top: 11%;
     display: none;
     z-index: 20;
     background-color: auto;
     backdrop-filter: blur(5px);
-    position: fixed;
+    
     resize: true;
     opacity: 100%;
     border: 5px white;
@@ -242,22 +242,16 @@ body {
     height: 25%;
     border-radius: 18px;
     text-align: center;
-    
 
-
-    cursor: move;
-  cursor: -webkit-grab;
-  cursor: -moz-grab;
-   
     padding: 5px;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
 }
 
-.code-steps:active {
+/* .code-steps:active {
     cursor: move;
     cursor: -webkit-grabbing;
     cursor: -moz-grabbing;
-}
+} */
 
 
 .tour-button-style {
@@ -271,13 +265,13 @@ body {
   }
 
 
-.code-steps:-moz-drag-over{
+/* .code-steps:-moz-drag-over{
     box-shadow: rgba(0, 0, 0, 0.2) 0px 16px 16px -16px, rgba(0, 0, 0, 0.14) 0px 16px 20px 0px, rgba(0, 0, 0, 0.12) 0px 8px 32px 0px;
 }
 
 .code-steps:hover{
     box-shadow: rgba(0, 0, 0, 0.2) 0px 16px 16px -16px, rgba(0, 0, 0, 0.14) 0px 16px 20px 0px, rgba(0, 0, 0, 0.12) 0px 8px 32px 0px;
-}
+} */
 
 .step-title{
     text-align: center;

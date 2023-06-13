@@ -73,6 +73,7 @@ class TutorialEditorProvider {
         var files = document.fileName.split("/");
         var fileName = files[files.length - 1];
         var fileNoExt = fileName.split(".")[0];
+        this.fileNum = Number(fileNoExt.split("-")[1]);
         console.log(`DOC NAME: ${fileNoExt}`);
         this.tourFilePath = path.join(this.baseWorkspaceUri.fsPath, ".gigo", ".tours", `${fileNoExt}.tour`);
         if (fs.existsSync(this.tourFilePath)) {
@@ -159,6 +160,7 @@ class TutorialEditorProvider {
                 // webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
                 case "cursorPosition":
                     this.cursorPos = e.message;
+                    console.log("this worked", e.message);
                     return;
                 case "tourStepButton":
                     console.log("button", +e.message, "was clicked");
@@ -291,7 +293,7 @@ class TutorialEditorProvider {
         if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark) {
             vsTheme = 'vs-dark';
         }
-        const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-1.yaml");
+        const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-" + this.fileNum + ".yaml");
         const fileContents = fs.readFileSync(filePath, 'utf8');
         const tourData = yaml.load(fileContents);
         const tourDataStr = JSON.stringify(tourData);
@@ -386,9 +388,9 @@ class TutorialEditorProvider {
             </button>
             
         </div>
-        <div id="pop-container" class="pop-up-container">
-            <div id="add-pop" class="add-pop-up"></div>
-            <div id="pop-arrow" class="arrow-left"></div>
+        <div id="pop-container" class="pop-up-container" style="left: 100px;">
+            <div id="add-pop" class="add-pop-up" style="left: 110px;"></div>
+            <div id="pop-arrow" class="arrow-left" ></div>
         </div>
 
                 
@@ -515,6 +517,39 @@ class TutorialEditorProvider {
                         message: updatedContent
                     });
                 }
+
+
+                editor.onMouseDown(function(e) {
+                    if (e.target.type === monaco.editor.MouseTargetType.CONTENT_WIDGET) {
+                        return;
+                    }
+                
+                    const cursorPosition = editor.getPosition();
+                    const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
+                    
+                    console.log("this is sparta", lineTop);
+                    vscode.postMessage({
+                        type: 'cursorPosition',
+                        message: cursorPosition
+                    });
+
+                    const scrollInfo = editor.getScrollTop();
+                    document.getElementById('@@@Step0@@@').style.top = (lineTop - scrollInfo - 1) + 'px';
+                    document.getElementById('add-pop').style.top = (lineTop - scrollInfo - 10) + 'px';
+                    document.getElementById('pop-container').style.top = (lineTop - scrollInfo) + 'px';
+                });
+
+                editor.onMouseWheel(function(e) {
+                    const cursorPosition = editor.getPosition();
+                    const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
+                    e.preventDefault();
+                    const scrollInfo = editor.getScrollTop();
+                    document.getElementById('@@@Step0@@@').style.top = (lineTop - scrollInfo - 1) + 'px';
+                    document.getElementById('add-pop').style.top = (lineTop - scrollInfo - 10) + 'px';
+                    document.getElementById('pop-container').style.top = (lineTop - scrollInfo) + 'px';
+                });
+
+
         
                 editor.onDidChangeModelContent(function(e) {
                     postUpdatedContent();
@@ -525,17 +560,10 @@ class TutorialEditorProvider {
                     if (message.type === 'placeStep') {
                         const button = document.createElement('button');
                         const cursorPosition = editor.getPosition();
-    
-                        console.log("place step");
                         
                         const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
                         button.style.top = lineTop + 'px';
                         
-                        
-                        editor.onDidScrollChange(() => {
-                          const scrollInfo = editor.getScrollTop();
-                          button.style.top = (lineTop - scrollInfo) + 'px';
-                        });
 
                         button.classList.add('tour-button-style')
                         button.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
@@ -554,7 +582,11 @@ class TutorialEditorProvider {
 
                         editor.getDomNode().appendChild(button);
                     }
+                    
                 });
+
+
+
             });
             </script>
         </body>

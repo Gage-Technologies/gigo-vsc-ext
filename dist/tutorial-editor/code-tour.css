@@ -226,7 +226,7 @@ body {
 
 .code-steps{
    
-    left: 130px;
+    left: 123px;
     position: absolute;
     top: 11%;
     display: none;
@@ -290,7 +290,7 @@ body {
 }
 
 .code-steps-inner{
-    background-color: green;
+    background-color: red;
     border-radius: 18px;
 }
 

@@ -53,7 +53,8 @@ function addCodeTour(){
 
         var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
 
-        title.innerHTML = `<b>Step ${tourNum.value}</b>`;
+        // here ----
+        title.innerHTML = `<b>Add Step</b>`;
         // stepClone.querySelector("#div.code-steps-inner > span > b")
 
         // vscode.postMessage({
@@ -119,113 +120,112 @@ function loadCodeTours(){
     }
     
     console.log(`this is post message in load code tours length of steps: ${steps.length}`);
-    for (let i = 0; i < steps.length; i++) {
-        var randomColor = Math.floor(Math.random()*16777215).toString(16);
+    // for (let i = 0; i < steps.length; i++) {
+    //     var randomColor = Math.floor(Math.random()*16777215).toString(16);
 
-        var step = document.getElementById("@@@Step0@@@");
+    //     var step = document.getElementById("@@@Step0@@@");
         
 
-        let stepClone = step.cloneNode(true);
-        stepClone.id = `@@@Step${i + 1}@@@`;
+    //     let stepClone = step.cloneNode(true);
+    //     stepClone.id = `@@@Step${i + 1}@@@`;
 
-        console.log(`this is the step in iter: ${stepClone.id}`);
 
        
-        var innerStep = stepClone.querySelector(".code-steps-inner");
-        innerStep.style.backgroundColor = "#" + randomColor;
-        var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
+    //     var innerStep = stepClone.querySelector(".code-steps-inner");
+    //     innerStep.style.backgroundColor = "#" + randomColor;
+    //     var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
 
-        title.innerHTML = `<b>Step ${i + 1}</b>`;
+    //     title.innerHTML = `<b>Step ${i + 1}</b>`;
 
-        var filePath = stepClone.querySelector("#file-path-div").querySelector("#file-path");
-        filePath.value = steps[i].file;
+    //     var filePath = stepClone.querySelector("#file-path-div").querySelector("#file-path");
+    //     filePath.value = steps[i].file;
 
-        var lineNumber = stepClone.querySelector("#line-number-div").querySelector("#line-number");
-        lineNumber.value = steps[i].line;
+    //     var lineNumber = stepClone.querySelector("#line-number-div").querySelector("#line-number");
+    //     lineNumber.value = steps[i].line;
 
-        var description = stepClone.querySelector("#description-div").querySelector("#description-input");
-        description.value = steps[i].description;
+    //     var description = stepClone.querySelector("#description-div").querySelector("#description-input");
+    //     description.value = steps[i].description;
 
-        stepClone.style.display = "inline-block";
-        step.parentElement.appendChild(stepClone);
+    //     stepClone.style.display = "inline-block";
+    //     step.parentElement.appendChild(stepClone);
 
-        var filePathDiv = stepClone.querySelector("#file-path-div")
-        var lineNumberDiv = stepClone.querySelector("#line-number-div")
-        var descriptionDiv = stepClone.querySelector("#description-div")
-        var saveButton = stepClone.querySelector('#save-step-button');
-        var textBoxEx = document.getElementById("ci-external");
-        var textBoxIn = document.getElementById("ci-internal");
-        var word = stepClone.id;
-        var elmnt = stepClone;
+    //     var filePathDiv = stepClone.querySelector("#file-path-div")
+    //     var lineNumberDiv = stepClone.querySelector("#line-number-div")
+    //     var descriptionDiv = stepClone.querySelector("#description-div")
+    //     var saveButton = stepClone.querySelector('#save-step-button');
+    //     var textBoxEx = document.getElementById("ci-external");
+    //     var textBoxIn = document.getElementById("ci-internal");
+    //     var word = stepClone.id;
+    //     var elmnt = stepClone;
 
-        console.log(`this is the step in iter2: ${stepClone.id}`);
+    //     console.log(`this is the step in iter2: ${stepClone.id}`);
 
-        filePathDiv.style.display = "none";
-        lineNumberDiv.style.display = "none";
-        descriptionDiv.style.display = "none";
-        saveButton.style.display = "none";
-        stepClone.style.height = "3%";
+    //     filePathDiv.style.display = "none";
+    //     lineNumberDiv.style.display = "none";
+    //     descriptionDiv.style.display = "none";
+    //     saveButton.style.display = "none";
+    //     stepClone.style.height = "3%";
 
-        var caretPos = textBoxIn.selectionStart;
+    //     var caretPos = textBoxIn.selectionStart;
             
-        if (textBoxEx.value.indexOf(word) === -1){
-            console.log(caretPos)
+    //     if (textBoxEx.value.indexOf(word) === -1){
+    //         console.log(caretPos)
 
 
-            textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
+    //         textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
 
 
-            console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
-            console.log("rest of string: ", textBoxEx.value.slice(`${word}`.length))
-            console.log(textBoxEx.value);
-            //textBoxEx.value += `\n${word}\n`;
-        }
+    //         console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
+    //         console.log("rest of string: ", textBoxEx.value.slice(`${word}`.length))
+    //         console.log(textBoxEx.value);
+    //         //textBoxEx.value += `\n${word}\n`;
+    //     }
         
-        // now you have a proper float for the font size (yes, it can be a float, not just an integer)
-        var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
-        var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
+    //     // now you have a proper float for the font size (yes, it can be a float, not just an integer)
+    //     var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
+    //     var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
 
-        var charsBefore = 0
-        const newLines = textBoxEx.value.split("\n");
-        for (let i = 0; i < newLines.length; i++) {
-            if (newLines[i].indexOf(word) !== -1){
-                heightPos = i + 1;
-            }
-        } 
+    //     var charsBefore = 0
+    //     const newLines = textBoxEx.value.split("\n");
+    //     for (let i = 0; i < newLines.length; i++) {
+    //         if (newLines[i].indexOf(word) !== -1){
+    //             heightPos = i + 1;
+    //         }
+    //     } 
 
-        for (let i = 0; i < newLines.length; i++) {
-            if (newLines[i].indexOf(word)!== -1){
-                break;
-            }
-            charsBefore += newLines[i].length + 1;
-        }
+    //     for (let i = 0; i < newLines.length; i++) {
+    //         if (newLines[i].indexOf(word)!== -1){
+    //             break;
+    //         }
+    //         charsBefore += newLines[i].length + 1;
+    //     }
 
-        console.log(`postr newline calc`);
-        var startPos = (textBoxEx.value.indexOf(word));
-        var endPos = (startPos + word.length) - charsBefore;
+    //     console.log(`postr newline calc`);
+    //     var startPos = (textBoxEx.value.indexOf(word));
+    //     var endPos = (startPos + word.length) - charsBefore;
 
-        var top = (getOffset(textBoxEx).top + (heightPos * lineHeight))
-        var left = (getOffset(textBoxEx).left + (endPos * fontSize))
+    //     var top = (getOffset(textBoxEx).top + (heightPos * lineHeight))
+    //     var left = (getOffset(textBoxEx).left + (endPos * fontSize))
 
-        // if (top > rect.height || left > rect.width || left > rect.width){ 
-        //     elmnt.style.top = (getOffset(textBoxEx).top) + "px";
-        //     elmnt.style.left = (getOffset(textBoxEx).left) + "px";
-        //     handleCodeSteps();
-        // }
+    //     // if (top > rect.height || left > rect.width || left > rect.width){ 
+    //     //     elmnt.style.top = (getOffset(textBoxEx).top) + "px";
+    //     //     elmnt.style.left = (getOffset(textBoxEx).left) + "px";
+    //     //     handleCodeSteps();
+    //     // }
         
-        console.log(`postr newline calc2`);
+    //     console.log(`postr newline calc2`);
         
-        //  elmnt.style.position = "fixed";
+    //     //  elmnt.style.position = "fixed";
 
-        stepClone.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)+5) + "px";
-        stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
-        stepClone.style.position = "absolute";
+    //     stepClone.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)+5) + "px";
+    //     stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
+    //     stepClone.style.position = "absolute";
 
-        console.log(`loading step: ${stepClone.id} into pos: ${stepClone.style.top}, ${stepClone.style.left}`);
-        // elmnt.ondragstart = function () { return false; };
+    //     console.log(`loading step: ${stepClone.id} into pos: ${stepClone.style.top}, ${stepClone.style.left}`);
+    //     // elmnt.ondragstart = function () { return false; };
        
 
-    }
+    // }
 
     // console.log(`load handle code steps`);
     // handleCodeSteps();
@@ -291,6 +291,8 @@ function saveStep(button) {
     var descriptionDiv = codeStep.querySelector('#description-div');
     var step = codeStep.id;
 
+
+    var stepPop = document.getElementById(step);
     var popUp = document.getElementById('pop-container');
 
     if (filePath.value === "" || lineNumber.value === "") {
@@ -330,8 +332,8 @@ function saveStep(button) {
     button.style.display = "none";
     codeStep.style.height = "3%";
     codeStep.style.zIndex = "20";
-    // popUp.style.display = "none";
-    
+    popUp.style.display = "none";
+    stepPop.style.display = "none";
 
     
     vscode.postMessage({
@@ -935,10 +937,7 @@ function dragElement(elmnt) {
 
         title.innerHTML = stepTitle.innerHTML;
 
-        var deleteButton = deleteContainer.querySelector(".delete-btn");
-        deleteButton.addEventListener("click", () =>{
-            return executeDelete(elmnt.id);
-        }, {once: true});
+
 
         // deleteButton.removeEventListener("click", function() {
         //     return executeDelete(elmnt.id);
@@ -969,6 +968,99 @@ function dragElement(elmnt) {
     var deleteContainer = document.getElementById("delete-container");
     deleteContainer.style.display = "none";
   }
+
+  function openDeleteBox(number){
+    var deleteContainer = document.getElementById("delete-container");
+    deleteContainer.style.display = "inline-block";
+
+    
+    console.log("delete box is open", number);
+    var step = document.getElementById("stepToDelete");
+
+    var title = step.querySelector('.step-title');
+    var stepColor = document.getElementById("Step " + number).style.backgroundColor;
+
+    step.style.backgroundColor = stepColor;
+
+    title.textContent = 'Step '+ number; 
+
+  }
+
+
+  function deleteSteps() {
+    var step = document.getElementById("stepToDelete");
+    var title = step.querySelector('.step-title').textContent;
+    
+
+    // const steps = []; // create an empty array to store the steps
+
+    // const elements = document.querySelectorAll("[id^='Step']"); // get all elements with an ID that starts with "Step"
+    // elements.forEach(element => {
+    // const id = element.id;
+    // const match = id.match(/^Step (\d+)$/); // extract the step number from the ID using a regular expression
+    // if (match) {
+    //     const step = parseInt(match[1]); // convert the step number from a string to an integer
+    //     steps.push(step); // add the step to the array
+    // }
+    // });
+
+    // const delMatch = title.match(/\d+/);
+
+    // if (delMatch) {
+    //     const delNum = parseInt(delMatch[0]); 
+    //     console.log("whatever this is i am testing step is: ", delNum);
+    // }
+
+    
+    // steps.sort((a, b) => a - b); // sort the steps in ascending order
+
+    // console.log("whatever this is i am testing",steps); // print the steps to the console for testing
+
+    // console.log("whatever this is i am testing", title)
+
+
+
+    
+    var num = title.replace("Step ", "");
+    console.log("num is:", num)
+    var tourNum = document.getElementById("tour-step-num");
+    var tourNumLength = tourNum.value
+    console.log("tour num is: ", tourNumLength)
+
+    tourNumLength = tourNumLength - 1;
+    tourNum.value = tourNumLength;
+
+    if (tourNumLength > 0) {
+        console.log("made it here: ", Number(num) + 1)
+        console.log("tour num length is: ", Number(tourNumLength))
+        for (let i = Number(num) + 1; i <= Number(tourNumLength) + 1; i++){
+            console.log("i guess we made it this far: ", i)
+            var id = 'Step ' + i;
+            var steps = document.getElementById(id);
+            console.log("steps are: ", steps)
+            console.log("element id is: ", id)
+            steps.textContent = 'Step '+ (i - 1); 
+            steps.id = 'Step '+ (i - 1); 
+        }
+    }
+    
+
+    var element = document.getElementById(title);
+    
+    console.log("element is this: ", element)
+
+    element.remove();
+
+    closeDeleteBox()
+
+    vscode.postMessage({
+        type: 'deleteTourStep',
+        message: num
+    });
+
+
+}
+
 
 
   function executeDelete(step){
@@ -1157,6 +1249,8 @@ function dragElement(elmnt) {
         left: rect.left + window.scrollX,
         top: rect.top + window.scrollY
       };
+
+    
     }
   
   

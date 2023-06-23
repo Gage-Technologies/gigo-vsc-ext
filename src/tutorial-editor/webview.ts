@@ -171,6 +171,7 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 
 
 
+
         // Receive message from the webview.
         webviewPanel.webview.onDidReceiveMessage(e => {
             switch (e.type) {
@@ -204,8 +205,10 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                     vscode.window.showInformationMessage('add code tour');
                 // webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
                 case "cursorPosition":
-                    this.cursorPos = e.message;
-                    console.log("this worked", e.message);
+                    if (e.message !== undefined) {
+                        this.cursorPos = e.message["lineNumber"];
+                    }
+                    console.log("this worked!!! ", this.cursorPos);
                     return;
                 case "tourStepButton":
                     console.log("button", + e.message, "was clicked");
@@ -213,7 +216,63 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 
                 case 'saveTourStep':
                     webviewPanel.webview.postMessage({ type: 'placeStep' });
+                    console.log("this worked!!!", this.cursorPos);
                     
+
+                    const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-2.yaml");
+                    const fileContents = fs.readFileSync(filePath, 'utf8');
+                    const tourData = yaml.load(fileContents) as any;
+                    console.log("this is tourdata", tourData);
+                    console.log("this is tourdata", this.cursorPos);
+                    
+                    if (tourData === undefined) {
+                        const data = {
+                            steps: [
+                              {
+                                step_number: 1,
+                                line_number: this.cursorPos,
+                              },
+                            ],
+                          };
+                          
+                          const yamlStr = yaml.dump(data);
+                          
+                          fs.writeFileSync(filePath, yamlStr);
+                    } else {
+                    this.numOfSteps = tourData.steps.length;
+            
+                    
+                    let newLineNum = this.cursorPos; // new line number to push
+                    let lineNumExists = true;
+                    
+                    // Check if the new line number already exists and increment if necessary
+                    while (lineNumExists) {
+                      lineNumExists = false;
+                      for (let i = 0; i < tourData.steps.length; i++) {
+                        if (tourData.steps[i].line_number === newLineNum) {
+                          newLineNum++;
+                          lineNumExists = true;
+                          break;
+                        }
+                      }
+                    }
+                    
+                    // Push the new step to the steps array
+                    tourData.steps.push({
+                      step_number: this.numOfSteps + 1,
+                      line_number: newLineNum
+                    });
+                    
+                    // Write the updated YAML back to the file
+                    const tourDataStr = yaml.dump(tourData);
+                    fs.writeFileSync(filePath, tourDataStr);
+
+                    this.numOfSteps = this.numOfSteps + 1;
+                }
+ 
+
+
+
 
                     // // vscode.window.showInformationMessage(`saveTourStep tour num: ${this.numOfSteps}`);
                     // console.log(`${e.message}`)
@@ -305,6 +364,8 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 
 
 
+
+
                     // this.fullTour = JSON.stringify(ts);
                     // fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
 
@@ -315,21 +376,45 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                 // fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
 
                 case 'deleteTourStep':
-                    console.log('deleteTour');
-                    var deletedStepNum = parseInt(e.message);
-                    // vscode.window.showInformationMessage(`delete step: ${deletedStepNum} `);
-                    let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
-                    let tss = JSON.parse(tours);
-                    this.numOfSteps--;
+                    webviewPanel.webview.postMessage({ type: 'deleteTourStep' });
+
+                    vscode.window.showInformationMessage("step to be deleted: ", e.message);
+                    // var deletedStepNum = parseInt(e.message);
+                    // // vscode.window.showInformationMessage(`delete step: ${deletedStepNum} `);
+                    // let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
+                    // let tss = JSON.parse(tours);
+                    // this.numOfSteps--;
 
 
-                    tss.steps = tss.steps.splice(deletedStepNum);
-                    // vscode.window.showInformationMessage(`new steps: ${JSON.stringify(tss.steps.splice(deletedStepNum))} `);
-                    this.fullTour = JSON.stringify(tss);
-                    fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+                    // tss.steps = tss.steps.splice(deletedStepNum);
+                    // // vscode.window.showInformationMessage(`new steps: ${JSON.stringify(tss.steps.splice(deletedStepNum))} `);
+                    // this.fullTour = JSON.stringify(tss);
+                    // fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+                    const delFilePath = path.join(this.baseWorkspaceUri.fsPath, "tour-2.yaml");
+                    const deliFleContents = fs.readFileSync(delFilePath, 'utf8');
+                    const delTourData = yaml.load(deliFleContents) as any;
+
+                    const delStep = delTourData.steps.filter((step: any) => step.step_number === e.message);
+                    console.log("deleting step: ", e.message);
+
+                    // The step to delete (replace with actual user input)
+                    const stepToDelete = e.message;
+
+                    // Remove the desired step from the array and adjust line numbers for following steps
+                    delTourData.steps.splice(stepToDelete-1, 1);
+                    for (let i = stepToDelete-1; i < delTourData.steps.length; i++) {
+                        delTourData.steps[i].step_number -= 1;
+                    }
+
+                    // Convert the updated JavaScript object back into YAML
+                    const updatedYaml = yaml.dump(delTourData);
+
+
+                    fs.writeFileSync(delFilePath, updatedYaml);
+
+                    this.numOfSteps = this.numOfSteps - 1;
 
                     break;
-
             }
         });
 
@@ -408,13 +493,20 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
             vsTheme = 'vs-dark';
         } 
 
-        const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-" + this.fileNum + ".yaml");
-        const fileContents = fs.readFileSync(filePath, 'utf8');
-       const tourData = yaml.load(fileContents) as any;
-        const tourDataStr = JSON.stringify(tourData);
-        this.numOfSteps = tourData.steps.length;
+        // const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-" + this.fileNum + ".yaml");
+        let filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-2.yaml");
+        let fileContents = fs.readFileSync(filePath, 'utf8');
+        let tourData = yaml.load(fileContents) as any;
+        let tourDataStr = JSON.stringify("");
+        if (tourData !== undefined) {
+            tourDataStr = JSON.stringify(tourData);
+            this.numOfSteps = tourData.steps.length;
+        } else if (tourData === undefined) {
+            this.numOfSteps = 0;
+        }
+        
 
-        console.log("fuck this shit", tourData);
+
         console.log(`text before render: ${this.text.length}`);
         console.log(`steps befor load: ${JSON.stringify(this.fullTour.steps)}`);
         return /* html */`
@@ -495,44 +587,36 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
             <button class="storage-tray-button" id="storage-tray-button" onclick="addCodeTour(this)">+</button>
             </br>
             </br>
-            <button id="trash" class="trash">
-                <svg id="trash-icon" class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path class="trash-icon-path" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>
-                </svg>
-
-                
-            </button>
+            
             
         </div>
         <div id="pop-container" class="pop-up-container" style="left: 100px;">
-            <div id="add-pop" class="add-pop-up" style="left: 110px;"></div>
-            <div id="pop-arrow" class="arrow-left" ></div>
         </div>
 
                 
 
                 <div id="delete-container" class="delete-container">
-                   <b id="delete-prompt" class="delete-prompt" >Are you sure you want to delete?</b>
+                   <b id="delete-prompt" class="delete-prompt" >Do you want to delete this step?</b>
                    </br>
 
-                   <div class="code-steps-inner">	
+                   <div class="code-steps-inner" id="stepToDelete">	
                         <span  class="step-title"><b>Step 0</b></span> 
                     </div>
 
                    </br>
                    <div id="button-container" style="padding-top: 50%; display: flex; justify-content: center">
-                   <button id="delete-btn" class="delete-btn">Delete</button>
+                   <button id="deleteBtn" class="delete-btn" onClick="deleteSteps()">Delete</button>
                    <button id="cancel-btn" class="cancel-btn" onclick="closeDeleteBox()">Cancel</button>
                    </div>
                 </div>
-            
+
                 <div class="code-steps-box">
                         <div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" oncontextmenu="expandStep(event, this)" class="code-steps">
                         <div class="code-steps-inner">	
                         <span  class="step-title"><b>Step 0</b></span> 
                         </div>
                         <div id="file-path-div">
-                            <label>File Path*:</label>
+                            <label>Relative File Path*:</label>
                             <input id="file-path" class="file-path-box">
                             </input>
                         </div>
@@ -546,9 +630,9 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                             <textarea id="description-input" class="description-box">
                             </textarea>
                         </div>
-                        
 
-                        
+
+
 
 
                         <button id="save-step-button" class="save-step" onclick="saveStep(this)">Save</button>
@@ -598,33 +682,36 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                     scrollBeyondLastLine: false,
                 });
 
+
             
                 const parsedYaml = ${tourDataStr};
+                let numbersArray = []
 
-                
+                if (parsedYaml !== "") {
+                    parsedYaml.steps.forEach(step => {
+                        const button = document.createElement('button');
+                        button.classList.add('tour-button-style')
+                        button.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                        button.id = 'Step ' + step.step_number;
+                        button.textContent = 'Step ' + step.step_number;
+                        button.addEventListener('click', () => {
+                            openDeleteBox(step.step_number);
+                            });
+                        const lineTop = editor.getTopForLineNumber(step.line_number);
+                        button.style.top = lineTop + 'px';
+                        editor.onDidScrollChange(() => {
+                            const scrollInfo = editor.getScrollTop();
+                            button.style.top = (lineTop - scrollInfo) + 'px';
+                            });
+
+                        numbersArray.push(step.line_number);
+                        editor.getDomNode().appendChild(button);
+                    })
+                }
+
+                console.log("this is the full array", numbersArray);
                 
 
-                parsedYaml.steps.forEach(step => {
-                    const button = document.createElement('button');
-                    button.classList.add('tour-button-style')
-                    button.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-                    button.textContent = 'Step ' + step.step_number;
-                    button.addEventListener('click', () => {
-                        vscode.postMessage({
-                            type: 'tourStepButton',
-                            message: step.step_number
-                        });
-                      });
-                    const lineTop = editor.getTopForLineNumber(step.line_number);
-                    button.style.top = lineTop + 'px';
-                    editor.onDidScrollChange(() => {
-                        const scrollInfo = editor.getScrollTop();
-                        button.style.top = (lineTop - scrollInfo) + 'px';
-                      });
-
-                    editor.getDomNode().appendChild(button);
-                })
-                
         
                 function postUpdatedContent() {
                     const updatedContent = editor.getValue();
@@ -643,16 +730,20 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                     const cursorPosition = editor.getPosition();
                     const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
                     
-                    console.log("this is sparta", lineTop);
+                    console.log("this is myline", lineTop);
                     vscode.postMessage({
                         type: 'cursorPosition',
                         message: cursorPosition
                     });
 
                     const scrollInfo = editor.getScrollTop();
-                    document.getElementById('@@@Step0@@@').style.top = (lineTop - scrollInfo - 1) + 'px';
-                    document.getElementById('add-pop').style.top = (lineTop - scrollInfo - 10) + 'px';
-                    document.getElementById('pop-container').style.top = (lineTop - scrollInfo) + 'px';
+                    document.getElementById('@@@Step0@@@').style.top = (lineTop - scrollInfo) + 'px';
+                    
+                    let element = document.getElementById('@@@Step${this.numOfSteps + 1}@@@');
+                    
+                    if (element !== null && element.style !== undefined) {
+                        element.style.top = (lineTop - scrollInfo) + 'px';
+                    }
                 });
 
                 editor.onMouseWheel(function(e) {
@@ -660,12 +751,18 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                     const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
                     e.preventDefault();
                     const scrollInfo = editor.getScrollTop();
-                    document.getElementById('@@@Step0@@@').style.top = (lineTop - scrollInfo - 1) + 'px';
-                    document.getElementById('add-pop').style.top = (lineTop - scrollInfo - 10) + 'px';
-                    document.getElementById('pop-container').style.top = (lineTop - scrollInfo) + 'px';
+                    
+                    let element = document.getElementById('@@@Step${this.numOfSteps + 1}@@@');
+                
+                    if (element !== null && element.style !== undefined) {
+                        element.style.top = (lineTop - scrollInfo) + 'px';
+                    }
+
                 });
 
 
+                let numOfSteps = ${this.numOfSteps};
+                console.log("numOfSteps", numOfSteps);
         
                 editor.onDidChangeModelContent(function(e) {
                     postUpdatedContent();
@@ -673,31 +770,46 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
         
                 window.addEventListener('message', event => {
                     const message = event.data;
+                    if (message.type === 'deleteTourStep') {
+                        numOfSteps--;
+                    }
                     if (message.type === 'placeStep') {
                         const button = document.createElement('button');
                         const cursorPosition = editor.getPosition();
-                        
-                        const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
-                        button.style.top = lineTop + 'px';
-                        
+                        let lineNumber = cursorPosition.lineNumber
 
+                        if (numbersArray.includes(lineNumber)) {
+                            while (numbersArray.includes(lineNumber)) {
+                                lineNumber++;
+                            }
+                        }
+
+                        newStep = (numOfSteps + 1)
+                        numbersArray.push(lineNumber);
+                        
+                        const lineTop = editor.getTopForLineNumber(lineNumber);
+                        const scrollInfo = editor.getScrollTop();
+                        button.style.top = (lineTop - scrollInfo) + 'px';
+                        
+                        button.id = 'Step ' + newStep;
                         button.classList.add('tour-button-style')
                         button.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-                        button.textContent = 'Step ' + ${this.numOfSteps + 1};
+                        button.textContent = 'Step ' + newStep;
+                        const deleteButton = newStep;
                         button.addEventListener('click', () => {
-                        vscode.postMessage({
-                            type: 'tourStepButton',
-                            message: ${this.numOfSteps + 1}
-                        });
+                            openDeleteBox(deleteButton);
                       });
-                        button.style.top = lineTop + 'px';
                         editor.onDidScrollChange(() => {
                             const scrollInfo = editor.getScrollTop();
                             button.style.top = (lineTop - scrollInfo) + 'px';
                         });
 
+
                         editor.getDomNode().appendChild(button);
+
+                        numOfSteps++;
                     }
+
                     
                 });
 

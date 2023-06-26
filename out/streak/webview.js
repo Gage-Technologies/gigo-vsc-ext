@@ -5,6 +5,7 @@ const axios_1 = require("axios");
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
 const explosion_1 = require("./explosion");
+const eplosion_webview_1 = require("./eplosion_webview");
 var messageData;
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 async function activateStreakWebView(context, cfg, logger) {
@@ -41,67 +42,28 @@ class StreakWebViewprovider {
         this.weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         this.isOnFire = false;
         this.dayOfTheWeek = "";
-        // explosion animation for when streak is hit
         this.explode = async (editor, left = false) => {
             console.log("inside explode");
-            // To give the explosions space, only explode every X strokes
-            // Where X is the configured explosion frequency
-            // This counter resets if the user does not type for 1 second.
-            // clearTimeout(this.counterTimeout);
-            // this.counterTimeout = setTimeout(() => {
-            //     this.keystrokeCounter = -1;
-            // }, 1000);
-            // if (++this.keystrokeCounter % this.config["explosions.frequency"] !== 0) {
-            //     return;
-            // }
-            // set the cursor position
-            const cursorPosition = editor.selection.active;
-            // The delta is greater to the left than to the right because otherwise the gif doesn't appear
-            const delta = left ? -2 : 1;
-            // const newRange = new vscode.Range(
-            //     cursorPosition.with(cursorPosition.line, cursorPosition.character),
-            //     // Value can't be negative
-            //     cursorPosition.with(cursorPosition.line, Math.max(0, cursorPosition.character + delta))
-            // );
-            console.log("cursor position: ", editor.visibleRanges[0]);
-            // var start = Math.floor(Math.random() * cursorPosition.line - 1);
-            // var end = Math.floor(Math.random() * cursorPosition.line - 1);
-            // start and end of current line in use
-            var start = editor.visibleRanges[0].start.line;
-            console.log(editor.visibleRanges[0]);
-            // var end = editor.visibleRanges[0].end.line  - 5;
-            var end = editor.visibleRanges[0].end.line;
-            // prevents any negative values
-            if (start < 1) {
-                start = 1;
-            }
-            if (end < 1) {
-                end = 1;
-            }
-            for (let i = end; i > start; i--) {
-                console.log("start and end: ", start, end);
-                // load new range 
-                const newRange = new vscode.Range(editor.document.lineAt(i).range.start, 
-                // Value can't be negative
-                editor.document.lineAt(i).range.start);
-                // Dispose excess explosions
-                // while(this.activeDecorations.length >= this.config["explosions.maxExplosions"]) {
-                //     this.activeDecorations.shift().dispose();
-                // }
-                // A new decoration is used each time because otherwise adjacent
-                // gifs will all be identical. This helps them be at least a little
-                // offset.
-                // const decoration = this.getExplosionDecoration(newRange.start);
-                const decoration = this.getExplosionDecoration(newRange.end);
-                if (!decoration) {
-                    return;
+            // Get the current scroll position
+            const visibleRanges = editor.visibleRanges;
+            for (const range of visibleRanges) {
+                const startLine = range.start.line;
+                const endLine = range.end.line;
+                // Iterate over each line in the visible range
+                for (let i = endLine; i > startLine; i--) {
+                    console.log("start and end: ", startLine, endLine);
+                    // Create a new range for each line
+                    const newRange = new vscode.Range(editor.document.lineAt(i).range.start, editor.document.lineAt(i).range.start);
+                    // Perform the fire animation for the new range
+                    const decoration = this.getExplosionDecoration(newRange.end);
+                    if (!decoration) {
+                        return;
+                    }
+                    console.log("anim placement: ", newRange.end);
+                    this.decorations.push(decoration);
+                    editor.setDecorations(decoration, [newRange]);
+                    await this.sleep(100);
                 }
-                console.log("anim placement: ", newRange.end);
-                // append decoration with new range to current decorations array
-                this.decorations.push(decoration);
-                // editor.setDecorations(decoration, [newRange]);
-                editor.setDecorations(decoration, [newRange]);
-                await this.sleep(100);
             }
         };
         this.getExplosionDecoration = (position) => {
@@ -130,14 +92,15 @@ class StreakWebViewprovider {
             const backgroundCss = this.getBackgroundCssSettings("/home/user/Development/Projects/gigo-vsc-ext/src/streak/SCJ6Uv4ExK.gif");
             console.log("https://api.gigo.dev/static/ext/streak-notif.gif");
             const defaultCss = {
-                position: 'absolute',
+                position: 'fixed',
                 ["margin-left"]: `-${leftValue}ch`,
                 loop: 'twice',
                 // width: `1920vh`,
                 // height: `1080vh`,
                 top: `20vh`,
+                bottom: `0`,
                 display: `inline-block`,
-                ['z-index']: 1,
+                ['z-index']: 10,
                 ['pointer-events']: 'none',
             };
             const backgroundCssString = this.objectToCssString(backgroundCss);
@@ -156,7 +119,7 @@ class StreakWebViewprovider {
                     contentText: '',
                     textDecoration: `none; ${defaultCssString} ${backgroundCssString} ${customCssString}`,
                 },
-                textDecoration: `none; position: absolute;`,
+                textDecoration: `none; position: fixed;`,
                 rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
             });
         };
@@ -168,6 +131,7 @@ class StreakWebViewprovider {
         </div>`;
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
+        (0, eplosion_webview_1.activateFireAnimation)(this.context);
     }
     // public websocketStreakCheck(wsID: any, secret: any){
     //     const WebSocket = require('isomorphic-ws');
@@ -239,7 +203,7 @@ class StreakWebViewprovider {
     async renewStats() {
         while (true) {
             console.log("display explode");
-            this.explode(vscode.window.activeTextEditor, false);
+            //this.explode(vscode.window.activeTextEditor, false);
             console.log("past explode");
             // update stats with the message recieved from websocket
             try {
@@ -310,10 +274,10 @@ class StreakWebViewprovider {
     getBackgroundCssSettings(explosion) {
         return {
             'background-repeat': 'repeat-x',
-            'background-size': '1000px',
+            'background-size': '60vh',
             'background-image': `url("${explosion}")`,
-            'width': `100vw`,
-            'height': `1200vh`,
+            'width': `60vw`,
+            'height': `60vh`,
             //'top': `10vh`,
             'left': `10%`,
             // 'filter': `invert(53%) sepia(18%) saturate(5540%) hue-rotate(353deg) brightness(104%) contrast(101%);`
@@ -338,88 +302,6 @@ class StreakWebViewprovider {
         }).join(' ');
         return cssString;
     }
-    // //_getCurrentPage retrieves the number of the current page from the configfile
-    // private _getCurrentPage(webview: vscode.Webview) {
-    //     //get message from message hander of current page number
-    //     webview.onDidReceiveMessage(
-    //         async (message: any) => {
-    //             const command = message.command;
-    //             const text = message.text;
-    //             //verify command received is currentPage and write to config file
-    //             switch (command) {
-    //                 case "currentPage":
-    //                     try {
-    //                         const fs = require('fs');
-    //                         //create json formatted string
-    //                         let yamlContent = `{\"currentPageNum\": ${text}}`;
-    //                         //write json formatted string to config file
-    //                         fs.writeFileSync(this.baseWorkspaceUri.fsPath + "/.tutorial_config.json", yamlContent);
-    //                         //render page with current page number as main page
-    //                         if (this._view) {
-    //                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                             await this._getHtmlForWebview(this._view.webview, "");
-    //                         }
-    //                     } catch (err) {
-    //                         console.log(err);
-    //                     }
-    //                     break;
-    //                 case "nextGroup":
-    //                     try {
-    //                         if (this._view) {
-    //                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                             await this._getHtmlForWebview(this._view.webview, "next");
-    //                         }
-    //                     } catch (err) {
-    //                         console.log(err);
-    //                     }
-    //                     break;
-    //                 case "lastGroup":
-    //                     try {
-    //                         if (this._view) {
-    //                             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-    //                             await this._getHtmlForWebview(this._view.webview, "last");
-    //                         }
-    //                     } catch (err) {
-    //                         console.log(err);
-    // main_afk.css
-    //                     }
-    //                     break;
-    //                 case "startCodeTour":
-    //                     try {
-    //                         if (this.codeTour) {
-    //                             const codeTourApi = this.codeTour.exports;
-    //                             let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-    //                             codeTourApi.startTourByUri(uri);
-    //                         }
-    //                     } catch (err) {
-    //                         console.log(err);
-    //                     }
-    //                     break;
-    //                 case "startCodeTourStep":
-    //                     try {
-    //                         const step = message.step;
-    //                         if (this.codeTour) {
-    //                             const codeTourApi = this.codeTour.exports;
-    //                             let uri = vscode.Uri.file(`${this.baseWorkspaceUri.fsPath}/.tours/tutorial-${message.text}.tour`);
-    //                             try {
-    //                                 await codeTourApi.endCurrentTour();
-    //                             } catch (err) {}
-    //                             await codeTourApi.startTourByUri(uri, 0);
-    //                             await codeTourApi.startTourByUri(uri, step - 1);
-    //                             // await codeTourApi.startTourByUri(uri, step - 1);
-    //                             //codeTourApi.startTourByUri(uri, step - 1);
-    //                             //codeTourApi.endCurrentTour();
-    //                         }
-    //                     } catch (err) {
-    //                         console.log(err);
-    //                     }
-    //                     break;
-    //                     return;
-    //             }
-    //         },
-    //         undefined,
-    //     );
-    // }
     //resolveWebviewView handles editor callback functions and basic html render
     async resolveWebviewView(webviewView, context, _token) {
         this._view = webviewView;

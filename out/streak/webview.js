@@ -42,7 +42,7 @@ class StreakWebViewprovider {
         this.isOnFire = false;
         this.dayOfTheWeek = "";
         // explosion animation for when streak is hit
-        this.explode = (editor, left = false) => {
+        this.explode = async (editor, left = false) => {
             console.log("inside explode");
             // To give the explosions space, only explode every X strokes
             // Where X is the configured explosion frequency
@@ -68,7 +68,9 @@ class StreakWebViewprovider {
             // var end = Math.floor(Math.random() * cursorPosition.line - 1);
             // start and end of current line in use
             var start = editor.visibleRanges[0].start.line;
-            var end = editor.visibleRanges[0].end.line - 5;
+            console.log(editor.visibleRanges[0]);
+            // var end = editor.visibleRanges[0].end.line  - 5;
+            var end = editor.visibleRanges[0].end.line;
             // prevents any negative values
             if (start < 1) {
                 start = 1;
@@ -76,28 +78,31 @@ class StreakWebViewprovider {
             if (end < 1) {
                 end = 1;
             }
-            console.log("start and end: ", start, end);
-            // load new range 
-            const newRange = new vscode.Range(editor.document.lineAt(start).range.start, 
-            // Value can't be negative
-            editor.document.lineAt(end).range.start);
-            // Dispose excess explosions
-            // while(this.activeDecorations.length >= this.config["explosions.maxExplosions"]) {
-            //     this.activeDecorations.shift().dispose();
-            // }
-            // A new decoration is used each time because otherwise adjacent
-            // gifs will all be identical. This helps them be at least a little
-            // offset.
-            // const decoration = this.getExplosionDecoration(newRange.start);
-            const decoration = this.getExplosionDecoration(newRange.end);
-            if (!decoration) {
-                return;
+            for (let i = end; i > start; i--) {
+                console.log("start and end: ", start, end);
+                // load new range 
+                const newRange = new vscode.Range(editor.document.lineAt(i).range.start, 
+                // Value can't be negative
+                editor.document.lineAt(i).range.start);
+                // Dispose excess explosions
+                // while(this.activeDecorations.length >= this.config["explosions.maxExplosions"]) {
+                //     this.activeDecorations.shift().dispose();
+                // }
+                // A new decoration is used each time because otherwise adjacent
+                // gifs will all be identical. This helps them be at least a little
+                // offset.
+                // const decoration = this.getExplosionDecoration(newRange.start);
+                const decoration = this.getExplosionDecoration(newRange.end);
+                if (!decoration) {
+                    return;
+                }
+                console.log("anim placement: ", newRange.end);
+                // append decoration with new range to current decorations array
+                this.decorations.push(decoration);
+                // editor.setDecorations(decoration, [newRange]);
+                editor.setDecorations(decoration, [newRange]);
+                await this.sleep(100);
             }
-            console.log("anim placement: ", newRange.end);
-            // append decoration with new range to current decorations array
-            this.decorations.push(decoration);
-            // editor.setDecorations(decoration, [newRange]);
-            editor.setDecorations(decoration, [newRange]);
         };
         this.getExplosionDecoration = (position) => {
             const explosion = (0, explosion_1.getExplosion)();
@@ -105,13 +110,14 @@ class StreakWebViewprovider {
             if (!explosion) {
                 return null;
             }
+            console.log("exploding");
             return this.createExplosionDecorationType(explosion, position);
         };
         this.createExplosionDecorationType = (explosion, editorPosition) => {
             // subtract 1 ch to account for the character and divide by two to make it centered
             // Use Math.floor to skew to the right which especially helps when deleting chars
             // const leftValue = Math.floor((10 - 1) / 2);
-            const leftValue = Math.floor(Math.random() * (30 - 1 + 1) + 1);
+            const leftValue = Math.floor(Math.random() * (60 - 20 + 1) + 30);
             console.log("left value: ", leftValue);
             // By default, the top of the gif will be at the top of the text.
             // Setting the top to a negative value will raise it up.
@@ -121,14 +127,15 @@ class StreakWebViewprovider {
             // off the top of the editor
             const topValue = 10 * .25;
             const explosionUrl = explosion;
-            const backgroundCss = this.getBackgroundCssSettings("https://api.gigo.dev/static/ext/streak-notif.gif");
+            const backgroundCss = this.getBackgroundCssSettings("/home/user/Development/Projects/gigo-vsc-ext/src/streak/SCJ6Uv4ExK.gif");
             console.log("https://api.gigo.dev/static/ext/streak-notif.gif");
             const defaultCss = {
                 position: 'absolute',
                 ["margin-left"]: `-${leftValue}ch`,
-                loop: 'once',
-                width: `10ch`,
-                height: `10rem`,
+                loop: 'twice',
+                // width: `1920vh`,
+                // height: `1080vh`,
+                top: `20vh`,
                 display: `inline-block`,
                 ['z-index']: 1,
                 ['pointer-events']: 'none',
@@ -149,7 +156,7 @@ class StreakWebViewprovider {
                     contentText: '',
                     textDecoration: `none; ${defaultCssString} ${backgroundCssString} ${customCssString}`,
                 },
-                textDecoration: `none; position: relative;`,
+                textDecoration: `none; position: absolute;`,
                 rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
             });
         };
@@ -232,7 +239,7 @@ class StreakWebViewprovider {
     async renewStats() {
         while (true) {
             console.log("display explode");
-            // this.explode(vscode.window.activeTextEditor, false);
+            this.explode(vscode.window.activeTextEditor, false);
             console.log("past explode");
             // update stats with the message recieved from websocket
             try {
@@ -260,9 +267,11 @@ class StreakWebViewprovider {
                 console.log("Streak: failed to set variables from message, err: ", err);
             }
             // wait 4 seconds to remove new decorations after successful streak day
-            await new Promise(f => setTimeout(f, 4000));
+            await new Promise(f => setTimeout(f, 5000));
             for (let d in this.decorations) {
+                console.log("disposing anims");
                 this.decorations[d].dispose();
+                await this.sleep(100);
             }
             //wait for 1 second before checking again
             await new Promise(f => setTimeout(f, 1000));
@@ -295,15 +304,18 @@ class StreakWebViewprovider {
         this.streakNum = res.data.current_streak_num;
         return;
     }
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     getBackgroundCssSettings(explosion) {
         return {
-            'background-repeat': 'no-repeat',
-            'background-size': 'contain',
+            'background-repeat': 'repeat-x',
+            'background-size': '1000px',
             'background-image': `url("${explosion}")`,
-            'width': `600px`,
-            'height': `600px`,
-            'top': `10%`,
-            'left': `40%`,
+            'width': `100vw`,
+            'height': `1200vh`,
+            //'top': `10vh`,
+            'left': `10%`,
             // 'filter': `invert(53%) sepia(18%) saturate(5540%) hue-rotate(353deg) brightness(104%) contrast(101%);`
         };
     }

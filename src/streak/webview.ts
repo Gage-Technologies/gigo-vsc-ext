@@ -178,7 +178,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         while(true){
             console.log("display explode");
-            // this.explode(vscode.window.activeTextEditor, false);
+            this.explode(vscode.window.activeTextEditor, false);
             console.log("past explode");
 
             // update stats with the message recieved from websocket
@@ -215,9 +215,11 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
 
             // wait 4 seconds to remove new decorations after successful streak day
-            await new Promise(f => setTimeout(f, 4000));
+            await new Promise(f => setTimeout(f, 5000));
             for (let d in this.decorations){
+                console.log("disposing anims")
                 this.decorations[d].dispose();
+                await this.sleep(100);
             }
             
                             
@@ -264,7 +266,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     }
 
     // explosion animation for when streak is hit
-    private explode = (editor: vscode.TextEditor | any, left = false) => {
+    private explode = async (editor: vscode.TextEditor | any, left = false) => {
         console.log("inside explode");
 
         // To give the explosions space, only explode every X strokes
@@ -297,7 +299,11 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         // start and end of current line in use
         var start = editor.visibleRanges[0].start.line;
-        var end = editor.visibleRanges[0].end.line  - 5;
+
+        console.log(editor.visibleRanges[0])
+
+        // var end = editor.visibleRanges[0].end.line  - 5;
+        var end = editor.visibleRanges[0].end.line;
 
         // prevents any negative values
         if (start < 1){
@@ -308,43 +314,53 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
             end = 1;
         }
 
-        console.log("start and end: ", start, end);
+        for (let i = end ; i > start; i --){
+            console.log("start and end: ",start, end);
 
 
-        // load new range 
-        const newRange = new vscode.Range(
-            editor.document.lineAt(start).range.start,
-            // Value can't be negative
-            editor.document.lineAt(end).range.start
-        );
+            // load new range 
+            const newRange = new vscode.Range(
+                editor.document.lineAt(i).range.start,
+                // Value can't be negative
+                editor.document.lineAt(i).range.start
+            );
+    
+            // Dispose excess explosions
+            // while(this.activeDecorations.length >= this.config["explosions.maxExplosions"]) {
+            //     this.activeDecorations.shift().dispose();
+            // }
+    
+            
+    
+            // A new decoration is used each time because otherwise adjacent
+            // gifs will all be identical. This helps them be at least a little
+            // offset.
+            // const decoration = this.getExplosionDecoration(newRange.start);
+            const decoration = this.getExplosionDecoration(newRange.end);
+            if (!decoration) {
+                return;
+            }
+    
+            console.log("anim placement: ", newRange.end);
+    
+            // append decoration with new range to current decorations array
+            this.decorations.push(decoration);
+           
+            // editor.setDecorations(decoration, [newRange]);
+            editor.setDecorations(decoration, [newRange]);
 
-        // Dispose excess explosions
-        // while(this.activeDecorations.length >= this.config["explosions.maxExplosions"]) {
-        //     this.activeDecorations.shift().dispose();
-        // }
+            await this.sleep(100)
+    
+        }
 
         
 
-        // A new decoration is used each time because otherwise adjacent
-        // gifs will all be identical. This helps them be at least a little
-        // offset.
-        // const decoration = this.getExplosionDecoration(newRange.start);
-        const decoration = this.getExplosionDecoration(newRange.end);
-        if (!decoration) {
-            return;
-        }
-
-        console.log("anim placement: ", newRange.end);
-
-        // append decoration with new range to current decorations array
-        this.decorations.push(decoration);
-       
-        // editor.setDecorations(decoration, [newRange]);
-        editor.setDecorations(decoration, [newRange]);
-
-
     };
 
+
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
 
     private getExplosionDecoration = (position: vscode.Position): any => {
@@ -355,6 +371,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
             return null;
         }
 
+        console.log("exploding")
         return this.createExplosionDecorationType(explosion, position);
     };
 
@@ -366,7 +383,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         // const leftValue = Math.floor((10 - 1) / 2);
 
-        const leftValue = Math.floor(Math.random() * (30 - 1 + 1) + 1);
+        const leftValue = Math.floor(Math.random() * (60 - 20 + 1) + 30);
         console.log("left value: ", leftValue);
 
         // By default, the top of the gif will be at the top of the text.
@@ -379,15 +396,16 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
         const explosionUrl = explosion;
 
-        const backgroundCss = this.getBackgroundCssSettings("https://api.gigo.dev/static/ext/streak-notif.gif");
+        const backgroundCss = this.getBackgroundCssSettings("/home/user/Development/Projects/gigo-vsc-ext/src/streak/SCJ6Uv4ExK.gif");
         console.log("https://api.gigo.dev/static/ext/streak-notif.gif");
 
         const defaultCss = {
             position: 'absolute',
             ["margin-left"] : `-${leftValue}ch`,
-            loop: 'once',
-            width: `10ch`,
-            height: `10rem`,
+            loop: 'twice',
+            // width: `1920vh`,
+            // height: `1080vh`,
+            top: `20vh`,
             display: `inline-block`,
             ['z-index']: 1,
             ['pointer-events']: 'none',
@@ -413,7 +431,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                 contentText: '',
                 textDecoration: `none; ${defaultCssString} ${backgroundCssString} ${customCssString}`,
             },
-            textDecoration: `none; position: relative;`,
+            textDecoration: `none; position: absolute;`,
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         });
 
@@ -422,13 +440,13 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
     private getBackgroundCssSettings(explosion: any) {
         return {
-            'background-repeat': 'no-repeat',
-            'background-size': 'contain',
+            'background-repeat': 'repeat-x',
+            'background-size': '1000px',
             'background-image': `url("${explosion}")`,
-            'width': `600px`,
-            'height': `600px`,
-            'top': `10%`,
-            'left': `40%`,
+            'width': `100vw`,
+            'height': `1200vh`,
+            //'top': `10vh`,
+            'left': `10%`,
             // 'filter': `invert(53%) sepia(18%) saturate(5540%) hue-rotate(353deg) brightness(104%) contrast(101%);`
         }
     }

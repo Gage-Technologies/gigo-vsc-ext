@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export function activateFireAnimation(context: vscode.ExtensionContext) {
+export async function activateFireAnimation(context: vscode.ExtensionContext) {
   // Create a new WebView panel
 //   const panel = vscode.window.createWebviewPanel(
 //     'customEditorOverlay',
@@ -22,14 +22,23 @@ export function activateFireAnimation(context: vscode.ExtensionContext) {
   );
 
   // Load HTML content
-  panel.webview.html = getWebviewContent(panel.webview, vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/SCJ6Uv4ExK.gif"), vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/ClaXgyIXJR.gif"));
+  panel.webview.html = getWebviewContent(panel.webview, vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/SCJ6Uv4ExK.gif"), vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/ClaXgyIXJR.gif"), 51);
 
   // Show the WebView panel
   panel.reveal(vscode.ViewColumn.Active);
 
+  await new Promise(resolve => setTimeout(resolve, 6000));
+  panel.dispose();
+
 }
 
-function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Uri, fireworkPath: vscode.Uri) {
+function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Uri, fireworkPath: vscode.Uri, streakNum: number) {
+
+ 
+  const explodingNum = vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/6bFyXbikQz.gif");
+
+  const background = vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/background-logo.svg");
+
     // Return the HTML content for the WebView panel
     return `
     <html>
@@ -49,6 +58,7 @@ function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Ur
           body {
             position: relative;
             height: 100vh;
+            width: 100vw;
           }
           .animation-container {
             position: absolute;
@@ -58,82 +68,94 @@ function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Ur
             text-align: center;
           }
           .animation-image {
-            max-width: 100%;
+            width: 500%;
             max-height: 100%;
+          }
+          .animation-image-num {
+            position: absolute;
+            z-index: 1;
+            top: 15%;
+            left: 15%;
           }
           
           .streak-title {
             position: absolute;
-            top: 10%;
+            top: 5%;
             left: 50%;
+            white-space: nowrap;
             transform: translate(-50%, -50%);
-            font-size: 48px;
+            font-size: 10vw;
             font-weight: bold;
-            color: white;
+            color: #ff7a0e;
             text-shadow: 2px 2px 4px rgba(255, 29, 17, 1);
+           
           }
 
           .streak-number {
             position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 50%;
+            top: 48%;
             left: 50%;
-            font-size: 48px;
+            white-space: nowrap;
+            transform: translate(-50%, -50%);
+            font-size: 10vw;
             font-weight: bold;
-            color: white;
+            color: #ff7a0e;
             text-shadow: 2px 2px 4px rgba(255, 29, 17, 1);
+            z-index: 2;
+        
+          }
+
+          .background {
+            text-align: center;
+            position: absolute;
+            bottom: 0;
+            left: 30;
+            width: 100%;
+            height: 100%;
+            background-image: url("${webview.asWebviewUri(background)}");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            opacity: 100%;
           }
         
-          .rolling-digit {
-            top: 50%;
-            animation: roll 1s;
-          }
-        
-          @keyframes roll {
-            0% {
-              transform: translateY(0%);
-            }
-            20% {
-              transform: translateY(30%);
-            }
-            40% {
-              transform: translateY(35%);
-            }
-            60% {
-              transform: translateY(40%);
-            }
-            80% {
-              transform: translateY(45%);
-            }
-            100% {
-              transform: translateY(50%);
-            }
-          }
+          
+      
           
         </style>
-
+        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> 
   
       </head>
       <body onload="load()">
+        <div class="background"></div>
         <div class="streak-title">
           Streak Extended
         </div>
         <div id="rolling-num" class="streak-number">
         
           <p id="num">0</p>
+          
 
+
+   
          
         </div>
-    
+        <div class="animation-image-num">
+          <lottie-player src="https://lottie.host/7820b38d-2747-4a17-9285-d7972c5634e8/lr8YOV3XKS.json" background="transparent" speed=".65" style="width: 600px; height: 600px;" autoplay></lottie-player>
+        </div>
         <!-- Add the animation content here -->
+        <div>
+          
+        </div>
         <div class="animation-container">
           <img id="fireworks" class="animation-image" src="${webview.asWebviewUri(fireworkPath)}" style="display:none;" alt="Animation">
           <img class="animation-image" src="${webview.asWebviewUri(animationFilePath)}" alt="Animation">
           
+          
         </div>
         <script type="text/javascript">
+        function wait(ms) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
         function animate(obj, initVal, lastVal, duration) {
           let startTime = null;
 
@@ -161,6 +183,10 @@ function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Ur
                   window.cancelAnimationFrame(window.requestAnimationFrame(step));
                   const firework = document.getElementById('fireworks');
                   firework.style.display = "block";
+
+                  const animNum = document.getElementById('animNum');
+                  animNum.style.display = "block";
+                  
                 }
           };
           //start animating
@@ -169,9 +195,11 @@ function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Ur
         let text1 = document.getElementById('num');
         const load = () => {
            
-            animate(text1, 0, 511, 700);
+          animate(text1, ${streakNum - 1}, ${streakNum}, 1000);
+          
             
         }
+        
         
         </script>
       </body>

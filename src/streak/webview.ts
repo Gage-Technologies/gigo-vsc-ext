@@ -82,39 +82,12 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         </div>`;
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
-        activateFireAnimation(this.context);
+       // activateFireAnimation(this.context, 100);
         
         
     }
 
 
-    // public websocketStreakCheck(wsID: any, secret: any){
-    //     const WebSocket = require('isomorphic-ws');
-
-    //     const ws = new WebSocket(`wss://api.gigo.dev/internal/v1/ext/streak-check/${wsID}/${secret}`);
-
-    //     ws.onerror = function error(err: any){
-    //         console.log('Streak Websocket: failed, err: ', err);
-    //     };
-
-    //     ws.onopen = function open() {
-    //     console.log('Streak Websocket: connected');
-    //     // ws.send(Date.now());
-    //     ws.send('PONG');
-    //     };
-
-    //     ws.onclose = function close() {
-    //     console.log('Streak Websocket: disconnected');
-    //     };
-
-    //     ws.onmessage = function incoming(data: any) {
-    //     console.log(`Streak Websocket: Roundtrip time: ${Date.now() - data.data} ms`);
-
-    //     setTimeout(function timeout() {
-    //         ws.send(Date.now());
-    //     }, 500);
-    //     };
-    // }
 
     // checking websocket connection to recieve information from messages
     public websocketStreakCheck(wsID: any, secret: any) {
@@ -197,7 +170,8 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                 // if user currently has an active streak and hit the mark to keep it going, trigger explosion
                 if (!wasFire && this.isOnFire){
                     console.log("displaying notification streak wasFire: ", wasFire, " isOnFire: ", this.isOnFire);
-                    this.explode(vscode.window.activeTextEditor, false);
+                    activateFireAnimation(this.context, this.streakNum);
+                    //this.explode(vscode.window.activeTextEditor, false);
                 }
 
                 // update user's streak stats
@@ -218,13 +192,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
             }
 
 
-            // wait 4 seconds to remove new decorations after successful streak day
-            await new Promise(f => setTimeout(f, 5000));
-            for (let d in this.decorations){
-                console.log("disposing anims")
-                this.decorations[d].dispose();
-                await this.sleep(100);
-            }
+            
             
                             
             //wait for 1 second before checking again
@@ -269,41 +237,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
         return; 
     }
 
-    private explode = async (editor: vscode.TextEditor | any, left = false) => {
-        console.log("inside explode");
-    
-        // Get the current scroll position
-        const visibleRanges = editor.visibleRanges;
-    
-        for (const range of visibleRanges) {
-            const startLine = range.start.line;
-            const endLine = range.end.line;
-    
-            // Iterate over each line in the visible range
-            for (let i = endLine; i > startLine; i--) {
-                console.log("start and end: ", startLine, endLine);
-    
-                // Create a new range for each line
-                const newRange = new vscode.Range(
-                    editor.document.lineAt(i).range.start,
-                    editor.document.lineAt(i).range.start
-                );
-    
-                // Perform the fire animation for the new range
-                const decoration = this.getExplosionDecoration(newRange.end);
-                if (!decoration) {
-                    return;
-                }
-    
-                console.log("anim placement: ", newRange.end);
-    
-                this.decorations.push(decoration);
-                editor.setDecorations(decoration, [newRange]);
-    
-                await this.sleep(100);
-            }
-        }
-    }
+   
 
 
     private sleep(ms: number): Promise<void> {
@@ -311,116 +245,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
     }
 
 
-    private getExplosionDecoration = (position: vscode.Position): any => {
-        const explosion = getExplosion();
-
-        console.log("animation range: ", position);
-        if (!explosion) {
-            return null;
-        }
-
-        console.log("exploding")
-        return this.createExplosionDecorationType(explosion, position);
-    };
-
-
-
-    private createExplosionDecorationType = (explosion: string, editorPosition: vscode.Position ): vscode.TextEditorDecorationType => {
-        // subtract 1 ch to account for the character and divide by two to make it centered
-        // Use Math.floor to skew to the right which especially helps when deleting chars
-
-        // const leftValue = Math.floor((10 - 1) / 2);
-
-        const leftValue = Math.floor(Math.random() * (60 - 20 + 1) + 30);
-        console.log("left value: ", leftValue);
-
-        // By default, the top of the gif will be at the top of the text.
-        // Setting the top to a negative value will raise it up.
-        // The default gifs are "tall" and the bottom halves are empty.
-        // Lowering them makes them appear in a more natural position,
-        // but limiting the top to the line number keeps it from going
-        // off the top of the editor
-        const topValue = 10 * .25;
-
-        const explosionUrl = explosion;
-
-        const backgroundCss = this.getBackgroundCssSettings("/home/user/Development/Projects/gigo-vsc-ext/src/streak/SCJ6Uv4ExK.gif");
-        console.log("https://api.gigo.dev/static/ext/streak-notif.gif");
-
-        const defaultCss = {
-            position: 'fixed',
-            ["margin-left"] : `-${leftValue}ch`,
-            loop: 'twice',
-            // width: `1920vh`,
-            // height: `1080vh`,
-            top: `20vh`,
-            bottom: `0`,
-            display: `inline-block`,
-            ['z-index']: 10,
-            ['pointer-events']: 'none',
-        };
-
-        const backgroundCssString = this.objectToCssString(backgroundCss);
-        const defaultCssString = this.objectToCssString(defaultCss);
-        const customCssString = this.objectToCssString({});
-
-        // return vscode.window.createTextEditorDecorationType(<vscode.DecorationRenderOptions>{
-        //     before: {
-        //         contentText: '',
-        //         textDecoration: `none; ${defaultCssString} ${backgroundCssString} ${customCssString}`,
-        //     },
-        //     textDecoration: `none; position: relative;`,
-        //     rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-        // });
-
-
-
-        return vscode.window.createTextEditorDecorationType(<vscode.DecorationRenderOptions>{
-            before: {
-                contentText: '',
-                textDecoration: `none; ${defaultCssString} ${backgroundCssString} ${customCssString}`,
-            },
-            textDecoration: `none; position: fixed;`,
-            rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-        });
-
-      
-    }
-
-    private getBackgroundCssSettings(explosion: any) {
-        return {
-            'background-repeat': 'repeat-x',
-            'background-size': '60vh',
-            'background-image': `url("${explosion}")`,
-            'width': `60vw`,
-            'height': `60vh`,
-            //'top': `10vh`,
-            'left': `10%`,
-            // 'filter': `invert(53%) sepia(18%) saturate(5540%) hue-rotate(353deg) brightness(104%) contrast(101%);`
-        }
-    }
-
-    private getMaskCssSettings(explosion: string): any {
-        return {
-            'background-color': 'currentColor',
-            '-webkit-mask-repeat': 'no-repeat',
-            '-webkit-mask-size': 'contain',
-            '-webkit-mask-image': `url("${explosion}")`,
-            filter: 'saturate(150%)',
-        }
-    }
-
-    private objectToCssString(settings: any): string {
-        let value = '';
-        const cssString = Object.keys(settings).map(setting => {
-            value = settings[setting];
-            if (typeof value === 'string' || typeof value === 'number') {
-                return `${setting}: ${value};`;
-            }
-        }).join(' ');
-
-        return cssString;
-    }
+  
 
 
    

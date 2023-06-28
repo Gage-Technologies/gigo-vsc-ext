@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
 
-export async function activateFireAnimation(context: vscode.ExtensionContext) {
+export async function activateFireAnimation(context: vscode.ExtensionContext, streakNUm: number) {
   // Create a new WebView panel
-//   const panel = vscode.window.createWebviewPanel(
-//     'customEditorOverlay',
-//     'Custom Editor Overlay',
-//     vscode.ViewColumn.One,
-//     {
-//       enableScripts: true,
-//     }
-//   );
+  //   const panel = vscode.window.createWebviewPanel(
+  //     'customEditorOverlay',
+  //     'Custom Editor Overlay',
+  //     vscode.ViewColumn.One,
+  //     {
+  //       enableScripts: true,
+  //     }
+  //   );
 
   // Create a new WebView panel
   const panel = vscode.window.createWebviewPanel(
@@ -22,7 +22,7 @@ export async function activateFireAnimation(context: vscode.ExtensionContext) {
   );
 
   // Load HTML content
-  panel.webview.html = getWebviewContent(panel.webview, vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/SCJ6Uv4ExK.gif"), vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/ClaXgyIXJR.gif"), 51);
+  panel.webview.html = getWebviewContent(panel.webview, "https://api.gigo.dev/static/ext/SCJ6Uv4ExK.gif", "https://api.gigo.dev/static/ext/ClaXgyIXJR.gif", streakNUm);
 
   // Show the WebView panel
   panel.reveal(vscode.ViewColumn.Active);
@@ -32,15 +32,15 @@ export async function activateFireAnimation(context: vscode.ExtensionContext) {
 
 }
 
-function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Uri, fireworkPath: vscode.Uri, streakNum: number) {
+function getWebviewContent(webview: vscode.Webview, animationFilePath: string, fireworkPath: string, streakNum: number) {
+
 
  
-  const explodingNum = vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/6bFyXbikQz.gif");
 
-  const background = vscode.Uri.file("/home/user/Development/Projects/gigo-vsc-ext/src/streak/background-logo.svg");
+  const background = "https://api.gigo.dev/static/ext/background-logo.svg";
 
-    // Return the HTML content for the WebView panel
-    return `
+  // Return the HTML content for the WebView panel
+  return `
     <html>
       <head>
       <meta charset="UTF-8">
@@ -112,7 +112,7 @@ function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Ur
             left: 30;
             width: 100%;
             height: 100%;
-            background-image: url("${webview.asWebviewUri(background)}");
+            background-image: url("${background}");
             background-repeat: no-repeat;
             background-size: 100% 100%;
             opacity: 100%;
@@ -147,8 +147,8 @@ function getWebviewContent(webview: vscode.Webview, animationFilePath: vscode.Ur
           
         </div>
         <div class="animation-container">
-          <img id="fireworks" class="animation-image" src="${webview.asWebviewUri(fireworkPath)}" style="display:none;" alt="Animation">
-          <img class="animation-image" src="${webview.asWebviewUri(animationFilePath)}" alt="Animation">
+          <img id="fireworks" class="animation-image" src="${fireworkPath}" style="display:none;" alt="Animation">
+          <img class="animation-image" src="${animationFilePath}" alt="Animation">
           
           
         </div>

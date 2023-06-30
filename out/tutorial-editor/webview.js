@@ -5,7 +5,6 @@ const path = require("path");
 const vscode = require("vscode");
 const yaml = require("js-yaml");
 async function activateEditor(context) {
-    console.log("WE FUCKIN HERE!");
     // Register our custom editor providers
     context.subscriptions.push(TutorialEditorProvider.register(context));
 }
@@ -39,6 +38,7 @@ class TutorialEditorProvider {
 	<path class="trash-icon-path" d="M9 13v6c0 .552-.448 1-1 1s-1-.448-1-1v-6c0-.552.448-1 1-1s1 .448 1 1zm7-1c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm-4 0c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1s1-.448 1-1v-6c0-.552-.448-1-1-1zm4.333-8.623c-.882-.184-1.373-1.409-1.189-2.291l-5.203-1.086c-.184.883-1.123 1.81-2.004 1.625l-5.528-1.099-.409 1.958 19.591 4.099.409-1.958-5.667-1.248zm4.667 4.623v16h-18v-16h18zm-2 14v-12h-14v12h14z"/>
 	</svg>`;
         this.tourFilePath = "";
+        this.currentColor = "rgb(0,0,0)";
         this.text = "";
     }
     /**
@@ -47,7 +47,6 @@ class TutorialEditorProvider {
      *
      */
     async resolveCustomTextEditor(document, webviewPanel, _token) {
-        console.log("WE FUCKIN HERE!");
         //ensure that user has opened a project before continuing
         if (!vscode.workspace.workspaceFolders) {
             vscode.window.showInformationMessage("Open a folder/workspace first");
@@ -74,17 +73,14 @@ class TutorialEditorProvider {
         var fileName = files[files.length - 1];
         var fileNoExt = fileName.split(".")[0];
         this.fileNum = Number(fileNoExt.split("-")[1]);
-        console.log(`DOC NAME: ${fileNoExt}`);
         this.tourFilePath = path.join(this.baseWorkspaceUri.fsPath, ".gigo", ".tours", `${fileNoExt}.tour`);
         if (fs.existsSync(this.tourFilePath)) {
             let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
             let ts = JSON.parse(tour).steps;
             this.numOfSteps = ts.length;
             this.fullTour = JSON.parse(tour);
-            console.log("REGISTERED EXITS");
         }
         else {
-            console.log("NOT REGISTERED EXITS");
             var obj = {
                 $schema: "https://aka.ms/codetour-schema",
                 title: fileNoExt,
@@ -94,7 +90,6 @@ class TutorialEditorProvider {
             this.fullTour = JSON.stringify(obj);
             fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
         }
-        console.log(`text from load: ${document.getText()}`);
         this.text = document.getText();
         function updateWebview() {
             webviewPanel.webview.postMessage({
@@ -119,10 +114,6 @@ class TutorialEditorProvider {
                 updateWebview();
             }
         });
-        // webviewPanel.onDidChangeViewState(() => {
-        // 	console.log(`code tours: ${this.codeTourSteps}`)
-        // 	webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-        // })
         // Make sure we get rid of the listener when our editor is closed.
         webviewPanel.onDidDispose(() => {
             changeDocumentSubscription.dispose();
@@ -140,41 +131,75 @@ class TutorialEditorProvider {
                 case 'updateFile':
                     this.updateCounter++;
                     this.text = e.message;
-                    vscode.window.showInformationMessage(`${e.message.length}`);
                     try {
                         fs.writeFileSync(document.fileName, this.text, 'utf-8');
                     }
                     catch (err) {
                         vscode.window.showInformationMessage(`error in file write ${err}`);
                     }
-                    // if (this.updateCounter >= 30){
-                    // 	webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-                    // 	this.updateCounter = 0;
-                    // }
+                    webviewPanel.webview.postMessage({ type: 'helloWorld' });
                     return;
-                case "openCodeTourDialog":
-                    vscode.window.showInformationMessage('openCodeTourDialog');
-                    return;
-                case 'addCodeTour':
-                    vscode.window.showInformationMessage('add code tour');
-                // webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
                 case "cursorPosition":
                     if (e.message !== undefined) {
                         this.cursorPos = e.message["lineNumber"];
                     }
-                    console.log("this worked!!! ", this.cursorPos);
                     return;
-                case "tourStepButton":
-                    console.log("button", +e.message, "was clicked");
                     return;
                 case 'saveTourStep':
-                    webviewPanel.webview.postMessage({ type: 'placeStep' });
-                    console.log("this worked!!!", this.cursorPos);
-                    const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-2.yaml");
+                    const filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${this.fileNum}.yaml`);
+                    let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
+                    let ts = JSON.parse(tour);
+                    let parsedMsg = JSON.parse(e.message);
+                    parsedMsg.line = parseInt(parsedMsg.line);
+                    var stepNum = parseInt(parsedMsg.step);
+                    delete parsedMsg['step'];
+                    var lines = [];
+                    fs.readFile(path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file), 'utf8', (err, data) => {
+                        if (err) {
+                            console.error('Error reading file:', err);
+                            return;
+                        }
+                        lines = data.split('\n');
+                    });
+                    this.currentColor = this.rgbToHex(parsedMsg.color);
+                    if (parsedMsg.line < 1) {
+                        console.log('incorrect value passed for parsedMsg.line: ', parsedMsg.line);
+                        vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number is greater than 0.`);
+                        return;
+                    }
+                    var doExist = false;
+                    try {
+                        doExist = fs.existsSync(path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
+                    }
+                    catch (e) {
+                        console.log(e);
+                    }
+                    if (!doExist) {
+                        console.log("does exist: ", doExist, " file path: ", path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
+                        vscode.window.showInformationMessage(`Incorrect file path for step. Please ensure that the file exists and is the relative path to the file.`);
+                        return;
+                    }
+                    const readline = require('readline');
+                    var fileP = path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file);
+                    var linesCount = 0;
+                    var rl = readline.createInterface({
+                        input: fs.createReadStream(fileP),
+                        output: process.stdout,
+                        terminal: false
+                    });
+                    rl.on('line', function (line) {
+                        linesCount++; // on each linebreak, add +1 to 'linesCount'
+                    });
+                    rl.on('close', function () {
+                        console.log(linesCount); // print the result when the 'close' event is called
+                    });
+                    if (parsedMsg > linesCount) {
+                        console.log(`number of lines in pass ${parsedMsg.line} is greater than number of lines in file ${linesCount}`);
+                        vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number exists in file.`);
+                        return;
+                    }
                     const fileContents = fs.readFileSync(filePath, 'utf8');
                     const tourData = yaml.load(fileContents);
-                    console.log("this is tourdata", tourData);
-                    console.log("this is tourdata", this.cursorPos);
                     if (tourData === undefined) {
                         const data = {
                             steps: [
@@ -212,94 +237,40 @@ class TutorialEditorProvider {
                         fs.writeFileSync(filePath, tourDataStr);
                         this.numOfSteps = this.numOfSteps + 1;
                     }
-                    // // vscode.window.showInformationMessage(`saveTourStep tour num: ${this.numOfSteps}`);
-                    // console.log(`${e.message}`)
-                    // console.log(`saveTourStep tour num: ${this.numOfSteps}`)
-                    // let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
-                    // let ts = JSON.parse(tour);
-                    // let parsedMsg = JSON.parse(e.message);
-                    // parsedMsg.line = parseInt(parsedMsg.line);
-                    // var stepNum = parseInt(parsedMsg.step);
-                    // delete parsedMsg['step'];
-                    // console.log('before all checking steps')
-                    // if (parsedMsg.line < 1) {
-                    //     console.log('incorrect value passed for parsedMsg.line: ', parsedMsg.line);
-                    //     vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number is greater than 0.`);
-                    //     return;
-                    // }
-                    // console.log("before do exist check")
-                    // var doExist = false;
-                    // try {
-                    //     doExist = fs.existsSync(path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
-                    // } catch (e) {
-                    //     console.log(e);
-                    // }
-                    // console.log("after do exist")
-                    // if (!doExist) {
-                    //     console.log("does exist: ", doExist, " file path: ", path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file));
-                    //     vscode.window.showInformationMessage(`Incorrect file path for step. Please ensure that the file exists and is the relative path to the file.`);
-                    //     return;
-                    // }
-                    // console.log("after file check")
-                    // const readline = require('readline');
-                    // var fileP = path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file);
-                    // var linesCount = 0;
-                    // var rl = readline.createInterface({
-                    //     input: fs.createReadStream(fileP),
-                    //     output: process.stdout,
-                    //     terminal: false
-                    // });
-                    // rl.on('line', function (line: any) {
-                    //     linesCount++; // on each linebreak, add +1 to 'linesCount'
-                    // });
-                    // rl.on('close', function () {
-                    //     console.log(linesCount); // print the result when the 'close' event is called
-                    // });
-                    // console.log(`than number of lines in file ${linesCount}`);
-                    // if (parsedMsg > linesCount) {
-                    //     console.log(`number of lines in pass ${parsedMsg.line} is greater than number of lines in file ${linesCount}`);
-                    //     vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number exists in file.`);
-                    //     return;
-                    // }
-                    // console.log("after line num check")
-                    // if (stepNum > this.numOfSteps) {
-                    //     this.numOfSteps++;
-                    //     ts.steps.push(parsedMsg);
-                    // } else {
-                    //     ts.steps[stepNum - 1] = parsedMsg;
-                    //     console.log(`ts: ${JSON.stringify(ts)}`);
-                    // }
-                    // this.fullTour = JSON.stringify(ts);
-                    // fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
-                    // vscode.window.showInformationMessage(`save code tour, fp: ${e.message.file}, ln: ${e.message.line} desc: ${e.message.description}`);
+                    if (stepNum > this.numOfSteps) {
+                        this.numOfSteps++;
+                        ts.steps.push(parsedMsg);
+                    }
+                    else {
+                        ts.steps[stepNum - 1] = parsedMsg;
+                        console.log(`ts this is working?: ${JSON.stringify(ts)}`);
+                    }
+                    this.fullTour = JSON.stringify(ts);
+                    try {
+                        fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+                    }
+                    catch (err) {
+                        console.log("failed to save tour steps to: ", this.tourFilePath, err);
+                    }
+                    webviewPanel.webview.postMessage({ type: 'placeStep', message: this.currentColor });
                     break;
-                // let tourName = document.fileName.replace('cscratch', 'tour');
-                // fs.writeFileSync(path.join(this.baseWorkspaceUri.fsPath, ".tours", `${tourName}`), );
                 case 'deleteTourStep':
                     webviewPanel.webview.postMessage({ type: 'deleteTourStep' });
-                    vscode.window.showInformationMessage("step to be deleted: ", e.message);
-                    // var deletedStepNum = parseInt(e.message);
-                    // // vscode.window.showInformationMessage(`delete step: ${deletedStepNum} `);
-                    // let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
-                    // let tss = JSON.parse(tours);
-                    // this.numOfSteps--;
-                    // tss.steps = tss.steps.splice(deletedStepNum);
-                    // // vscode.window.showInformationMessage(`new steps: ${JSON.stringify(tss.steps.splice(deletedStepNum))} `);
-                    // this.fullTour = JSON.stringify(tss);
-                    // fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
-                    const delFilePath = path.join(this.baseWorkspaceUri.fsPath, "tour-2.yaml");
+                    var deletedStepNum = parseInt(e.message) - 1;
+                    let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
+                    let tss = JSON.parse(tours);
+                    tss.steps = tss.steps.filter((_, index) => index !== deletedStepNum);
+                    this.fullTour = JSON.stringify(tss);
+                    fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+                    const delFilePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${this.fileNum}.yaml`);
                     const deliFleContents = fs.readFileSync(delFilePath, 'utf8');
                     const delTourData = yaml.load(deliFleContents);
                     const delStep = delTourData.steps.filter((step) => step.step_number === e.message);
-                    console.log("deleting step: ", e.message);
-                    // The step to delete (replace with actual user input)
                     const stepToDelete = e.message;
-                    // Remove the desired step from the array and adjust line numbers for following steps
                     delTourData.steps.splice(stepToDelete - 1, 1);
                     for (let i = stepToDelete - 1; i < delTourData.steps.length; i++) {
                         delTourData.steps[i].step_number -= 1;
                     }
-                    // Convert the updated JavaScript object back into YAML
                     const updatedYaml = yaml.dump(delTourData);
                     fs.writeFileSync(delFilePath, updatedYaml);
                     this.numOfSteps = this.numOfSteps - 1;
@@ -307,6 +278,19 @@ class TutorialEditorProvider {
             }
         });
         updateWebview();
+    }
+    rgbToHex(rgb) {
+        // Remove the "rgb(" and ")" parts from the string
+        const values = rgb.substring(4, rgb.length - 1).split(",");
+        // Convert each RGB value to its hexadecimal equivalent
+        const hexValues = values.map((value) => {
+            const intValue = parseInt(value.trim(), 10);
+            const hexValue = intValue.toString(16).padStart(2, "0");
+            return hexValue;
+        });
+        // Combine the hexadecimal values for red, green, and blue
+        const hexCode = "#" + hexValues.join("");
+        return hexCode;
     }
     /**
      * Get the static html used for the editor webviews.
@@ -319,7 +303,6 @@ class TutorialEditorProvider {
         if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Light) {
             highlightStyle = `<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.css"/>`;
         }
-        console.log("WE FUCKIN HERE!");
         console.log(this.context.extensionUri);
         // Local path to script and css for the webview
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'tutorial-editor', 'catScratch.js'));
@@ -355,8 +338,7 @@ class TutorialEditorProvider {
         if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark) {
             vsTheme = 'vs-dark';
         }
-        // const filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-" + this.fileNum + ".yaml");
-        let filePath = path.join(this.baseWorkspaceUri.fsPath, "tour-2.yaml");
+        const filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${this.fileNum}.yaml`);
         let fileContents = fs.readFileSync(filePath, 'utf8');
         let tourData = yaml.load(fileContents);
         let tourDataStr = JSON.stringify("");
@@ -367,8 +349,6 @@ class TutorialEditorProvider {
         else if (tourData === undefined) {
             this.numOfSteps = 0;
         }
-        console.log(`text before render: ${this.text.length}`);
-        console.log(`steps befor load: ${JSON.stringify(this.fullTour.steps)}`);
         return /* html */ `
         <!DOCTYPE html>
         <html lang="en">
@@ -460,7 +440,7 @@ class TutorialEditorProvider {
                    </br>
 
                    <div class="code-steps-inner" id="stepToDelete">	
-                        <span  class="step-title"><b>Step 0</b></span> 
+                        <span class="step-title"><b>Step 0</b></span> 
                     </div>
 
                    </br>
@@ -471,7 +451,7 @@ class TutorialEditorProvider {
                 </div>
 
                 <div class="code-steps-box">
-                        <div id="@@@Step0@@@" draggable="true" ondragstart="dragElement(this)" oncontextmenu="expandStep(event, this)" class="code-steps">
+                        <div id="@@@Step0@@@" class="code-steps">
                         <div class="code-steps-inner">	
                         <span  class="step-title"><b>Step 0</b></span> 
                         </div>
@@ -569,7 +549,6 @@ class TutorialEditorProvider {
                     })
                 }
 
-                console.log("this is the full array", numbersArray);
                 
 
         
@@ -590,7 +569,6 @@ class TutorialEditorProvider {
                     const cursorPosition = editor.getPosition();
                     const lineTop = editor.getTopForLineNumber(cursorPosition.lineNumber);
                     
-                    console.log("this is myline", lineTop);
                     vscode.postMessage({
                         type: 'cursorPosition',
                         message: cursorPosition
@@ -622,7 +600,6 @@ class TutorialEditorProvider {
 
 
                 let numOfSteps = ${this.numOfSteps};
-                console.log("numOfSteps", numOfSteps);
         
                 editor.onDidChangeModelContent(function(e) {
                     postUpdatedContent();
@@ -630,7 +607,14 @@ class TutorialEditorProvider {
         
                 window.addEventListener('message', event => {
                     const message = event.data;
+                    
                     if (message.type === 'deleteTourStep') {
+                        const cursorPosition = editor.getPosition();
+                        let lineNumber = cursorPosition.lineNumber
+                        let index = numbersArray.indexOf(lineNumber);
+                        if (index > -1) {
+                            numbersArray.splice(index, 1);
+                        }
                         numOfSteps--;
                     }
                     if (message.type === 'placeStep') {
@@ -653,7 +637,7 @@ class TutorialEditorProvider {
                         
                         button.id = 'Step ' + newStep;
                         button.classList.add('tour-button-style')
-                        button.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                        button.style.backgroundColor = message.message;
                         button.textContent = 'Step ' + newStep;
                         const deleteButton = newStep;
                         button.addEventListener('click', () => {
@@ -669,7 +653,6 @@ class TutorialEditorProvider {
 
                         numOfSteps++;
                     }
-
                     
                 });
 

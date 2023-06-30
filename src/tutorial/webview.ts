@@ -2,11 +2,126 @@ import { runInThisContext } from 'vm';
 import * as vscode from 'vscode';
 import { Uri, Webview } from 'vscode';
 import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
+import path = require('path');
+import * as yaml from 'js-yaml';
 
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
 export async function activateTutorialWebView(context: vscode.ExtensionContext, logger: any) {
     //register afk provider by calling class constructor
     const provider = new TutorialWebViewprovider(context.extensionUri, logger);
+    
+    
+    function createTutorialFile() {
+        const fs = require('fs');
+        return new Promise((resolve, reject) => {
+            const tutorialFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tutorials');
+            fs.readdir(tutorialFolderPath, (err: any, files: any[]) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+    
+                // Find the highest tutorial number
+                let highestNumber = 0;
+                files.forEach((file: string) => {
+                    if (file.startsWith('tutorial-')) {
+                        const number = parseInt(file.substring(9));
+                        if (number > highestNumber) {
+                            highestNumber = number;
+                        }
+                    }
+                });
+    
+                // Increment the highest number to get the next tutorial number
+                const nextNumber = highestNumber + 1;
+    
+                const newTourFileName = `tour-${nextNumber}.yaml`;
+                const newTourFilePath = path.join(tutorialFolderPath, newTourFileName);
+                fs.writeFile(newTourFilePath, '', (err: any) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+    
+                    // Create the new tutorial file
+                    const newTutorialFileName = `tutorial-${nextNumber}.md`;
+                    const newTutorialFilePath = path.join(tutorialFolderPath, newTutorialFileName);
+                    fs.writeFile(newTutorialFilePath, `##### Use this markdown for your tutorial ${nextNumber} text \n\n\n\n`, (err: any) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                    });
+
+                    const tourFilePath = path.join(provider.baseWorkspaceUri.fsPath, ".gigo", ".tours", `tutorial-${nextNumber}.tour`);
+
+                    if (fs.existsSync(tourFilePath)) {
+                        let tour = fs.readFileSync(tourFilePath, 'utf-8');
+                        let ts = JSON.parse(tour).steps;
+                        let numOfSteps = ts.length;
+                        let fullTour = JSON.parse(tour);
+                    } else {
+                        var obj = {
+                            $schema: "https://aka.ms/codetour-schema",
+                            title: `tutorial-${nextNumber}.tour`,
+                            steps: [],
+                            ref: "master",
+                        };
+    
+                        fs.writeFileSync(tourFilePath, JSON.stringify(obj), 'utf-8');
+                    }
+                    vscode.commands.executeCommand('vscode.openWith', Uri.file( newTutorialFilePath), "catCustoms.catScratch");
+                    provider._view?.webview.postMessage({ type: 'openPage', message: nextNumber});
+                });
+            });
+
+        });
+    }
+
+    vscode.commands.registerCommand('gigo.testing', () => {
+        createTutorialFile();
+        
+    });
+
+    vscode.commands.registerCommand('gigo.edit', () => {
+        const tutorialFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tutorials');
+        const tutorialFileName = `tutorial-${provider.currentPageNum}.md`;
+        const tutorialFilePath = path.join(tutorialFolderPath, tutorialFileName);
+        vscode.commands.executeCommand('vscode.openWith', Uri.file( tutorialFilePath), "catCustoms.catScratch",);
+        
+    });
+
+    vscode.commands.registerCommand('gigo.delete', () => {
+        const fs = require('fs');
+        const tourFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tours');
+        const tutorialFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tutorials');
+
+        vscode.window.showInformationMessage('Are you sure you want to delete this tutorial?', 'Yes', 'No').then((selected) => {
+          if (selected === 'Yes') {
+            fs.unlink(path.join(tutorialFolderPath, `tutorial-${provider.currentPageNum}.md`), (err: any) => {
+                if (err) {
+                  console.error(err);
+                  return;
+                }
+            });
+            fs.unlink(path.join(tutorialFolderPath, `tour-${provider.currentPageNum}.yaml`), (err: any) => {
+                if (err) {
+                  console.error(err);
+                  return;
+                }
+            });
+            fs.unlink(path.join(tourFolderPath, `tutorial-${provider.currentPageNum}.tour`), (err: any) => {
+                if (err) {
+                  console.error(err);
+                  return;
+                }
+            });
+
+            provider._view?.webview.postMessage({ type: 'openPage', message: provider.currentPageNum - 1 });
+          }
+        });
+        
+    });
 
     if (provider.codeTour){
         provider.codeTour.activate();
@@ -19,7 +134,9 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext, 
 }
 
 //afk webview provider has basic functions for handling afk system
-class TutorialWebViewprovider implements vscode.WebviewViewProvider {
+export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
+   
+
 
     //defining local variables
     private themeConfigSection: string = 'markdown-preview-github-styles';
@@ -39,6 +156,8 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     public codeTour = vscode.extensions.getExtension(
         "vsls-contrib.codetour"
       );
+    public markdownRender: any;
+    public currentPageNum: any;
 
     //defining base color pallettes
     private themeConfigValues: { [key: string]: boolean } = {
@@ -51,10 +170,12 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
     public static readonly viewType = 'gigo.tutorialView';
 
-    private _view?: vscode.WebviewView;
+    public _view?: vscode.WebviewView;
     public logger: any;
     public configPath: any;
     public configFoldr: any;
+
+    
 
 
     constructor(
@@ -71,6 +192,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         
     }
 
+
     //_getCurrentPage retrieves the number of the current page from the configfile
     private _getCurrentPage(webview: vscode.Webview) {
         //get message from message hander of current page number
@@ -78,7 +200,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             async (message: any) => {
                 const command = message.command;
                 const text = message.text;
-
                 //verify command received is currentPage and write to config file
                 switch (command) {
                     case "currentPage":
@@ -154,10 +275,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                                 }
                                 await codeTourApi.startTourByUri(uri, 0);
                                 await codeTourApi.startTourByUri(uri, step - 1);
-                                // await codeTourApi.startTourByUri(uri, step - 1);
-                                //codeTourApi.startTourByUri(uri, step - 1);
-                                
-                                //codeTourApi.endCurrentTour();
+                                await codeTourApi.startTourByUri(uri, step - 1);
                             }
 
                         } catch (err) {
@@ -168,7 +286,7 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                         break;
 
                         return;
-                }
+                    }
             },
             undefined,
         );
@@ -217,16 +335,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             this._getCurrentPage(this._view.webview);
             await this._getHtmlForWebview(this._view.webview, "");
         }
-
-        //callback for registered commands
-        webviewView.webview.onDidReceiveMessage(data => {
-            switch (data.type) {
-                case "hello":
-                    //display message when hello command is called
-                    vscode.window.showInformationMessage(data.text);
-                    return;
-            }
-        });
     }
 
     //addColor sends color message to messsage handler
@@ -519,6 +627,8 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
         //set the page buttons to the member variable for the bottom of the page
         this.pageButtonsHTML = bottomPages;
+
+
     }
 
     //_getAfkDisabledHtml renders page for when afk is disabled
@@ -595,7 +705,8 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             //set current index to bed 1 less than current page
             let index = currentPgNum - 1;
 
-
+            const config = vscode.workspace.getConfiguration();
+            const themeName = config.get('workbench.colorTheme');
 
             // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
             const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'tutorial', 'buttons_tutorial.js'));
@@ -611,31 +722,65 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             //set the number of tutorials to the current number of markdown files matching the preset formatting
             this.numOfTutorials = mds.length;
 
-            let codeTourButton = "";
+            
+            let filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${currentPgNum}.yaml`);
+            let fileContents = fs.readFileSync(filePath, 'utf8');
+            let yamlData = yaml.load(fileContents) as any;
+            const mdFilePath = path.join(this.baseWorkspaceUri.fsPath + "/.gigo" + `/.tutorials/tutorial-${currentPgNum}.md`); // Replace with the actual file path
 
-            if (cts[index]){
-                codeTourButton = ` <div class="codeTourLink">
-                    <button id="codeTour" class="codeTourButton" onclick="startCodeTour(${currentPgNum})">Start CodeTour</button>
-                </div>`;
-                if (mds[index].indexOf("@@@")){
-                    var numberPattern = '@@@.*([Ss][Tt][Ee][Pp]).*(?<step_number>\\d+).*@@@';
-                    let stepNumber = [...mds[index].matchAll(numberPattern)];
-                    for (let i = 0; i < stepNumber.length; i++) {
-                        if (stepNumber[i][2] > this.tourSteps[index]){
-                            continue;
-                        }
-                        let stepButton = ` <div class="codeTourStep">
-                        <button id="codeStep${stepNumber[i][2]}" class="codeTourStep" onclick="startCodeTour(${currentPgNum}, ${stepNumber[i][2]})">Interactive Step ${stepNumber[i][2]}</button>
-                    </div>`;
-                        mds[index] = mds[index].replace(stepNumber[i][0], stepButton);
-                       
-                    }
+            let markdownContent = fs.readFileSync(mdFilePath, 'utf-8');
 
+            let markdownData = md.render(markdownContent);
+            let currentTheme = "var(--vscode-button-hoverBackground)";
+            let boxTheme = "0 7px 0px var(--vscode-button-background)";
+            let activeBoxTheme = "0 2px 0px var(--vscode-button-background)";
+            
+            if (themeName === 'Sam Custom Theme') {
+                currentTheme = "#41c18c";
+                boxTheme = "0 7px 0px #1c8762";
+                activeBoxTheme = "0 2px 0px #1c8762";
+            }
 
+            function getSteps(fileContents: any){
+                let yamlData = yaml.load(fileContents) as any;
+                for (let step of yamlData.steps) {
+                    let buttonHtml = `<br><div class="btn-9" style="background: ${currentTheme}; box-shadow: ${boxTheme}; " id="codeStep${step.step_number}" onclick="startCodeTour(${currentPgNum}, ${step.step_number})" onmousedown="this.style.boxShadow = '${activeBoxTheme}'" onmouseup="this.style.boxShadow = '${boxTheme}'">Step ${step.step_number}</div><br>`;
+                    let lineIndex = step.line_number - 1; // Convert line number to zero-based index
+                    let lines = markdownContent.split('\n');
+                    lines[lineIndex] = buttonHtml; // Replace the line with the button HTML
+                    markdownContent = lines.join('\n');
+
+                    markdownData = md.render(markdownContent); 
+                    webview.postMessage({ type: 'updateMarkdown', message: md.render(markdownContent)});
                 }
             }
 
-            
+            fs.watch(filePath, (eventType: string) => {
+                if (eventType === 'change') {
+                  fileContents = fs.readFileSync(filePath, 'utf-8');
+                  if (yamlData !== undefined) {
+                    getSteps(fileContents);
+                    }
+                }
+            });
+
+            fs.watch(mdFilePath, (eventType: string) => {
+                if (eventType === 'change') {
+                  markdownContent = fs.readFileSync(mdFilePath, 'utf-8');
+                  
+                if (yamlData !== undefined) {
+                    getSteps(fileContents);
+                }
+                }
+                webview.postMessage({ type: 'updateMarkdown', message: md.render(markdownContent)});
+            });
+
+
+            if (yamlData !== undefined) {
+                getSteps(fileContents);
+            }
+
+            this.currentPageNum = currentPgNum;
 
             //group control
             switch (group) {
@@ -680,7 +825,6 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 				<title>GIGO AFK Session</title>
 
 			</head>
-            ${codeTourButton}
             <style>
             body {
             min-width: 200px;
@@ -688,8 +832,20 @@ class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             </style>
 			<body>
             <div id="big">
-            ${mds[index]}
+            ${markdownData}
             </div>
+            <script>
+            window.addEventListener('message', event => {
+                const message = event.data;
+                    if (message.type === 'updateMarkdown') {
+                        const markdownData = message.message;
+                        document.getElementById('big').innerHTML = markdownData;
+                    }
+                    if (message.type ==='openPage') {
+                        page(message.message)
+                    }
+                });
+            </script>
                 <br/>
                 <br/>
                 <div id="nextButton">

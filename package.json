@@ -3,7 +3,7 @@
   "displayName": "GIGO Developer Extension",
   "description": "GIGO developer extension integrates a remote VSCode program into the GIGO ecosystem and provides convienence features for GIGO developers.",
   "publisher": "gage",
-  "version": "0.1.40",
+  "version": "0.1.41",
   "engines": {
     "vscode": "^1.75.1"
   },
@@ -78,6 +78,18 @@
         "title": "Add New Tutorial",
         "category": "GIGO TUTORIAL",
         "icon": "$(add)"
+      },
+      {
+        "command": "gigo.edit",
+        "title": "Edit This Tutorial",
+        "category": "GIGO TUTORIAL",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "gigo.delete",
+        "title": "Delete This Tutorial",
+        "category": "GIGO TUTORIAL",
+        "icon": "$(trash)"
       }
     ],
     "customEditors": [
@@ -146,9 +158,19 @@
     "menus": {
       "view/title": [
         {
-          "command": "gigo.testing",
+          "command": "gigo.edit",
           "when": "view == gigo.tutorialView",
           "group": "navigation@1"
+        },
+        {
+          "command": "gigo.delete",
+          "when": "view == gigo.tutorialView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "gigo.testing",
+          "when": "view == gigo.tutorialView",
+          "group": "navigation@3"
         }
       ]
     },
@@ -213,6 +235,7 @@
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
+    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
     "@types/node": "14.x",
     "@types/vscode": "^1.75.1",
@@ -233,8 +256,8 @@
     "fetch": "^1.1.0",
     "highlight.js": "^11.7.0",
     "isomorphic-ws": "^5.0.0",
+    "js-yaml": "^4.1.0",
     "markdown-it": "^13.0.1",
-    "mobx": "^6.9.0",
     "path": "^0.12.7",
     "prismjs": "^1.29.0",
     "react": "^18.2.0",

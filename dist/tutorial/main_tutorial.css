@@ -190,6 +190,30 @@ code {
 	padding: 0em;
 }
 
+.btn-9 {
+	background: var(--vscode-button-hoverBackground);
+			  font-size: 15px;
+			  color: white;
+			  border-radius: 7px;
+			  display: inline-block;
+			  transition: all .2s;
+			  position: relative;
+			  padding: 1px 20px;
+			  position: relative;
+			  top: 0;
+			  cursor: pointer;
+	margin:0 ;
+  }
+  
+   .btn-9:active {
+			  top: 3px;
+			  box-shadow: 0 2px 0px var(--vscode-button-background);
+			  transition: all .2s;
+		  }
+
+
+
+
 /* .shiki code span {
 	text-overflow: wrap;
 	min-width: 255px;

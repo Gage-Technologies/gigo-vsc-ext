@@ -239,7 +239,6 @@ body {
     border: 5px white;
     outline: 5px white;
     width: 12em;
-    height: 25%;
     border-radius: 18px;
     text-align: center;
 
@@ -283,6 +282,11 @@ body {
 
 .description-box{
     border-radius: 10px;
+
+}
+
+#description-input{
+    resize: none;
 }
 
 .line-number-box{

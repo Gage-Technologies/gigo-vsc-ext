@@ -16,23 +16,23 @@ function helloWrld(){
 
 
 function addCodeTour(){
-
+    var step = document.getElementById("@@@Step0@@@");
     try{
-        
-        var popCon = document.getElementById("pop-container");
-        console.log(popCon.style.display);
-        if (popCon.style.display === "inline-block"){
+        console.log("in addC")
+        // var popCon = document.getElementById("pop-container");
+        // console.log(popCon.style.display);
+        if (step.style.display === "inline-block"){
             var tourNum = document.getElementById("tour-step-num");
 
-            document.getElementById(`@@@Step${tourNum.value}@@@`).remove();
+            // document.getElementById(`@@@Step${tourNum.value}@@@`).remove();
             tourNum.value = parseInt(tourNum.value) - 1;
-            popCon.style.display = "none";
+            step.style.display = "none";
             
             return;
         }
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
 
-        var step = document.getElementById("@@@Step0@@@");
+        // var step = document.getElementById("@@@Step0@@@");
 
         var tourNum = document.getElementById("tour-step-num");
         
@@ -43,18 +43,21 @@ function addCodeTour(){
             message: `tourNum ${tourNum.value}`
         });
 
-        let stepClone = step.cloneNode(true);
-        stepClone.id = `@@@Step${tourNum.value}@@@`;
+        // let stepClone = step.cloneNode(true);
+        // stepClone.id = `@@@Step${tourNum.value}@@@`;
 
-        stepClone.style.display = "inline-block";
+        step.style.display = "inline-block";
 
-        var innerStep = stepClone.querySelector(".code-steps-inner");
+        var innerStep = step.querySelector(".code-steps-inner");
         innerStep.style.backgroundColor = "#" + randomColor;
 
-        var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
+        var title = step.querySelector(".code-steps-inner").querySelector(".step-title");
 
         // here ----
         title.innerHTML = `<b>Add Step</b>`;
+
+        step.querySelector("#description-div").querySelector("#description-input").value = "";
+
         // stepClone.querySelector("#div.code-steps-inner > span > b")
 
         // vscode.postMessage({
@@ -65,12 +68,12 @@ function addCodeTour(){
 
         
 
-        var popCon = document.getElementById("pop-container");
+        // var popCon = document.getElementById("pop-container");
         
 
 
-        popCon.style.display = "inline-block";
-        popCon.style.display = "inline-block";
+        // popCon.style.display = "inline-block";
+        // popCon.style.display = "inline-block";
 
 
         // vscode.postMessage({
@@ -78,8 +81,10 @@ function addCodeTour(){
         //     message: `displaying background add pop: ${popCon.style.display}`
         // });
 
-        stepClone.style.display = "inline-block";
-        step.parentElement.appendChild(stepClone);
+        // stepClone.style.display = "inline-block";
+        // step.parentElement.appendChild(stepClone);
+
+        
     
     
         // vscode.postMessage({
@@ -91,7 +96,7 @@ function addCodeTour(){
         vscode.postMessage({
             type: 'hello',
             message: e
-        })
+        }) 
     }
    
 
@@ -291,6 +296,11 @@ function saveStep(button) {
     var descriptionDiv = codeStep.querySelector('#description-div');
     var step = codeStep.id;
 
+    var tourNum = document.getElementById("tour-step-num");
+        
+
+    console.log("this is new num", parseInt(tourNum.value))
+
 
     var stepPop = document.getElementById(step);
     var popUp = document.getElementById('pop-container');
@@ -304,8 +314,6 @@ function saveStep(button) {
     }
     
 
-    var num = step.replaceAll("@", "");
-    var num = num.replace("Step", "");
 
 
     // vscode.postMessage({
@@ -319,23 +327,35 @@ function saveStep(button) {
     //     type: 'hello',
     //     message: `${filePath}`,
     // });
-    let mes = {
+
+
+    var step = document.getElementById("@@@Step0@@@");
+    var innerStep = step.querySelector(".code-steps-inner");
+    console.log("this will work i think", innerStep.style.backgroundColor)
+
+    const mes = {
         file: filePath.value,
         line: lineNumber.value,
         description: description.value,
-        step: num
+        step: parseInt(tourNum.value),
+        color: innerStep.style.backgroundColor
     };
-
-    filePathDiv.style.display = "none";
-    lineNumberDiv.style.display = "none";
-    descriptionDiv.style.display = "none";
-    button.style.display = "none";
-    codeStep.style.height = "3%";
-    codeStep.style.zIndex = "20";
-    popUp.style.display = "none";
-    stepPop.style.display = "none";
-
     
+
+   
+
+    // stepPop.remove();
+
+    stepPop.style.display = "none";
+    filePath.value = "";
+    lineNumber.value = "";
+    description.value = "";
+    
+
+
+    codeStep.display = "none"
+    
+    // TODO pass color from stepPop
     vscode.postMessage({
         type: 'saveTourStep',
         message: `${JSON.stringify(mes)}`
@@ -978,6 +998,8 @@ function dragElement(elmnt) {
     var step = document.getElementById("stepToDelete");
 
     var title = step.querySelector('.step-title');
+    console.log("title is: ", title);
+    console.log("text of title title is: ", title.textContent);
     var stepColor = document.getElementById("Step " + number).style.backgroundColor;
 
     step.style.backgroundColor = stepColor;
@@ -990,37 +1012,7 @@ function dragElement(elmnt) {
   function deleteSteps() {
     var step = document.getElementById("stepToDelete");
     var title = step.querySelector('.step-title').textContent;
-    
 
-    // const steps = []; // create an empty array to store the steps
-
-    // const elements = document.querySelectorAll("[id^='Step']"); // get all elements with an ID that starts with "Step"
-    // elements.forEach(element => {
-    // const id = element.id;
-    // const match = id.match(/^Step (\d+)$/); // extract the step number from the ID using a regular expression
-    // if (match) {
-    //     const step = parseInt(match[1]); // convert the step number from a string to an integer
-    //     steps.push(step); // add the step to the array
-    // }
-    // });
-
-    // const delMatch = title.match(/\d+/);
-
-    // if (delMatch) {
-    //     const delNum = parseInt(delMatch[0]); 
-    //     console.log("whatever this is i am testing step is: ", delNum);
-    // }
-
-    
-    // steps.sort((a, b) => a - b); // sort the steps in ascending order
-
-    // console.log("whatever this is i am testing",steps); // print the steps to the console for testing
-
-    // console.log("whatever this is i am testing", title)
-
-
-
-    
     var num = title.replace("Step ", "");
     console.log("num is:", num)
     var tourNum = document.getElementById("tour-step-num");
@@ -1039,8 +1031,14 @@ function dragElement(elmnt) {
             var steps = document.getElementById(id);
             console.log("steps are: ", steps)
             console.log("element id is: ", id)
-            steps.textContent = 'Step '+ (i - 1); 
-            steps.id = 'Step '+ (i - 1); 
+            steps.textContent = `Step ${(i - 1)}`; 
+            steps.id = `Step ${(i - 1)}`;
+
+            // Remove the old event listener
+            steps.removeEventListener('click', () => openDeleteBox(i));
+
+            // Add the new event listener with the updated ID
+            steps.addEventListener('click', () => openDeleteBox(i - 1));
         }
     }
     
@@ -1057,7 +1055,6 @@ function dragElement(elmnt) {
         type: 'deleteTourStep',
         message: num
     });
-
 
 }
 

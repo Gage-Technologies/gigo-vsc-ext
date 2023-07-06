@@ -42,9 +42,7 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
     
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
-		console.log(`currentAfkValue1: ${this.afkActive}`);
-        //this.afkActive = gigoConfig.get("afk.on");
-		console.log(`currentAfkValue2: ${this.afkActive}`);
+
 
         //this.disableAFK();
     }
@@ -58,10 +56,8 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 	) {
 		this._view = webviewView;
 		this._view.webview.postMessage({type: "hello", text: `currentAfkValue: ${this.afkActive}`});
-		console.log(`currentAfkValue: ${this.afkActive}`);
 		this._view.webview.html = this._getAfkDisabledHtml(this._view.webview);
 
-		console.log(this._view.webview.html);
 
 		//setup webview
 		webviewView.webview.options = {
@@ -88,9 +84,7 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 					//call disable afk function when disableAFK command is called
                     this.disableAFK();
                     break;
-                case "hello":
-					//display message when hello command is called
-                    vscode.window.showInformationMessage(data.text);
+                case "hello":                    
                     return;
 			}
 		});
@@ -137,7 +131,6 @@ class AFKWebViewprovider implements vscode.WebviewViewProvider {
 				"60"
 			).then((exp) => {
 				this.logger.info.appendLine(`AFK Expires: ${exp} `);
-				console.log(`AFK Expires: ${exp}`);
 				if (exp > 0){
 					//ensures that webview exists and then sends afk timestamp to callback messenger
 					if (this._view) {

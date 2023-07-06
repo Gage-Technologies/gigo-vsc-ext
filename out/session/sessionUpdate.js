@@ -16,7 +16,6 @@ async function activateTimeout(context, cfg, sysLogger) {
     while (true) {
         //if user is not afk but is active call live check to renew session timer
         let res = await executeLiveCheck(cfg.workspace_id_string, cfg.secret);
-        console.log(`INIT LIVE CHECK COMPLETED: ${nextTimeStamp}`);
         if (res === -1) {
             logger.info.appendLine("Session: Disconnected from GIGO servers.");
             vscode.window.showInformationMessage("We are unable to connect to GIGO servers. Please check your network connection.");
@@ -33,14 +32,8 @@ async function activateTimeout(context, cfg, sysLogger) {
         while (true) {
             //if the user is afk wait 100ms before checking again
             if (!isAFK) {
-                // logger.info.appendLine("Session: User is not afk, time remaining: " + (nextTimeStamp - (Date.now()/1000)));
-                // console.log("checking if we go time remaining: " + (nextTimeStamp - (Date.now()/1000)));
                 //determine time remaining before user is considered inactive
                 let currentTimeRemaining = nextTimeStamp - (Date.now() / 1000);
-                //if user has less than or equal to 3 minutes remaining break from loop 
-                // if (currentTimeRemaining <= 180){
-                //     break;
-                // }
                 if (currentTimeRemaining <= 180) {
                     console.log("checking activity");
                     break;
@@ -49,17 +42,14 @@ async function activateTimeout(context, cfg, sysLogger) {
             //wait 100ms before iterating again
             await new Promise(f => setTimeout(f, 100));
         }
-        console.log("calling renewpopup");
         //prompt user that with inactive pop-up and display time remaining before session timeout
         let isRenewed = (await renewPopup()).valueOf();
-        console.log(`isRenewed: ${isRenewed}`);
         //if the user is not afk and is still inactive terminate the session
         if (!isRenewed && !isAFK) {
             logger.info.appendLine("Session: Session is being terminated due to inactivity.");
             vscode.window.showInformationMessage("Session is being terminated due to inactivity");
             break;
         }
-        console.log("CALLING LIVE CHECK");
         logger.info.appendLine(`Session: Calling live check user is afk: ${isAFK}  user is active: ${isRenewed}  time remaining: ${(nextTimeStamp - (Date.now() / 1000)) / 60}`);
         //if user is not afk but is active call live check to renew session timer
         let res = await executeLiveCheck(cfg.workspace_id_string, cfg.secret);
@@ -88,7 +78,6 @@ async function renewPopup() {
             logger.info.appendLine("Session: User is active.");
             // // vscode.window.showInformationMessage("Welcome back");
             isRenewed = true;
-            console.log("setting renewed status inside conditional: ", isRenewed);
             return true;
         }
         //if the user has not been active dip1674382421ay 'are you still there' message
@@ -97,7 +86,6 @@ async function renewPopup() {
             vscode.window.showInformationMessage("Welcome back");
             logger.info.appendLine("Session: User is active.");
             isRenewed = true;
-            console.log("setting renewed status inside popup: ", isRenewed);
             return true;
         });
         //wait for 1 minute before checking again
@@ -106,7 +94,6 @@ async function renewPopup() {
         timeRemaining = timeRemaining - 60;
     }
     if (isRenewed) {
-        console.log("renewed varibale setb outside function");
         vscode.window.showInformationMessage("Welcome back");
         return true;
     }

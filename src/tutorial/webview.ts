@@ -35,15 +35,16 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext, 
                 // Increment the highest number to get the next tutorial number
                 const nextNumber = highestNumber + 1;
     
+                // create tour file to record steps and line numbers
                 const newTourFileName = `tour-${nextNumber}.yaml`;
                 const newTourFilePath = path.join(tutorialFolderPath, newTourFileName);
-                fs.writeFile(newTourFilePath, '', (err: any) => {
+                fs.writeFile(newTourFilePath, 'steps: []', (err: any) => {
                     if (err) {
                         reject(err);
                         return;
                     }
     
-                    // Create the new tutorial file
+                    // Create the new tutorial markdown file
                     const newTutorialFileName = `tutorial-${nextNumber}.md`;
                     const newTutorialFilePath = path.join(tutorialFolderPath, newTutorialFileName);
                     fs.writeFile(newTutorialFilePath, `##### Use this markdown for your tutorial ${nextNumber} text \n\n\n\n`, (err: any) => {
@@ -55,6 +56,7 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext, 
 
                     const tourFilePath = path.join(provider.baseWorkspaceUri.fsPath, ".gigo", ".tours", `tutorial-${nextNumber}.tour`);
 
+                    // create codetour file for the new tutorial
                     if (fs.existsSync(tourFilePath)) {
                         let tour = fs.readFileSync(tourFilePath, 'utf-8');
                         let ts = JSON.parse(tour).steps;
@@ -70,7 +72,8 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext, 
     
                         fs.writeFileSync(tourFilePath, JSON.stringify(obj), 'utf-8');
                     }
-                    vscode.commands.executeCommand('vscode.openWith', Uri.file( newTutorialFilePath), "catCustoms.catScratch");
+                    // open the new file in editor and tutorial viewer 
+                    vscode.commands.executeCommand('vscode.openWith', Uri.file( newTutorialFilePath), "gigo.editor");
                     provider._view?.webview.postMessage({ type: 'openPage', message: nextNumber});
                 });
             });
@@ -78,26 +81,30 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext, 
         });
     }
 
+    // register a command to create a new tutorial
     vscode.commands.registerCommand('gigo.testing', () => {
         createTutorialFile();
-        
     });
 
+    // register a command to open a tutorial for editing
     vscode.commands.registerCommand('gigo.edit', () => {
         const tutorialFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tutorials');
         const tutorialFileName = `tutorial-${provider.currentPageNum}.md`;
         const tutorialFilePath = path.join(tutorialFolderPath, tutorialFileName);
-        vscode.commands.executeCommand('vscode.openWith', Uri.file( tutorialFilePath), "catCustoms.catScratch",);
+        vscode.commands.executeCommand('vscode.openWith', Uri.file( tutorialFilePath), "gigo.editor",);
         
     });
 
+    // register a command to delete the current tutorial
     vscode.commands.registerCommand('gigo.delete', () => {
         const fs = require('fs');
         const tourFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tours');
         const tutorialFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tutorials');
 
+        // popup for deletion confirmation
         vscode.window.showInformationMessage('Are you sure you want to delete this tutorial?', 'Yes', 'No').then((selected) => {
           if (selected === 'Yes') {
+            // delete all the files associated with the current tutorial
             fs.unlink(path.join(tutorialFolderPath, `tutorial-${provider.currentPageNum}.md`), (err: any) => {
                 if (err) {
                   console.error(err);
@@ -117,6 +124,7 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext, 
                 }
             });
 
+            // open previous page in tutorial viewer for consistency
             provider._view?.webview.postMessage({ type: 'openPage', message: provider.currentPageNum - 1 });
           }
         });
@@ -722,25 +730,31 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             //set the number of tutorials to the current number of markdown files matching the preset formatting
             this.numOfTutorials = mds.length;
 
-            
+            // setup the filepaths for reading the yaml and markdown files for the tutorials
             let filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${currentPgNum}.yaml`);
             let fileContents = fs.readFileSync(filePath, 'utf8');
             let yamlData = yaml.load(fileContents) as any;
             const mdFilePath = path.join(this.baseWorkspaceUri.fsPath + "/.gigo" + `/.tutorials/tutorial-${currentPgNum}.md`); // Replace with the actual file path
 
+            // load the markdown content 
             let markdownContent = fs.readFileSync(mdFilePath, 'utf-8');
 
+            // load the markdown content using the shiki highlighter
             let markdownData = md.render(markdownContent);
+
+            // get the default themes for the buttons
             let currentTheme = "var(--vscode-button-hoverBackground)";
             let boxTheme = "0 7px 0px var(--vscode-button-background)";
             let activeBoxTheme = "0 2px 0px var(--vscode-button-background)";
             
+            // if using premium theme, assign new styling to match the theme better
             if (themeName === 'Sam Custom Theme') {
                 currentTheme = "#41c18c";
                 boxTheme = "0 7px 0px #1c8762";
                 activeBoxTheme = "0 2px 0px #1c8762";
             }
 
+            // iterate through the yaml data to get the steps for each tutorial and place the buttons in the right places on the viewer
             function getSteps(fileContents: any){
                 let yamlData = yaml.load(fileContents) as any;
                 for (let step of yamlData.steps) {
@@ -755,6 +769,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 }
             }
 
+            // watch for changes to the yaml file and update the buttons accordingly
             fs.watch(filePath, (eventType: string) => {
                 if (eventType === 'change') {
                   fileContents = fs.readFileSync(filePath, 'utf-8');
@@ -764,6 +779,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 }
             });
 
+            // watch for changes to the markdown file and update the buttons accordingly
             fs.watch(mdFilePath, (eventType: string) => {
                 if (eventType === 'change') {
                   markdownContent = fs.readFileSync(mdFilePath, 'utf-8');

@@ -41,7 +41,6 @@ class AutoGit implements vscode.Disposable {
             console.log("AutoGit: Auto-Git initialized.");
         }
 
-        console.log("auto git config: ", this.cfg)
 
 		// try {
         //     //ensure that config exists
@@ -200,9 +199,6 @@ class AutoGit implements vscode.Disposable {
 
     //start() functions as main loop for auto-git extension
     public start(): void {
-        console.log("Starting auto-git extension");
-        //loads auto-git config into json object
-        // var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
 
         var cfg = this.cfg;
 
@@ -355,7 +351,6 @@ class AutoGit implements vscode.Disposable {
     }
 
     public setup() {
-        console.log("setup auto git");
         this.logger.info.appendLine("AutoGit: Setting up auto git.");
         try{
             fs.statSync(this.homedir);

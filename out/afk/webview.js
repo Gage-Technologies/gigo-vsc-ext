@@ -26,18 +26,13 @@ class AFKWebViewprovider {
         this.logger = sysLogger;
         // load configuration value for afk from
         let gigoConfig = vscode.workspace.getConfiguration("gigo");
-        console.log(`currentAfkValue1: ${this.afkActive}`);
-        //this.afkActive = gigoConfig.get("afk.on");
-        console.log(`currentAfkValue2: ${this.afkActive}`);
         //this.disableAFK();
     }
     //resolveWebviewView handles editor callback functions and basic html render
     resolveWebviewView(webviewView, context, _token) {
         this._view = webviewView;
         this._view.webview.postMessage({ type: "hello", text: `currentAfkValue: ${this.afkActive}` });
-        console.log(`currentAfkValue: ${this.afkActive}`);
         this._view.webview.html = this._getAfkDisabledHtml(this._view.webview);
-        console.log(this._view.webview.html);
         //setup webview
         webviewView.webview.options = {
             // Allow scripts in the webview
@@ -60,8 +55,6 @@ class AFKWebViewprovider {
                     this.disableAFK();
                     break;
                 case "hello":
-                    //display message when hello command is called
-                    vscode.window.showInformationMessage(data.text);
                     return;
             }
         });
@@ -97,7 +90,6 @@ class AFKWebViewprovider {
             //executeAfkCheck sets current status to afk and retrieves the timestamp of when afk expires
             (0, sessionUpdate_1.executeAfkCheck)(this.cfg.workspace_id_string, this.cfg.secret, "60").then((exp) => {
                 this.logger.info.appendLine(`AFK Expires: ${exp} `);
-                console.log(`AFK Expires: ${exp}`);
                 if (exp > 0) {
                     //ensures that webview exists and then sends afk timestamp to callback messenger
                     if (this._view) {

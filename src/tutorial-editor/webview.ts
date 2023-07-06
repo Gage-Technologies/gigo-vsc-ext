@@ -11,18 +11,6 @@ export async function activateEditor(context: vscode.ExtensionContext) {
 }
 
 
-/**
- * Provider for cat scratch editors.
- * 
- * Cat scratch editors are used for `.cscratch` files, which are just json files.
- * To get started, run this extension and open an empty `.cscratch` file in VS Code.
- * 
- * This provider demonstrates:
- * 
- * - Setting up the initial webview for a custom editor.
- * - Loading scripts and styles in a custom editor.
- * - Synchronizing changes between a text document and a custom editor.
- */
 export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 
     public static register(context: vscode.ExtensionContext): vscode.Disposable {
@@ -34,7 +22,7 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 
     public text: any;
     public addCodeTourBtn: any = `<button class="add-code-tour" onclick="addCodeTour()">Create Code Tour</button>`;
-    private static readonly viewType = 'catCustoms.catScratch';
+    private static readonly viewType = 'gigo.editor';
 
     public updateCounter: number = 0;
     public baseWorkspaceUri!: vscode.Uri;
@@ -79,19 +67,6 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
             enableScripts: true
         };
 
-        // const panel = vscode.window.createWebviewPanel(
-        // 	'catCoding',
-        // 	'Cat Coding',
-        // 	vscode.ViewColumn.One,
-        // 	{
-        // 	  enableScripts: true,
-        // 	  retainContextWhenHidden: true
-        // 	}
-        //   );
-
-        // webviewPanel.options.retainContextWhenHidden = true;
-
-
         let fs = require('fs')
 
         var files = document.fileName.split("/");
@@ -113,7 +88,6 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                 steps: [],
                 ref: "master",
             };
-
             this.fullTour = JSON.stringify(obj);
 
             fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
@@ -166,10 +140,8 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                     var Prism = require('prismjs');
                     Prism.highlightElement(e.message);
                     return;
-                case 'hello':
-                    vscode.window.showInformationMessage(e.message);
-                    break;
                 case 'updateFile':
+                    // when using the tutorial editor, updates the file so that it can be saved and reflected in webview
                     this.updateCounter++;
                     this.text = e.message;
                     try {
@@ -177,7 +149,6 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                     } catch (err) {
                         vscode.window.showInformationMessage(`error in file write ${err}`);
                     }
-                    webviewPanel.webview.postMessage({ type: 'helloWorld'});
                     return;
                 case "cursorPosition":
                     if (e.message !== undefined) {
@@ -187,32 +158,21 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                 return;
 
                 case 'saveTourStep':
+                    // create file path to save the steps to the tour .yaml file
                     const filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${this.fileNum}.yaml`);
-
                     let tour = fs.readFileSync(this.tourFilePath, 'utf-8');
                     let ts = JSON.parse(tour);
 
+                    // parse the file to get the steps and line numbers currently in the tour
                     let parsedMsg = JSON.parse(e.message);
-
                     parsedMsg.line = parseInt(parsedMsg.line);
                     var stepNum = parseInt(parsedMsg.step);
                     delete parsedMsg['step'];
 
-                    var lines = [];
-                    fs.readFile(path.join(this.baseWorkspaceUri.fsPath, parsedMsg.file), 'utf8', (err: any, data: string) => {
-                        if (err) {
-                          console.error('Error reading file:', err);
-                          return;
-                        }
-                    
-                        lines = data.split('\n');
-
-                    });
-
+                    // load the color from the tour file 
                     this.currentColor = this.rgbToHex(parsedMsg.color);
-                    
 
-
+                    // check to see if user input line number is valid
                     if (parsedMsg.line < 1) {
                         console.log('incorrect value passed for parsedMsg.line: ', parsedMsg.line);
                         vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number is greater than 0.`);
@@ -259,6 +219,7 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                         return;
                     }
 
+                    // check yaml contents for existing steps and if there are none, add the first with user input
                     const fileContents = fs.readFileSync(filePath, 'utf8');
                     const tourData = yaml.load(fileContents) as any;
                     
@@ -312,7 +273,6 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                         ts.steps.push(parsedMsg);
                     } else {
                         ts.steps[stepNum - 1] = parsedMsg;
-                        console.log(`ts this is working?: ${JSON.stringify(ts)}`);
                     }
 
                     this.fullTour = JSON.stringify(ts);
@@ -328,22 +288,26 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
                     break;
 
                 case 'deleteTourStep':
+                    // post message for the tutorial editor to handle the deletion of the step on the webview
                     webviewPanel.webview.postMessage({ type: 'deleteTourStep' });
 
+                    // load the base 0 step number to delete from tour file 
                     var deletedStepNum = parseInt(e.message) - 1;
                     let tours = fs.readFileSync(this.tourFilePath, 'utf-8');
                     let tss = JSON.parse(tours);
                     tss.steps = tss.steps.filter((_: any, index: number) => index !== deletedStepNum);
                     this.fullTour = JSON.stringify(tss);
                     fs.writeFileSync(this.tourFilePath, this.fullTour, 'utf-8');
+
+                    // setup deletion of the step from the .yaml file
                     const delFilePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${this.fileNum}.yaml`);
                     const deliFleContents = fs.readFileSync(delFilePath, 'utf8');
                     const delTourData = yaml.load(deliFleContents) as any;
 
-                    const delStep = delTourData.steps.filter((step: any) => step.step_number === e.message);
-
+                    // load step to delete from the.yaml file
                     const stepToDelete = e.message;
 
+                    // when step is deleted from the.yaml file, decrement the step number and keep the corresponding line number
                     delTourData.steps.splice(stepToDelete-1, 1);
                     for (let i = stepToDelete-1; i < delTourData.steps.length; i++) {
                         delTourData.steps[i].step_number -= 1;
@@ -363,18 +327,16 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
     }
     
 
+    // load the step button color and translate to a hexcode so webview can stay consistent in step creation
     private rgbToHex(rgb: string): string {
-        // Remove the "rgb(" and ")" parts from the string
         const values = rgb.substring(4, rgb.length - 1).split(",");
       
-        // Convert each RGB value to its hexadecimal equivalent
         const hexValues = values.map((value) => {
           const intValue = parseInt(value.trim(), 10);
           const hexValue = intValue.toString(16).padStart(2, "0");
           return hexValue;
         });
       
-        // Combine the hexadecimal values for red, green, and blue
         const hexCode = "#" + hexValues.join("");
       
         return hexCode;
@@ -395,10 +357,8 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
         }
 
 
-        console.log(this.context.extensionUri);
         // Local path to script and css for the webview
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'dist', 'tutorial-editor', 'catScratch.js'));
+
 
         const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'dist', 'tutorial-editor', 'reset.css'));
@@ -406,8 +366,7 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
         const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'dist', 'tutorial-editor', 'vscode.css'));
 
-        const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(
-            this.context.extensionUri, 'dist', 'tutorial-editor', 'catScratch.css'));
+
         const styleJS = webview.asWebviewUri(vscode.Uri.joinPath(
             this.context.extensionUri, 'dist', 'tutorial-editor', 'style.js'));
 
@@ -490,7 +449,6 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-markdown.js"></script>
             <link href="${styleResetUri}" rel="stylesheet" />
             <link href="${styleVSCodeUri}" rel="stylesheet" />
-            <link href="${styleMainUri}" rel="stylesheet" />
             <link href="${codeInStyling}" rel="stylesheet" />
             <link href="${codeCompleteStyle}" rel="stylesheet" />
             <link href="${codeTourStyle}" rel="stylesheet" />
@@ -504,7 +462,6 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
 
-            <title>Cat Scratch</title>
         </head>
 
         <script src="${codeTourScript}"></script>
@@ -778,7 +735,6 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
         </body>
 
             <script  nonce="${nonce}" src="${styleJS}" ></script>
-            <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
         </div>
         </body>
         </html>`;

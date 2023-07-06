@@ -24,11 +24,6 @@ export class HelloWorldPanel {
             const command = message.command;
             const text = message.text;
     
-            switch (command) {
-              case "hello":
-                vscode.window.showInformationMessage(text);
-                return;
-            }
           },
           undefined,
           this._disposables
@@ -49,7 +44,6 @@ export class HelloWorldPanel {
     }
 
     public activate(context: vscode.ExtensionContext){
-      console.log("activating hello world");
 
       const helloCommand = vscode.commands.registerCommand("hello-world.helloWorld", () => {
           HelloWorldPanel.render(context.extensionUri);
@@ -84,7 +78,6 @@ export class HelloWorldPanel {
   
     const mainUri = this.getUri(webview, extensionUri, ["src", "main.js"]);
 
-    console.log("main file: ", mainUri);
 
     const toolkitUri = this.getUri(webview, extensionUri, [
         "node_modules",

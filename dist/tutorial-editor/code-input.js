@@ -18,9 +18,6 @@ function helloWrld(){
 function addCodeTour(){
     var step = document.getElementById("@@@Step0@@@");
     try{
-        console.log("in addC")
-        // var popCon = document.getElementById("pop-container");
-        // console.log(popCon.style.display);
         if (step.style.display === "inline-block"){
             var tourNum = document.getElementById("tour-step-num");
 
@@ -106,135 +103,20 @@ function addCodeTour(){
 }
 
 function loadCodeTours(){
-    console.log("inside load code tours");
     try{
         var steps = document.getElementById("tour-step-objs").value;
         
         steps = JSON.parse(steps);
-        console.log(`this is the steps inside load code tours: ${steps[0]}`);
         vscode.postMessage({
             type: 'hello',
             message: `in side load code tours ${steps}`
         })
-        // var tourPath = document.getElementById("tour-path").value;
-        // let tour = fs.readFileSync(tourPath, 'utf-8');
-        // let ts = JSON.parse(tour);
-        // var steps = ts.steps;
+
     }catch(e){
         console.log(e);
     }
     
-    console.log(`this is post message in load code tours length of steps: ${steps.length}`);
-    // for (let i = 0; i < steps.length; i++) {
-    //     var randomColor = Math.floor(Math.random()*16777215).toString(16);
-
-    //     var step = document.getElementById("@@@Step0@@@");
-        
-
-    //     let stepClone = step.cloneNode(true);
-    //     stepClone.id = `@@@Step${i + 1}@@@`;
-
-
-       
-    //     var innerStep = stepClone.querySelector(".code-steps-inner");
-    //     innerStep.style.backgroundColor = "#" + randomColor;
-    //     var title = stepClone.querySelector(".code-steps-inner").querySelector(".step-title");
-
-    //     title.innerHTML = `<b>Step ${i + 1}</b>`;
-
-    //     var filePath = stepClone.querySelector("#file-path-div").querySelector("#file-path");
-    //     filePath.value = steps[i].file;
-
-    //     var lineNumber = stepClone.querySelector("#line-number-div").querySelector("#line-number");
-    //     lineNumber.value = steps[i].line;
-
-    //     var description = stepClone.querySelector("#description-div").querySelector("#description-input");
-    //     description.value = steps[i].description;
-
-    //     stepClone.style.display = "inline-block";
-    //     step.parentElement.appendChild(stepClone);
-
-    //     var filePathDiv = stepClone.querySelector("#file-path-div")
-    //     var lineNumberDiv = stepClone.querySelector("#line-number-div")
-    //     var descriptionDiv = stepClone.querySelector("#description-div")
-    //     var saveButton = stepClone.querySelector('#save-step-button');
-    //     var textBoxEx = document.getElementById("ci-external");
-    //     var textBoxIn = document.getElementById("ci-internal");
-    //     var word = stepClone.id;
-    //     var elmnt = stepClone;
-
-    //     console.log(`this is the step in iter2: ${stepClone.id}`);
-
-    //     filePathDiv.style.display = "none";
-    //     lineNumberDiv.style.display = "none";
-    //     descriptionDiv.style.display = "none";
-    //     saveButton.style.display = "none";
-    //     stepClone.style.height = "3%";
-
-    //     var caretPos = textBoxIn.selectionStart;
-            
-    //     if (textBoxEx.value.indexOf(word) === -1){
-    //         console.log(caretPos)
-
-
-    //         textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
-
-
-    //         console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
-    //         console.log("rest of string: ", textBoxEx.value.slice(`${word}`.length))
-    //         console.log(textBoxEx.value);
-    //         //textBoxEx.value += `\n${word}\n`;
-    //     }
-        
-    //     // now you have a proper float for the font size (yes, it can be a float, not just an integer)
-    //     var fontSize = parseInt(window.getComputedStyle(textBoxEx).fontSize)
-    //     var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
-
-    //     var charsBefore = 0
-    //     const newLines = textBoxEx.value.split("\n");
-    //     for (let i = 0; i < newLines.length; i++) {
-    //         if (newLines[i].indexOf(word) !== -1){
-    //             heightPos = i + 1;
-    //         }
-    //     } 
-
-    //     for (let i = 0; i < newLines.length; i++) {
-    //         if (newLines[i].indexOf(word)!== -1){
-    //             break;
-    //         }
-    //         charsBefore += newLines[i].length + 1;
-    //     }
-
-    //     console.log(`postr newline calc`);
-    //     var startPos = (textBoxEx.value.indexOf(word));
-    //     var endPos = (startPos + word.length) - charsBefore;
-
-    //     var top = (getOffset(textBoxEx).top + (heightPos * lineHeight))
-    //     var left = (getOffset(textBoxEx).left + (endPos * fontSize))
-
-    //     // if (top > rect.height || left > rect.width || left > rect.width){ 
-    //     //     elmnt.style.top = (getOffset(textBoxEx).top) + "px";
-    //     //     elmnt.style.left = (getOffset(textBoxEx).left) + "px";
-    //     //     handleCodeSteps();
-    //     // }
-        
-    //     console.log(`postr newline calc2`);
-        
-    //     //  elmnt.style.position = "fixed";
-
-    //     stepClone.style.top = (getOffset(textBoxEx).top + (heightPos * lineHeight)+5) + "px";
-    //     stepClone.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
-    //     stepClone.style.position = "absolute";
-
-    //     console.log(`loading step: ${stepClone.id} into pos: ${stepClone.style.top}, ${stepClone.style.left}`);
-    //     // elmnt.ondragstart = function () { return false; };
-       
-
-    // }
-
-    // console.log(`load handle code steps`);
-    // handleCodeSteps();
-    // console.log(`after load handle code steps`);
+   
 }
 
 function deleteStep(elmnt){
@@ -245,7 +127,6 @@ function deleteStep(elmnt){
 
 
 function editStep(button){
-    // console.log(event);
  
     var codeStep = button.parentElement;
 
@@ -299,7 +180,6 @@ function saveStep(button) {
     var tourNum = document.getElementById("tour-step-num");
         
 
-    console.log("this is new num", parseInt(tourNum.value))
 
 
     var stepPop = document.getElementById(step);
@@ -331,7 +211,6 @@ function saveStep(button) {
 
     var step = document.getElementById("@@@Step0@@@");
     var innerStep = step.querySelector(".code-steps-inner");
-    console.log("this will work i think", innerStep.style.backgroundColor)
 
     const mes = {
         file: filePath.value,
@@ -391,7 +270,6 @@ function expandStep(ev, step){
         step.style.zIndex = "25";
         step.style.height = "8%";
         var rect = step.getBoundingClientRect();
-        console.log(rect.height);
         if (rect.height < 70){
             step.style.height = "70px";
         }
@@ -401,7 +279,6 @@ function expandStep(ev, step){
     }
 
     editButton.style.display = "none";
-    console.log("closing edit button")
     var editButton = document.getElementById('edit-step-button');
     step.style.height = "3%";
     step.style.zIndex = "20";
@@ -648,7 +525,6 @@ var codeInput = {
             this.transfer_event("selectionchange", this.querySelector("textarea"), null, this.onselectionchange);
 
             /* Add code from value attribute - useful for loading from backend */
-            console.log("loading default value into text area: ", value)
             this.update(value, this);
         }
         
@@ -856,7 +732,6 @@ customElements.define("code-input", codeInput.CodeInput); // Set tag
 
 
 function dragElement(elmnt) {
-    console.log(`element being dragged: ${elmnt.id}`);
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     var saveButton = elmnt.querySelector("#save-step-button");
     var isMoved = false;
@@ -870,7 +745,6 @@ function dragElement(elmnt) {
     
   
     function dragMouseDown(e) {
-        console.log("dragMouseDown is moved: ", isMoved);
         isMoved = false;
   
 
@@ -896,7 +770,6 @@ function dragElement(elmnt) {
     function elementDrag(e) {
       e = e || window.event;
      
-      console.log("is moved in elementDrag: ", isMoved);
       isMoved = true;
       // calculate the new cursor position:
       pos1 = pos3 - e.clientX;
@@ -911,7 +784,6 @@ function dragElement(elmnt) {
       var trash = document.getElementById("trash");
       var textBoxEx = document.getElementById("ci-external");
       var textBoxIn = document.getElementById("ci-internal");
-      console.log(textBoxIn.selectionStart, textBoxIn.selectionEnd);
       if (Math.abs(localToGlobal(trash).top - (localToGlobal(elmnt).top - window.scrollY)) < 50 && Math.abs(localToGlobal(trash).left - (localToGlobal(elmnt).left - window.scrollX)) < 50) {
         
         var icon = trash.querySelector(".trash-icon");
@@ -994,12 +866,9 @@ function dragElement(elmnt) {
     deleteContainer.style.display = "inline-block";
 
     
-    console.log("delete box is open", number);
     var step = document.getElementById("stepToDelete");
 
     var title = step.querySelector('.step-title');
-    console.log("title is: ", title);
-    console.log("text of title title is: ", title.textContent);
     var stepColor = document.getElementById("Step " + number).style.backgroundColor;
 
     step.style.backgroundColor = stepColor;
@@ -1014,23 +883,16 @@ function dragElement(elmnt) {
     var title = step.querySelector('.step-title').textContent;
 
     var num = title.replace("Step ", "");
-    console.log("num is:", num)
     var tourNum = document.getElementById("tour-step-num");
     var tourNumLength = tourNum.value
-    console.log("tour num is: ", tourNumLength)
 
     tourNumLength = tourNumLength - 1;
     tourNum.value = tourNumLength;
 
     if (tourNumLength > 0) {
-        console.log("made it here: ", Number(num) + 1)
-        console.log("tour num length is: ", Number(tourNumLength))
         for (let i = Number(num) + 1; i <= Number(tourNumLength) + 1; i++){
-            console.log("i guess we made it this far: ", i)
             var id = 'Step ' + i;
             var steps = document.getElementById(id);
-            console.log("steps are: ", steps)
-            console.log("element id is: ", id)
             steps.textContent = `Step ${(i - 1)}`; 
             steps.id = `Step ${(i - 1)}`;
 
@@ -1045,7 +907,6 @@ function dragElement(elmnt) {
 
     var element = document.getElementById(title);
     
-    console.log("element is this: ", element)
 
     element.remove();
 
@@ -1063,17 +924,14 @@ function dragElement(elmnt) {
   function executeDelete(step){
     var num = step.replaceAll("@", "");
     var num = num.replace("Step", "");
-    console.log("num is: ", num)
     var tourNum = document.getElementById("tour-step-num");
     var tourNumLength = tourNum.value
     var textBoxEx = document.getElementById("ci-external");
-    console.log("tour num iks: ", tourNumLength)
 
      var stepObj = document.getElementById(step);
      textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(step)) + textBoxEx.value.slice(textBoxEx.value.indexOf(step) + step.length);
      stepObj.remove();
 
-    console.log("here we are")
 
     tourNumLength = tourNumLength - 1;
     tourNum.value = tourNumLength;
@@ -1082,14 +940,9 @@ function dragElement(elmnt) {
     deleteContainer.style.display = "none";
 
     if (tourNumLength > 0) {
-        console.log("made it here: ", Number(num) + 1)
-        console.log("tour num length is: ", Number(tourNumLength))
         for (let i = Number(num) + 1; i <= Number(tourNumLength) + 1; i++){
-            console.log("i guess we made it this far: ", i)
             var id = `@@@Step${i}@@@`
             var steps = document.getElementById(id);
-            console.log("steps are: ", steps)
-            console.log("element id is: ", id)
             var title = steps.querySelector(".code-steps-inner").querySelector(".step-title");
             title.innerHTML = `<b>Step ${i - 1}</b>`;
             textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(steps.id)) + `@@@Step${i-1}@@@` +  textBoxEx.value.slice(textBoxEx.value.indexOf(steps.id) + steps.id.length);
@@ -1105,108 +958,6 @@ function dragElement(elmnt) {
 
   }
 
-//   //exexcuteDelete takes in the id of the step to be deleted
-//   function executeDelete(step){
-//         console.log(`START OF EXECUTE DELETE`)
-//         //retrieve the total number of steps from the document
-//         var tourNum = document.getElementById("tour-step-num");
-//         vscode.postMessage({
-//             type: "hello",
-//             message: `tournum: ${tourNum.value} for step: ${step}`
-//         })
-//         // if (parseInt(tourNum.value) < 1){
-//         //     return;
-//         // }
-
-//         //retrieve the markdown text box for removing/editing the step marker
-//         var textBoxEx = document.getElementById("ci-external");
-
-//         //parse the step number from the step id
-//         var num = step.replaceAll("@", "");
-//         var num = num.replace("Step", "");
-//         vscode.postMessage({
-//             type: "hello",
-//             message: `step to be deleted: ${num}`
-//         })
-
-
-//         //decrement the number of total steps
-//         tourNum.value = parseInt(tourNum.value) - 1;
-
-//         console.log(`tourNum ${tourNum.value}`);
-
-//         //hide the delete pop up
-//         var deleteContainer = document.getElementById("delete-container");
-//         deleteContainer.style.display = "none";
-
-//         //todo figure out why it looks like it is grabbing the object below the one to be deleted
-//         //retrieve the actual object of the step from its id
-//         var stepObj = document.getElementById(step);
-//         console.log("step before obj: ", step);
-//         console.log("step obj: ", stepObj);
-//         //remove the marker from the markdown text box
-//         textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(step)) + textBoxEx.value.slice(textBoxEx.value.indexOf(step) + step.length);
-//         //remove the step object from the document
-//         stepObj.remove();
-
-//         //if there was more than 1 step present when delete was called 
-//         //edit the remaining steps accordingly
-//         if (tourNum.value > 0) {
-
-//             //create an array to store the number of steps this delete operation will affect
-//             var stepArr = [];
-//             console.log(`start ${tourNum.value} ned ${num}`);
-//             //iterate over all steps that are greater than the step that was deleted
-//             //and decrement their ids and titles
-//             for (var i = parseInt(tourNum.value) + 1; i > num; i--) {
-//                 console.log(`step ${i}\n`);
-//                 //retrieve step of the current index
-//                 var steps = document.getElementById(`@@@Step${i}@@@`);
-//                 console.log(steps);
-//                 //retrieve the step title
-//                 var title = steps.querySelector(".code-steps-inner").querySelector(".step-title");
-//                 //decrement the step title 
-//                 title.innerHTML = `<b>Step ${i - 1}</b>`;
-//                 //push the step to the array of edited steps
-//                 stepArr.push(steps);
-//             }
-
-
-//             //itearate over the array of edited steps and 
-//             for (var i = 0; i < stepArr.length; i++) {
-//                 var steps = stepArr[i];
-
-//                 //decrement the step number
-//                 var num = steps.id.replaceAll("@", "");
-//                 num = num.replace("Step", "");
-//                 num = parseInt(num) - 1;
-                
-//                 console.log(`setting step ${step.id} to  Step${num}`);
-
-//                 //change the marker in the markdown text box to reflect the changed number of the step
-//                 textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(steps.id)) + `@@@Step${num}@@@` +  textBoxEx.value.slice(textBoxEx.value.indexOf(steps.id) + steps.id.length);
-//                 //decrement id of step
-//                 step.id = `@@@Step${num}@@@`;
-//                 console.log(step);
-
-//             }
-//         }
-
-      
-        
-
-        
-        
-        
-       
-
-
-
-//         // vscode.postMessage({
-//         //     type: "deleteTourStep",
-//         //     message: ""
-//         // });
-//    }
 
    
   
@@ -1355,13 +1106,9 @@ function handleCodeSteps(elmnt){
         // get the line height of the text box
         var lineHeight = parseInt(window.getComputedStyle(textBoxEx).lineHeight)
 
-        /////
-        console.log(`line number: ${(elPos.top - rect.top) / lineHeight}`);
-
         // do some math to get the caret position with the line height
         var lineNumber = (elPos.top - rect.top) / lineHeight;
         var newCaretPos = textBoxEx.value.split('\n', Math.round(lineNumber)).join('\n').length;
-        console.log(`newCaretPos: ${newCaretPos} for ${elmnt.id}`);
         
         // var caretPos = textBoxIn.selectionStart;
 
@@ -1369,33 +1116,20 @@ function handleCodeSteps(elmnt){
         // set new caret position
         var caretPos = newCaretPos;
 
-        console.log(`moving step with id: ${word}`);
         
 
         // ensure that the @@@Step#@@@ only exists once in the text box
         // by replacing the old @@@Step#@@@ with the empty string
         if (textBoxEx.value.indexOf(word) !== -1){
-            console.log(`replacing ${word} in handle code steps`);
-            // textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
             textBoxEx.value = textBoxEx.value.replace(word, "");
-            console.log("replacing word in handle: ", textBoxEx.value.replace(word, ""));
-            // console.log(textBoxEx.value);
-            //textBoxEx.value += `\n${word}\n`;
+
         }
-
-        console.log(caretPos)
-
-
-        console.log("adding word in handle: ", textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos));
 
 
         // add the @@@Step#@@@ to the text box at the line number of the code tour box
         textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
 
 
-        console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
-        console.log("rest of string: ", textBoxEx.value.slice(`${word}`.length))
-        console.log(textBoxEx.value);
         
         // now you have a proper float for the font size (yes, it can be a float, not just an integer)
         
@@ -1453,7 +1187,6 @@ function handleCodeSteps(elmnt){
 
         // ensure that the code tour box is within the bounds of the text box
         if (top > rect.height || left > rect.width || left > rect.width){ 
-            console.log(`step: ${word} is outside the bounds of the window`)
             elmnt.style.top = (getOffset(textBoxEx).top) + "px";
             elmnt.style.left = (getOffset(textBoxEx).left) + "px";
             handleCodeSteps(elmnt);
@@ -1469,8 +1202,6 @@ function handleCodeSteps(elmnt){
         elmnt.style.left = (getOffset(textBoxEx).left + (endPos * fontSize) + 13) + "px";
 
         
-        console.log(`moving step with id: ${word} to pos: ${top}, ${left}`);
-        // elmnt.ondragstart = function () { return false; };
         
         
         
@@ -1497,7 +1228,6 @@ function handleCodeSteps(elmnt){
         if (textBoxEx.value.indexOf(word) !== -1){
             
             textBoxEx.value = textBoxEx.value.substring(0, textBoxEx.value.indexOf(word)) + textBoxEx.value.slice(textBoxEx.value.indexOf(word) + word.length);
-            console.log(textBoxEx.value);
             
             //textBoxEx.value += `\n${word}\n`;
         }
@@ -1510,7 +1240,6 @@ function handleCodeSteps(elmnt){
 
 function alignCodeSteps(){
    
-    console.log("INSIDE ALIGN CODE STEPS");
     var textBoxIn = document.getElementById("ci-internal");
     var textBoxEx = document.getElementById("ci-external");
     const rect = textBoxEx.getBoundingClientRect();
@@ -1548,17 +1277,11 @@ function alignCodeSteps(){
         var caretPos = textBoxIn.selectionStart;
         
         if (textBoxEx.value.indexOf(word) === -1){
-            console.log(caretPos)
 
-            console.log()
 
-            console.log("adding word in align: ", textBoxEx.value.substring(0, caretPos), "for: ", word);
             textBoxEx.value = textBoxEx.value.substring(0, caretPos) + `\n${word}` + textBoxEx.value.slice(caretPos)
 
 
-            console.log(`caret ${textBoxEx.value.substring(0, caretPos)}`)
-            console.log("rest of string: ", textBoxEx.value.slice(`${word}`.length))
-            console.log(textBoxEx.value);
             //textBoxEx.value += `\n${word}\n`;
         }
         
@@ -1581,7 +1304,6 @@ function alignCodeSteps(){
             charsBefore += newLines[i].length + 1;
         }
 
-        console.log(`postr newline calc`);
         var startPos = (textBoxEx.value.indexOf(word));
         var endPos = (startPos + word.length) - charsBefore;
 
@@ -1594,7 +1316,6 @@ function alignCodeSteps(){
         //     handleCodeSteps();
         // }
         
-        console.log(`postr newline calc2`);
         
         //  elmnt.style.position = "fixed";
 

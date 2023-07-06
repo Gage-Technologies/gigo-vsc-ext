@@ -27,7 +27,6 @@ class AutoGit {
             this.logger.info.appendLine("AutoGit: Auto-Git initialized.");
             console.log("AutoGit: Auto-Git initialized.");
         }
-        console.log("auto git config: ", this.cfg);
         // try {
         //     //ensure that config exists
         //     fs.statSync(this.cfg);
@@ -175,9 +174,6 @@ class AutoGit {
     }
     //start() functions as main loop for auto-git extension
     start() {
-        console.log("Starting auto-git extension");
-        //loads auto-git config into json object
-        // var cfg = JSON.parse(fs.readFileSync(this.cfg, 'utf8'));
         var cfg = this.cfg;
         //setting up local variables for auto-update intervals
         this.running = true;
@@ -311,7 +307,6 @@ class AutoGit {
         }
     }
     setup() {
-        console.log("setup auto git");
         this.logger.info.appendLine("AutoGit: Setting up auto git.");
         try {
             fs.statSync(this.homedir);

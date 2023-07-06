@@ -21,49 +21,14 @@ let autoGit: AutoGit;
 //activate function registers all listed commands and initializes some classes on startup
 export function activate(context: vscode.ExtensionContext) {
 
-
-    // vscode.languages.registerHoverProvider('markdown', {
-    //     provideHover(document, position, token) {
-    //         try{
-    //             let texrEditr =  vscode.window.activeTextEditor;
-    //             const decorationType = vscode.window.createTextEditorDecorationType(
-    //                 {
-    //                     light:
-    //                     {
-    //                         gutterIconPath: '/home/user/Downloads/xlf3lb2pg0x71.svg',
-    //                         gutterIconSize: '85%',
-    //                     },
-    //                     dark:
-    //                     {
-    //                         gutterIconPath: '/home/user/Downloads/xlf3lb2pg0x71.svg',
-    //                         gutterIconSize: '85%'
-    //                     }
-    //                 });
-            
-    //             if (texrEditr) {
-    //                  texrEditr.setDecorations(decorationType, rangesO);
-    //             }
-    //         }catch(error){
-    //             console.log(error);
-    //         }
-            
-    //       return {
-    //         contents: [`${document.lineAt(position.line).text}: ${token.onCancellationRequested}`]
-    //       };
-    //     }
-    //   });
-
-
     let logger: Record<string, any> = {};
 
-    console.log("before output channels")
     let errors = vscode.window.createOutputChannel("GIGO Developer Errors");
     let debug = vscode.window.createOutputChannel("GIGO Developer Debug");
 
     logger.error = errors;
     logger.info = debug;
 
-    console.log("after output channels: ", logger.error)
     
     let fs = require('fs');
 
@@ -96,14 +61,12 @@ export function activate(context: vscode.ExtensionContext) {
     autoGit = new AutoGit(cfg.workspace_settings.auto_git, logger);
     autoGit.activate(context);
 
-    console.log("after auto git");
 
     //start tutorial using its local activation function
     // tutorial = new Tutorial(context);
     logger.info.appendLine("Starting GIGO Session...");
     activateTimeout(context, cfg, logger);
 
-    console.log("calling afk activation");
 
     logger.info.appendLine("Starting GIGO AFK Page...");
     //start afk using its local activation function
@@ -119,7 +82,6 @@ export function activate(context: vscode.ExtensionContext) {
     // activateTeacherWebView(context, cfg, logger);
     
     
-    console.log("calling editor activation");
     activateEditor(context);
 
     logger.info.appendLine("GIGO Extension Setup...");

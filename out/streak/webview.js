@@ -99,9 +99,6 @@ class StreakWebViewprovider {
     // checks every minute to handle any stat changes 
     async renewStats() {
         while (true) {
-            console.log("display explode");
-            //this.explode(vscode.window.activeTextEditor, false);
-            console.log("past explode");
             // update stats with the message recieved from websocket
             try {
                 let wasFire = this.isOnFire;
@@ -111,12 +108,10 @@ class StreakWebViewprovider {
                 this.dayOfTheWeek = messageData.current_day_of_week;
                 // if user currently has an active streak and hit the mark to keep it going, trigger explosion
                 if (!wasFire && this.isOnFire) {
-                    console.log("displaying notification streak wasFire: ", wasFire, " isOnFire: ", this.isOnFire);
                     (0, eplosion_webview_1.activateFireAnimation)(this.context, this.streakNum);
                     //this.explode(vscode.window.activeTextEditor, false);
                 }
                 // update user's streak stats
-                console.log("Streak: set params{ isOnFire: ", messageData.streak_active, " weekInReview: ", messageData.week_in_review, " streakNum: ", messageData.current_streak, " current day of week: ", messageData.current_day_of_week);
                 if (this._view) {
                     if (this._view.visible) {
                         this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
@@ -243,17 +238,12 @@ class StreakWebViewprovider {
                             </span>`;
             }
         }
-        console.log("Streak: active days: ", this.activeDays);
         // checks for the users active days where a streak was continued and displays accordingly 
         if (this.activeDays) {
             this.activeDaysHTML = ``;
-            console.log("this day of the week: ", this.dayOfTheWeek);
             for (let day in this.weekDays) {
                 let dayString = this.weekDays[day];
-                console.log("Streak iter day initial: ", dayString);
-                console.log("Streak iterating iter day : ", dayString, " streak active value: ", this.activeDays[dayString]);
                 if (this.dayOfTheWeek === dayString) {
-                    console.log("Streak iter on today: ", dayString);
                     if (this.activeDays[dayString]) {
                         this.activeDaysHTML += `<div class="weekday weekdayActive"><span>${dayString.charAt(0)}</span></div>`;
                     }

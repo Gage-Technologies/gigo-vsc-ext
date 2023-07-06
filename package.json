@@ -94,21 +94,12 @@
     ],
     "customEditors": [
       {
-        "viewType": "catCustoms.catScratch",
-        "displayName": "Cat Scratch",
+        "viewType": "gigo.editor",
+        "displayName": "GIGO editor",
         "editor.semanticHighlighting.enabled": true,
         "selector": [
           {
             "filenamePattern": "tutorial-*.md"
-          }
-        ]
-      },
-      {
-        "viewType": "catCustoms.pawDraw",
-        "displayName": "Paw Draw",
-        "selector": [
-          {
-            "filenamePattern": "*.pawdraw"
           }
         ]
       }

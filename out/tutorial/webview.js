@@ -67,6 +67,9 @@ async function activateTutorialWebView(context, logger) {
                     // open the new file in editor and tutorial viewer 
                     vscode.commands.executeCommand('vscode.openWith', vscode_1.Uri.file(newTutorialFilePath), "gigo.editor");
                     provider._view?.webview.postMessage({ type: 'openPage', message: nextNumber });
+                    if (nextNumber === 1) {
+                        vscode.commands.executeCommand('workbench.action.reloadWindow');
+                    }
                 });
             });
         });
@@ -85,32 +88,67 @@ async function activateTutorialWebView(context, logger) {
     // register a command to delete the current tutorial
     vscode.commands.registerCommand('gigo.delete', () => {
         const fs = require('fs');
+        const path = require('path');
         const tourFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tours');
         const tutorialFolderPath = path.join(provider.baseWorkspaceUri.fsPath, '.gigo', '.tutorials');
         // popup for deletion confirmation
         vscode.window.showInformationMessage('Are you sure you want to delete this tutorial?', 'Yes', 'No').then((selected) => {
             if (selected === 'Yes') {
+                const currentPageNum = provider.currentPageNum;
                 // delete all the files associated with the current tutorial
-                fs.unlink(path.join(tutorialFolderPath, `tutorial-${provider.currentPageNum}.md`), (err) => {
+                fs.unlink(path.join(tutorialFolderPath, `tutorial-${currentPageNum}.md`), (err) => {
                     if (err) {
                         console.error(err);
                         return;
                     }
                 });
-                fs.unlink(path.join(tutorialFolderPath, `tour-${provider.currentPageNum}.yaml`), (err) => {
+                fs.unlink(path.join(tutorialFolderPath, `tour-${currentPageNum}.yaml`), (err) => {
                     if (err) {
                         console.error(err);
                         return;
                     }
                 });
-                fs.unlink(path.join(tourFolderPath, `tutorial-${provider.currentPageNum}.tour`), (err) => {
+                fs.unlink(path.join(tourFolderPath, `tutorial-${currentPageNum}.tour`), (err) => {
                     if (err) {
                         console.error(err);
                         return;
                     }
                 });
+                // rename the files after the deleted one
+                function renameFiles(folderPath, currentPageNum, prefix) {
+                    fs.readdir(folderPath, (err, files) => {
+                        if (err) {
+                            console.error(err);
+                            return;
+                        }
+                        files.sort().forEach((file) => {
+                            const match = file.match(new RegExp(`${prefix}-(\\d+)\\.`));
+                            if (match) {
+                                const num = parseInt(match[1]);
+                                if (num > currentPageNum) {
+                                    const newFileName = `${prefix}-${num - 1}.${file.split('.')[1]}`;
+                                    fs.rename(path.join(folderPath, file), path.join(folderPath, newFileName), (err) => {
+                                        if (err) {
+                                            console.error(err);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }
+                // Use the function for both folders
+                renameFiles(tutorialFolderPath, currentPageNum, 'tutorial');
+                renameFiles(tutorialFolderPath, currentPageNum, 'tour');
+                renameFiles(tourFolderPath, currentPageNum, 'tutorial');
                 // open previous page in tutorial viewer for consistency
-                provider._view?.webview.postMessage({ type: 'openPage', message: provider.currentPageNum - 1 });
+                if (currentPageNum > 1) {
+                    provider._view?.webview.postMessage({ type: 'openPage', message: currentPageNum - 1 });
+                }
+                else {
+                    provider._view?.webview.postMessage({ type: 'openPage', message: 1 });
+                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                }
             }
         });
     });

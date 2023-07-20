@@ -139,11 +139,10 @@ body {
 
 #big{
 	width: 100%;
+  	overflow-wrap: break-word;
 	font-family: Helvetica, arial, sans-serif;
-	font-size: 5vw;
+	font-size: 15px;
 	line-height: 2;
-	padding-top: 10px;
-	padding-bottom: 10px;
 }
 
 

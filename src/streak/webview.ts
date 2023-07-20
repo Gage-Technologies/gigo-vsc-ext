@@ -65,6 +65,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
     private _view?: vscode.WebviewView;
     public logger: any;
+    private isFirstCall: boolean = true;
 
   
 
@@ -163,7 +164,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
 
                 
                 // if user currently has an active streak and hit the mark to keep it going, trigger explosion
-                if (!wasFire && this.isOnFire){
+                if (!wasFire && this.isOnFire && !this.isFirstCall){
                     activateFireAnimation(this.context, this.streakNum);
                     //this.explode(vscode.window.activeTextEditor, false);
                 }
@@ -179,6 +180,7 @@ class StreakWebViewprovider implements vscode.WebviewViewProvider {
                   
                 }
         
+                this.isFirstCall = false;
 
             }catch(err){
                 console.log("Streak: failed to set variables from message, err: ", err);

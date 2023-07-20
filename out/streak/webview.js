@@ -41,6 +41,7 @@ class StreakWebViewprovider {
         this.weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         this.isOnFire = false;
         this.dayOfTheWeek = "";
+        this.isFirstCall = true;
         this.logger = sysLogger;
         // this.activeDays = [1,2];
         this.streakAnim = `<div class="streakAnim">
@@ -107,7 +108,7 @@ class StreakWebViewprovider {
                 this.streakNum = messageData.current_streak;
                 this.dayOfTheWeek = messageData.current_day_of_week;
                 // if user currently has an active streak and hit the mark to keep it going, trigger explosion
-                if (!wasFire && this.isOnFire) {
+                if (!wasFire && this.isOnFire && !this.isFirstCall) {
                     (0, eplosion_webview_1.activateFireAnimation)(this.context, this.streakNum);
                     //this.explode(vscode.window.activeTextEditor, false);
                 }
@@ -119,6 +120,7 @@ class StreakWebViewprovider {
                         await this._getHtmlForWebview(this._view.webview, "");
                     }
                 }
+                this.isFirstCall = false;
             }
             catch (err) {
                 console.log("Streak: failed to set variables from message, err: ", err);

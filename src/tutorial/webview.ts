@@ -78,6 +78,7 @@ export async function activateTutorialWebView(context: vscode.ExtensionContext, 
 
                     if (nextNumber === 1) {
                         vscode.commands.executeCommand('workbench.action.reloadWindow');
+                        provider._view?.webview.postMessage({ type: 'openPage', message: 1});
                     }
                 });
             });

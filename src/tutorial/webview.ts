@@ -772,7 +772,13 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
             // setup the filepaths for reading the yaml and markdown files for the tutorials
             let filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${currentPgNum}.yaml`);
-            let fileContents = fs.readFileSync(filePath, 'utf8');
+            let fileContents = "steps: []";
+            if (fs.existsSync(filePath)) {
+                fileContents = fs.readFileSync(filePath, 'utf8');
+              } else {
+                fileContents = "steps: []";
+            }
+            
             let yamlData = yaml.load(fileContents) as any;
             const mdFilePath = path.join(this.baseWorkspaceUri.fsPath + "/.gigo" + `/.tutorials/tutorial-${currentPgNum}.md`); // Replace with the actual file path
 
@@ -809,15 +815,18 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 }
             }
 
-            // watch for changes to the yaml file and update the buttons accordingly
-            fs.watch(filePath, (eventType: string) => {
-                if (eventType === 'change') {
-                  fileContents = fs.readFileSync(filePath, 'utf-8');
-                  if (yamlData !== undefined) {
-                    getSteps(fileContents);
+            if (fs.existsSync(filePath)) {
+                // watch for changes to the yaml file and update the buttons accordingly
+                fs.watch(filePath, (eventType: string) => {
+                    if (eventType === 'change') {
+                    fileContents = fs.readFileSync(filePath, 'utf-8');
+                    if (yamlData !== undefined) {
+                        getSteps(fileContents);
+                        }
                     }
-                }
-            });
+                });
+            }
+
 
             // watch for changes to the markdown file and update the buttons accordingly
             fs.watch(mdFilePath, (eventType: string) => {

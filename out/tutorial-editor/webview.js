@@ -96,6 +96,50 @@ class TutorialEditorProvider {
         webviewPanel.onDidDispose(() => {
             changeDocumentSubscription.dispose();
         });
+        const processFile = (filePath) => {
+            if (!fs.existsSync(filePath)) {
+                return;
+            }
+            const fileContents = fs.readFileSync(filePath, 'utf8');
+            const tourData = yaml.load(fileContents);
+            if (tourData === undefined) {
+                const data = {
+                    steps: [
+                        {
+                            step_number: 1,
+                            line_number: this.cursorPos,
+                        },
+                    ],
+                };
+                const yamlStr = yaml.dump(data);
+                fs.writeFileSync(filePath, yamlStr);
+            }
+            else {
+                this.numOfSteps = tourData.steps.length;
+                let newLineNum = this.cursorPos; // new line number to push
+                let lineNumExists = true;
+                // Check if the new line number already exists and increment if necessary
+                while (lineNumExists) {
+                    lineNumExists = false;
+                    for (let i = 0; i < tourData.steps.length; i++) {
+                        if (tourData.steps[i].line_number === newLineNum) {
+                            newLineNum++;
+                            lineNumExists = true;
+                            break;
+                        }
+                    }
+                }
+                // Push the new step to the steps array
+                tourData.steps.push({
+                    step_number: this.numOfSteps + 1,
+                    line_number: newLineNum
+                });
+                // Write the updated YAML back to the file
+                const tourDataStr = yaml.dump(tourData);
+                fs.writeFileSync(filePath, tourDataStr);
+                this.numOfSteps = this.numOfSteps + 1;
+            }
+        };
         // Receive message from the webview.
         webviewPanel.webview.onDidReceiveMessage(e => {
             switch (e.type) {
@@ -169,45 +213,46 @@ class TutorialEditorProvider {
                         vscode.window.showInformationMessage(`Incorrect line number for step. Please ensure that the line number exists in file.`);
                         return;
                     }
-                    // check yaml contents for existing steps and if there are none, add the first with user input
-                    const fileContents = fs.readFileSync(filePath, 'utf8');
-                    const tourData = yaml.load(fileContents);
-                    if (tourData === undefined) {
-                        const data = {
-                            steps: [
-                                {
-                                    step_number: 1,
-                                    line_number: this.cursorPos,
-                                },
-                            ],
-                        };
-                        const yamlStr = yaml.dump(data);
-                        fs.writeFileSync(filePath, yamlStr);
+                    if (fs.existsSync(filePath)) {
+                        processFile(filePath);
                     }
                     else {
-                        this.numOfSteps = tourData.steps.length;
-                        let newLineNum = this.cursorPos; // new line number to push
-                        let lineNumExists = true;
-                        // Check if the new line number already exists and increment if necessary
-                        while (lineNumExists) {
-                            lineNumExists = false;
-                            for (let i = 0; i < tourData.steps.length; i++) {
-                                if (tourData.steps[i].line_number === newLineNum) {
-                                    newLineNum++;
-                                    lineNumExists = true;
-                                    break;
-                                }
+                        const tutorialFolderPath = path.join(this.baseWorkspaceUri.fsPath, '.gigo', '.tutorials');
+                        const newTourFileName = `tour-${this.fileNum}.yaml`;
+                        const newTourFilePath = path.join(tutorialFolderPath, newTourFileName);
+                        fs.writeFile(newTourFilePath, '', (err) => {
+                            if (err) {
+                                console.log(err);
+                                return;
                             }
-                        }
-                        // Push the new step to the steps array
-                        tourData.steps.push({
-                            step_number: this.numOfSteps + 1,
-                            line_number: newLineNum
+                            // Create the new tutorial markdown file
+                            const newTutorialFileName = `tutorial-${this.fileNum}.md`;
+                            const newTutorialFilePath = path.join(tutorialFolderPath, newTutorialFileName);
+                            fs.writeFile(newTutorialFilePath, `##### Use this markdown for your tutorial ${this.fileNum} text \n\n\n\n`, (err) => {
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                            });
+                            const tourFilePath = path.join(this.baseWorkspaceUri.fsPath, ".gigo", ".tours", `tutorial-${this.fileNum}.tour`);
+                            // create codetour file for the new tutorial
+                            if (fs.existsSync(tourFilePath)) {
+                                let tour = fs.readFileSync(tourFilePath, 'utf-8');
+                                let ts = JSON.parse(tour).steps;
+                                let numOfSteps = ts.length;
+                                let fullTour = JSON.parse(tour);
+                            }
+                            else {
+                                var obj = {
+                                    $schema: "https://aka.ms/codetour-schema",
+                                    title: `tutorial-${this.fileNum}.tour`,
+                                    steps: [],
+                                    ref: "master",
+                                };
+                                fs.writeFileSync(tourFilePath, JSON.stringify(obj), 'utf-8');
+                            }
                         });
-                        // Write the updated YAML back to the file
-                        const tourDataStr = yaml.dump(tourData);
-                        fs.writeFileSync(filePath, tourDataStr);
-                        this.numOfSteps = this.numOfSteps + 1;
+                        processFile(filePath);
                     }
                     if (stepNum > this.numOfSteps) {
                         this.numOfSteps++;
@@ -308,16 +353,25 @@ class TutorialEditorProvider {
         if (vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark) {
             vsTheme = 'vs-dark';
         }
-        const filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${this.fileNum}.yaml`);
-        let fileContents = fs.readFileSync(filePath, 'utf8');
-        let tourData = yaml.load(fileContents);
         let tourDataStr = JSON.stringify("");
-        if (tourData !== undefined) {
-            tourDataStr = JSON.stringify(tourData);
-            this.numOfSteps = tourData.steps.length;
+        const filePath = path.join(this.baseWorkspaceUri.fsPath, "/.gigo" + `/.tutorials/tour-${this.fileNum}.yaml`);
+        if (fs.existsSync(filePath)) {
+            let fileContents = fs.readFileSync(filePath, 'utf8');
+            let tourData = yaml.load(fileContents);
+            if (tourData !== undefined) {
+                tourDataStr = JSON.stringify(tourData);
+                this.numOfSteps = tourData.steps.length;
+            }
+            else if (tourData === undefined) {
+                this.numOfSteps = 0;
+            }
         }
-        else if (tourData === undefined) {
+        else {
+            console.log('File does not exist');
             this.numOfSteps = 0;
+            tourDataStr = JSON.stringify({
+                steps: [],
+            });
         }
         return /* html */ `
         <!DOCTYPE html>

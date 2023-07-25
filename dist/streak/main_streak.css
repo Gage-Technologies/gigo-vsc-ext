@@ -1,0 +1,296 @@
+body {
+	background-color: transparent;
+}
+
+
+/* #big{
+	width: 100%;
+	font-family: Helvetica, arial, sans-serif;
+	font-size: 18px;
+	font-weight: bold;
+	font-size: 2.5vw;
+	line-height: 2;
+	padding-top: 10px;
+	padding-bottom: 10px;
+} */
+
+
+.bigger {
+	font-size: medium;;
+	/* font-weight: bold; */
+	font-family: Helvetica, arial, sans-serif;
+
+  }
+
+.streakBox{
+	width: 80vw;
+	height: auto;
+	padding: 2vw;
+	box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+	border-radius: 22px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+    align-items: center;
+	flex-wrap: wrap;
+}
+
+.streakText{
+	/* padding: auto; */
+	/* font-size: .3em; */
+	/* font-weight: bold; */
+	font-family: Helvetica, arial, sans-serif;
+	/* position: fixed; or absolute */
+	font-size: 6vw;
+	
+	
+	/* left: 45%; */
+	/* bring your own prefixes */
+	/* transform: translate(-50%, -50%); */
+}
+
+.streakNumber{
+	font-size: 25vw;
+	font-weight: bold;
+	opacity: 15%;
+	font-family: Helvetica, arial, sans-serif;
+	/* position: fixed; */
+	
+	/* top: 55%; */
+	/* left: 45%; */
+	/* bring your own prefixes */
+	/* transform: translate(-50%, -50%); */
+}
+
+.noStreak{
+	font-size: 5vw;
+	font-weight: bold;
+	opacity: 15%;
+	font-family: Helvetica, arial, sans-serif;
+	/* position: fixed; */
+	
+	/* top: 55%; */
+	/* left: 45%; */
+	/* bring your own prefixes */
+	/* transform: translate(-50%, -50%); */
+}
+  
+
+.streakIcon{
+	opacity: 10%;
+	height: 10vh;
+	width: auto;
+	/* position: fixed; or absolute */
+	/* top: 32%; */
+	/* left: 45%; */
+	/* bring your own prefixes */
+	/* transform: translate(-50%, -50%); */
+	/* filter: invert(70%) sepia(94%) saturate(5873%) hue-rotate(167deg) brightness(103%) contrast(101%); */
+	
+}
+
+.streakNumberOnFire{
+	font-size: 25vw;
+	font-weight: bold;
+	opacity: 100%;
+	font-family: Helvetica, arial, sans-serif;
+	color: #ff7a0e;
+}
+
+.streakIconOnFire{
+	opacity: 100%;
+	position: fixed; /* or absolute */
+	top: 32%;
+	left: 100%;
+	/* bring your own prefixes */
+	transform: translate(-50%, -50%);
+	/* filter: invert(70%) sepia(94%) saturate(5873%) hue-rotate(167deg) brightness(103%) contrast(101%); */
+	filter: invert(60%) sepia(82%) saturate(659%) hue-rotate(331deg) brightness(101%) contrast(101%);
+}
+
+
+.streakAnimOnFire{
+	opacity: 100%;
+	display: inline;
+	align-items: center;
+    justify-content: center;
+	height: auto;
+	width: 50vw;
+}
+
+.streakAnim{
+	opacity: 15%;
+	display: inline;
+	align-items: center;
+    justify-content: center;
+	height: auto;
+	width: 50vw;
+}
+
+
+.streakWeekBox{
+	width: 80vw;
+	height: auto;
+	padding: 2vw;
+	box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 8px -8px, rgba(0, 0, 0, 0.14) 0px 8px 10px 0px, rgba(0, 0, 0, 0.12) 0px 4px 18px 0px;
+	border-radius: 22px;
+	display: flex;
+	justify-content: center;
+    align-items: center;
+	flex-wrap: wrap;
+}
+
+.streakWeekText{
+    font-family: Helvetica, arial, sans-serif;
+	/* position: fixed; or absolute */
+	font-size: 6vw;
+}
+
+.weekdays {
+	width: 80vw;
+	height: auto;
+	align-items: center;
+    justify-content: center;
+	white-space: nowrap;
+	display: flex;
+	justify-content: center;
+    align-items: center;
+	flex-wrap: wrap;
+}
+  
+/* .weekdays {
+	height: 1em;
+	width: 1em;
+	border-radius: 50%;
+	display: inline-block;
+} */
+
+.weekday {
+	opacity: 15%;
+	font-family: monospace,monospace;
+	background-color: #ff7a0e;
+	color: #666;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 8vw;
+	font-size: 4vw;
+	border-radius: 50%;
+	width: 8vw;
+	height: 8vw;
+}
+
+.separator{
+	opacity: 15%;
+	color: #ff7a0e;
+	
+	
+	
+	font-size: 4vw;
+}
+
+.separatorActive{
+	opacity: 100%;
+}
+
+.weekdayActive{
+	opacity: 100%;
+}
+
+.weekdayToday{
+	opacity: 80%;
+	background-color: #144e5f;
+	color: white
+}
+
+/* .weekdays li .active{
+	
+	/* align-items: center;
+	justify-content: center; */
+	/* background-color: #ff8f3c;
+	color: #666;
+	height: 2em;
+	width: 2em;
+	
+	border-radius: 50%;
+	display: flex;; */
+	/* vertical-align: middle; */
+	
+/* } */
+
+
+
+
+
+.dot {
+	height: 25px;
+	width: variable;
+	background-color: #bbb;
+	border-radius: 50%;
+	display: inline-block;
+  }
+/* .weekdays li .active:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 100%;
+  } */
+
+  .weekdays li .alone:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 100%;
+  }
+
+  /* .weekdays li .rightActive:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 50%;
+  }
+
+  .weekdays li .leftActive:before {
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 50%;
+  }
+   */
+
+.weekdays li .disabled{
+	color: #666;
+	padding: 7px;
+	opacity: 10%;
+	border-radius: 100px;
+}
+
+.weekdays li .selected{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgb(73, 73, 73);
+	color: rgb(192, 192, 192);
+	min-width: 2.8em;
+	border-radius: 50%;
+	vertical-align: middle;
+}
+.weekdays li .selected:before{
+	content:'';
+	float: left;
+	width: auto;
+	padding-bottom: 100%;
+}
+
+/* Add media queries for smaller screens */
+@media screen and (max-width:720px) {
+	.weekdays li, .days li {width: 13.1%;}
+  }
+  
+@media screen and (max-width: 420px) {
+	.weekdays li, .days li {width: 12.5%;}
+	.days li .active {padding: 2px;}
+}
+
+@media screen and (max-width: 290px) {
+	.weekdays li, .days li {width: 12.2%;}
+}

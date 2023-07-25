@@ -1,0 +1,219 @@
+body {
+	background-color: transparent;
+}
+
+.enable-gigo-afk-button {
+	display: block;
+	border: none;
+	margin: 0 auto;
+}
+
+.disable-gigo-afk-button {
+	display: block;
+	border: none;
+	margin: 0 auto;
+}
+
+.expiration-countdown-title {
+	display: inline-flexbox;
+}
+
+#nextButton {
+	float: right;
+	font-size: medium;
+	width: 40vw;
+    height: 3vh;
+}
+
+#previousButton {
+    float: left;
+	font-size: smaller;
+	width: 40vw;
+    height: 3vh;
+}
+
+.enable-gigo-tutorial-next-button{
+	border-radius: 4px;
+	width: 40vw;
+    height: 3vh;
+	font-size: 1vh;
+	cursor: pointer;
+}
+
+.enable-gigo-tutorial-next-button:disabled,
+.enable-gigo-tutorial-next-button[disabled]{
+	border-radius: 4px;
+	
+	width: 40vw;
+    height: 3vh;
+	font-size: 1vh;
+	opacity: .4;
+	cursor: not-allowed;
+	outline: none;
+	border: none;
+	box-shadow: none;;
+	
+}
+
+
+
+.enable-gigo-tutorial-previous-button{
+	border-radius: 4px;
+	width: 40vw;
+    height: 3vh;
+	font-size: 1vh;
+	cursor: pointer;
+}
+.enable-gigo-tutorial-previous-button:disabled,
+.enable-gigo-tutorial-previous-button[disabled]{
+	border-radius: 4px;
+	
+	width: 40vw;
+    height: 3vh;
+	font-size: 1vh;
+	opacity: .4;
+	cursor: not-allowed;
+	outline: none;
+	border: none;
+	box-shadow: none;;
+	
+}
+
+#pageButton {
+	align-self: center;
+	float: center;
+	outline: none; 
+	padding: auto;
+	background-color: transparent;
+	border: none;
+    
+}
+
+.divider{
+    width:5px;
+    height: 0px;
+    display:inline-block;
+}
+
+.pageButtonContainer{
+	display: flex;
+	/* width: 100%; */
+}
+
+
+#pageButton{
+	background-color: transparent; 
+	background: transparent;
+	width: 10px; 
+	height: auto; 
+	border: none; 
+	text-decoration: underline; 
+	display: flexbox;
+	outline: none;
+}
+
+.pageButton:disabled,
+.pageButton[disabled]{
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	outline: none;
+	background-color: transparent; 
+	background: transparent;
+	border-radius: 4px;
+	cursor: not-allowed;
+	opacity: .2;
+	
+}
+
+.pageButton{
+	color: #8c8c8c;
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	outline: none;
+	background-color: transparent; 
+	background: transparent;
+	border-radius: 4px;
+}
+
+#big{
+	width: 100%;
+  	overflow-wrap: break-word;
+	font-family: Helvetica, arial, sans-serif;
+	font-size: 15px;
+	line-height: 2;
+}
+
+
+.codeTourButton{
+	display: flex;
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	border-radius: 4px;
+}
+
+.codeTourStep{
+	margin: auto;
+	flex: 1;
+	justify-content: center;
+	width: 30%;
+	display: flex;
+	
+	border-radius: 4px;
+}
+
+code {
+	border-radius: 6px;
+	padding: .2em .4em;
+	margin: 0;
+	white-space: break-spaces;
+	color: auto;
+	background-color: var(--vscode-editor-inactiveSelectionBackground);
+}
+
+.shiki {
+	border-radius: 8px;
+	min-width: 255px;
+	overflow: auto;
+	padding: 16px;
+	line-height: 1.45;
+}
+
+.shiki code {
+	font-size: 18px;
+	font-size: 2vw;
+	min-width: 255px;
+	background-color: rgba(0, 0, 0, 0);
+	padding: 0em;
+}
+
+.btn-9 {
+	background: var(--vscode-button-hoverBackground);
+			  font-size: 15px;
+			  color: white;
+			  border-radius: 7px;
+			  display: inline-block;
+			  transition: all .2s;
+			  position: relative;
+			  padding: 1px 20px;
+			  position: relative;
+			  top: 0;
+			  cursor: pointer;
+	margin:0 ;
+  }
+  
+   .btn-9:active {
+			  top: 3px;
+			  box-shadow: 0 2px 0px var(--vscode-button-background);
+			  transition: all .2s;
+		  }
+
+
+
+
+/* .shiki code span {
+	text-overflow: wrap;
+	min-width: 255px;
+} */

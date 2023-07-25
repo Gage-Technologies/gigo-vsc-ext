@@ -1,0 +1,161 @@
+/* Code-Input Compatibility */
+/* By WebCoder49 */
+/* First Published on CSS-Tricks.com */
+
+
+pre[class*="language-"].line-numbers {
+	position: relative;
+	padding-left: 8em;
+	counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+	position: relative;
+	white-space: inherit;
+}
+
+pre[class*="language-"] > code {
+	left: 3em;
+}
+
+#ci-internal{
+  left: 3.6em;
+  top: .5em;
+}
+
+.line-numbers .line-numbers-rows {
+	position: absolute;
+	pointer-events: none;
+	top: 0;
+	font-size: 100%;
+  left: -6em;
+	width: 5em; /* works for line-numbers below 1000 lines */
+	letter-spacing: -1px;
+	border-right: 2px solid rgba(100, 100, 100, 0.418);;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
+}
+
+	.line-numbers-rows > span {
+		display: block;
+		counter-increment: linenumber;
+	}
+
+		.line-numbers-rows > span:before {
+			content: counter(linenumber);
+			color: #999;
+			display: block;
+			padding-right: 0.8em;
+			text-align: right;
+		}
+
+
+.input-container{
+  height: fit-content;
+  width: 100%;
+}
+
+code-input {
+  /* Allow other elems to be inside */
+  position: relative;
+  top: 0;
+  left: 0;
+  display: block;
+  /* Only scroll inside elems */
+  overflow: hidden;
+
+  /* Normal inline styles */
+  padding: 8px;
+  margin: 8px;
+  width: calc(100% - 16px);
+  height: 100px;
+  resize: none;
+  overflow-y: hidden;
+  background-color: transparent;
+
+  font-size: normal;
+  font-family: monospace;
+  line-height: 15px;
+  tab-size: 2;
+  caret-color: darkgrey;
+  white-space: pre;
+}
+
+
+code-input textarea, code-input:not(.code-input_pre-element-styled) pre code, code-input.code-input_pre-element-styled pre {
+  /* Both elements need the same text and space styling so they are directly on top of each other */
+  margin: 0px!important;
+  padding: var(--padding, 20px)!important;
+  border: 0;
+  width: 100%;
+  /* min-height: 800px; */
+  height: auto;
+  background-color: transparent;
+}
+code-input textarea, code-input pre, code-input pre * {
+  /* Also add text styles to highlighing tokens */
+  font-size: inherit!important;
+  font-family: inherit!important;
+  line-height: inherit!important;
+  tab-size: inherit!important;
+  background-color: transparent;
+}
+
+
+code-input textarea, code-input pre {
+  
+  /* In the same place */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+/* Move the textarea in front of the result */
+
+code-input textarea {
+  z-index: 1;
+}
+code-input pre {
+  z-index: 0;
+}
+
+
+/* Make textarea almost completely transparent */
+
+code-input textarea {
+  color: transparent;
+  background: transparent;
+  caret-color: inherit!important; /* Or choose your favourite color */
+  background-color: transparent;
+}
+
+/* Can be scrolled */
+code-input textarea, code-input pre {
+  overflow: hidden!important;
+  
+  white-space: inherit;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+}
+
+/* No resize on textarea; stop outline */
+code-input textarea {
+  left: 2.5em;
+  resize: none;
+  outline: none!important;
+  background-color: transparent;
+}
+
+code-input:not(.code-input_registered)::before {
+  /* Display message to register */
+  content: "Use codeInput.registerTemplate to set up.";
+  display: block;
+  color: grey;
+  background-color: transparent;
+}

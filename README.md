@@ -6,7 +6,7 @@ gigo-vsc-ext is a Visual Studio extension for GIGO users to interact with visual
 
 ## Authors
 
-TBD
+The GIGO Development Team
 
 # GIGO Visual Studio Code Extension
 
@@ -18,8 +18,8 @@ GIGO VSC Extension is an all encompassing vscode extension that assists users in
 
 ## License
 
-TBD
+This project is licensed under the GPL v3 License - see the LICENSE.md file for details
 
 ## Thirdparty Libraries
 
-TBD
+- Simple-Git

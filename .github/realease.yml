@@ -1,0 +1,14 @@
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: Bug Fixes 🛠
+      labels:
+        - bug-fix
+    - title: Exciting New Features :tada:
+      labels:
+        - feature
+        - enhancement
+    - title: Other Changes
+      labels:
+        - "*"

@@ -427,7 +427,13 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 const md = markdown({
                     html: true,
                     highlight: (code: any, lang: any) => {
-                        return highlighter.codeToHtml(code, { lang });
+                        try {
+                            return highlighter.codeToHtml(code, { lang });
+                        } catch (err) {
+                            console.log(`failed to highlight for "${lang}": ${err}`);
+                            lang = "txt";
+                            return highlighter.codeToHtml(code, { lang });
+                        }
                     }
                 });
                 //get path to tutorial

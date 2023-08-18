@@ -333,7 +333,6 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                         }
                         break;
                     case 'notAFK':
-                        console.log("the scroll is being hit"); 
                             handleSessionUpdate();
                         break;
                     }

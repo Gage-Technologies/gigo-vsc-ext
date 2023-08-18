@@ -275,7 +275,6 @@ class TutorialWebViewprovider {
                     }
                     break;
                 case 'notAFK':
-                    console.log("the scroll is being hit");
                     (0, sessionUpdate_1.handleSessionUpdate)();
                     break;
             }

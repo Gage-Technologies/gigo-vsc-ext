@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.executeAfkCheck = exports.executeLiveCheck = exports.activateTimeout = exports.userHasBeenActive = void 0;
+exports.handleSessionUpdate = exports.executeAfkCheck = exports.executeLiveCheck = exports.activateTimeout = exports.userHasBeenActive = void 0;
 const vscode = require("vscode");
 const axios_1 = require("axios");
 exports.userHasBeenActive = false;
@@ -189,6 +189,11 @@ function activityCallback() {
     //set is afk to false
     isAFK = false;
 }
+// handle activity in the tutorial-viewer
+function handleSessionUpdate() {
+    activityCallback();
+}
+exports.handleSessionUpdate = handleSessionUpdate;
 //checkUserActivity is a callback funtion that occurs whenever a user does a recognizable input
 function checkUserActivity() {
     //all callback functions call activityCallback on registered input
@@ -200,7 +205,7 @@ function checkUserActivity() {
     vscode.window.onDidChangeTextEditorOptions(activityCallback);
     vscode.window.onDidChangeTextEditorSelection(activityCallback);
     vscode.window.onDidChangeTextEditorViewColumn(activityCallback);
-    // vscode.window.onDidChangeTextEditorVisibleRanges(activityCallback);
+    vscode.window.onDidChangeTextEditorVisibleRanges(activityCallback);
     vscode.window.onDidChangeVisibleTextEditors(activityCallback);
     //TODO
     // vscode.window.onDidChangeWindowState(activityCallback);

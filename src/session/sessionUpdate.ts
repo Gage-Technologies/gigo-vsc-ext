@@ -235,6 +235,10 @@ function activityCallback() {
     isAFK = false;
 }
 
+// handle activity in the tutorial-viewer
+export function handleSessionUpdate() {
+        activityCallback();
+}
 
 //checkUserActivity is a callback funtion that occurs whenever a user does a recognizable input
 function checkUserActivity() {
@@ -256,7 +260,7 @@ function checkUserActivity() {
 
     vscode.window.onDidChangeTextEditorViewColumn(activityCallback);
 
-    // vscode.window.onDidChangeTextEditorVisibleRanges(activityCallback);
+    vscode.window.onDidChangeTextEditorVisibleRanges(activityCallback);
 
     vscode.window.onDidChangeVisibleTextEditors(activityCallback);
 

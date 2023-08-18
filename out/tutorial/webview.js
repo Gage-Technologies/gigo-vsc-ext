@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TutorialWebViewprovider = exports.activateTutorialWebView = void 0;
 const vscode = require("vscode");
 const vscode_1 = require("vscode");
+const sessionUpdate_1 = require("../session/sessionUpdate");
 const path = require("path");
 const yaml = require("js-yaml");
 //activateAfkWebview is called upon extension start and registers necessary commands for afk functionality
@@ -273,7 +274,10 @@ class TutorialWebViewprovider {
                         console.log(err);
                     }
                     break;
-                    return;
+                case 'notAFK':
+                    console.log("the scroll is being hit");
+                    (0, sessionUpdate_1.handleSessionUpdate)();
+                    break;
             }
         }, undefined);
     }
@@ -341,7 +345,14 @@ class TutorialWebViewprovider {
                 const md = markdown({
                     html: true,
                     highlight: (code, lang) => {
-                        return highlighter.codeToHtml(code, { lang });
+                        try {
+                            return highlighter.codeToHtml(code, { lang });
+                        }
+                        catch (err) {
+                            console.log(`failed to highlight for "${lang}": ${err}`);
+                            lang = "txt";
+                            return highlighter.codeToHtml(code, { lang });
+                        }
                     }
                 });
                 //get path to tutorial
@@ -729,7 +740,28 @@ class TutorialWebViewprovider {
                     if (message.type ==='openPage') {
                         page(message.message)
                     }
-                });
+            });
+            
+            let lastEventTime = 0;
+            const throttleTime = 1000; // 1 second
+            
+            window.addEventListener('mousemove', () => {
+                const now = Date.now();
+            
+                if (now - lastEventTime > throttleTime) {
+                    vscode.postMessage({ command: 'notAFK' });
+                    lastEventTime = now;
+                }
+            });
+
+            window.addEventListener('scroll', () => {
+                const now = Date.now();
+            
+                if (now - lastEventTime > throttleTime) {
+                    vscode.postMessage({ command: 'notAFK' });
+                    lastEventTime = now;
+                }
+            });
             </script>
                 <br/>
                 <br/>

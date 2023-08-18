@@ -1,7 +1,7 @@
 import { runInThisContext } from 'vm';
 import * as vscode from 'vscode';
 import { Uri, Webview } from 'vscode';
-import { executeAfkCheck, executeLiveCheck } from '../session/sessionUpdate';
+import { executeAfkCheck, executeLiveCheck, handleSessionUpdate } from '../session/sessionUpdate';
 import path = require('path');
 import * as yaml from 'js-yaml';
 
@@ -332,13 +332,17 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
                         }
                         break;
-
-                        return;
+                    case 'notAFK':
+                        console.log("the scroll is being hit"); 
+                            handleSessionUpdate();
+                        break;
                     }
+                    
             },
             undefined,
         );
     }
+
 
 
     //resolveWebviewView handles editor callback functions and basic html render
@@ -915,7 +919,28 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                     if (message.type ==='openPage') {
                         page(message.message)
                     }
-                });
+            });
+            
+            let lastEventTime = 0;
+            const throttleTime = 1000; // 1 second
+            
+            window.addEventListener('mousemove', () => {
+                const now = Date.now();
+            
+                if (now - lastEventTime > throttleTime) {
+                    vscode.postMessage({ command: 'notAFK' });
+                    lastEventTime = now;
+                }
+            });
+
+            window.addEventListener('scroll', () => {
+                const now = Date.now();
+            
+                if (now - lastEventTime > throttleTime) {
+                    vscode.postMessage({ command: 'notAFK' });
+                    lastEventTime = now;
+                }
+            });
             </script>
                 <br/>
                 <br/>

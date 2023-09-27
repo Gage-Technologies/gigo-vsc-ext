@@ -78,6 +78,23 @@ export function activate(context: vscode.ExtensionContext) {
     logger.info.appendLine("Starting GIGO Streak...");
     activateStreakWebView(context, cfg, logger);
 
+    if (cfg.challenge_type === 0){
+        vscode.commands.executeCommand('gigo.tutorialView.focus')
+        .then(() => {
+            vscode.window.showInformationMessage('Tutorial started');
+        }, (err) => {
+            vscode.window.showErrorMessage(`Failed to reveal extension view: ${err}`);
+        });
+    }else{
+        vscode.commands.executeCommand('codeTeacher.chat.focus')
+        .then(() => {
+            // vscode.window.showInformationMessage('Tutorial started');
+        }, (err) => {
+            vscode.window.showErrorMessage(`Failed to reveal extension view: ${err}`);
+        });
+    }
+
+   
     // logger.info.appendLine("Starting GIGO Code Teacher...");
     // activateTeacherWebView(context, cfg, logger);
     

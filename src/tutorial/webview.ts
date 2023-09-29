@@ -798,9 +798,9 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             let markdownData = md.render(markdownContent);
 
             // get the default themes for the buttons
-            let currentTheme = "var(--vscode-button-hoverBackground)";
-            let boxTheme = "0 7px 0px var(--vscode-button-background)";
-            let activeBoxTheme = "0 2px 0px var(--vscode-button-background)";
+            let currentTheme = "var(--vscode-button-background)";
+            let boxTheme = "0 7px 0px var(--vscode-progressBar-background)";
+            let activeBoxTheme = "0 2px 0px var(--vscode-progressBar-background)";
             
             // if using premium theme, assign new styling to match the theme better
             if (themeName === 'Sam Custom Theme') {
@@ -908,39 +908,70 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             <div id="big">
             ${markdownData}
             </div>
-            <script>
+            <script nonce="${nonce}">
+            
+            function addCopyCodeButtons() {
+                const codeBlocks = document.querySelectorAll('pre code');
+                codeBlocks.forEach((codeBlock) => {
+                    if (!codeBlock.parentElement.querySelector('.copy-button')) {
+                        const button = document.createElement('div');
+                        button.className = 'copy-button';
+                        button.textContent = 'Copy'; // Set initial text content here
+                        button.addEventListener('click', () => {
+                            button.classList.add('copy-button-active'); // Add active class on click
+                            button.textContent = 'Copied!'; // Change button content to 'Copied!'
+                            navigator.clipboard.writeText(codeBlock.textContent)
+                                .then(() => {
+                                    console.log('Copying to clipboard was successful!');
+                                    setTimeout(() => {
+                                        button.classList.remove('copy-button-active'); // Remove active class after a delay
+                                        button.textContent = 'Copy'; // Reset button content back to 'Copy' after a delay
+                                    }, 2000); // Set a delay for removing the class and resetting the content to 3 seconds
+                                })
+                                .catch(err => {
+                                    console.error('Could not copy text: ', err);
+                                });
+                        });
+                        codeBlock.parentElement.appendChild(button);
+                    }
+                });
+            }
+            
+            document.addEventListener('DOMContentLoaded', addCopyCodeButtons);
+        
+            // Initially add "Copy Code" buttons
+            addCopyCodeButtons();
+        
             window.addEventListener('message', event => {
                 const message = event.data;
-                    if (message.type === 'updateMarkdown') {
-                        const markdownData = message.message;
-                        document.getElementById('big').innerHTML = markdownData;
-                    }
-                    if (message.type ==='openPage') {
-                        page(message.message)
-                    }
+                if (message.type === 'updateMarkdown') {
+                    const markdownData = message.message;
+                    document.getElementById('big').innerHTML = markdownData;
+                    
+                    // Re-add the "Copy Code" buttons after updating the content
+                    addCopyCodeButtons();
+                }
+        
+                if (message.type === 'openPage') {
+                    page(message.message);
+                }
             });
-            
+        
             let lastEventTime = 0;
             const throttleTime = 1000; // 1 second
-            
-            window.addEventListener('mousemove', () => {
+        
+            // Functions to handle user activity
+            function handleUserActivity() {
                 const now = Date.now();
-            
                 if (now - lastEventTime > throttleTime) {
                     vscode.postMessage({ command: 'notAFK' });
                     lastEventTime = now;
                 }
-            });
-
-            window.addEventListener('scroll', () => {
-                const now = Date.now();
-            
-                if (now - lastEventTime > throttleTime) {
-                    vscode.postMessage({ command: 'notAFK' });
-                    lastEventTime = now;
-                }
-            });
-            </script>
+            }
+        
+            window.addEventListener('mousemove', handleUserActivity);
+            window.addEventListener('scroll', handleUserActivity);
+        </script>
                 <br/>
                 <br/>
                 <div id="nextButton">
@@ -971,7 +1002,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                     --shiki-token-punctuation: #DD0000;
                     --shiki-token-link: #EE0000;
                 }
-                </style>
+            </style>
                         
             <script nonce="${nonce}" src="${scriptUri}"></script>
            

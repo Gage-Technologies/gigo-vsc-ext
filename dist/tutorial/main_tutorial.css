@@ -139,12 +139,42 @@ body {
 
 #big{
 	width: 100%;
-  	overflow-wrap: break-word;
+	overflow-wrap: break-word;
 	font-family: Helvetica, arial, sans-serif;
 	font-size: 15px;
 	line-height: 2;
+  }
+  
+  #big pre, #big code {
+	font-size: 15px;
+	padding-right: 40px;
+  }
+
+
+  .copy-button {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    background-color: transparent;
+    border: 2px solid;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s; /* For smooth transition */
 }
 
+.copy-button::before {
+    display: block;
+    font-size: 16px;
+}
+
+.copy-button-active {
+	content: 'Copied!';
+}
+
+pre {
+    position: relative;
+}
 
 .codeTourButton{
 	display: flex;

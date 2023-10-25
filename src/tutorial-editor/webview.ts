@@ -94,6 +94,22 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
         }
 
         this.text = document.getText();
+        // use regex to replace any escaped characters (\x) within a string (single or double quotes) with a double escaped character (\\)
+        // this will ensure that the markdown content has all of its line breaks preserved when rendered by markdown-it
+        this.text = this.text.replace(/```[\s\S]*?```/g, function(match: string) {
+            console.log("detected triple code block: ", match)
+            return match.replace(/(["'])(?:\\.|[^\1])*?\1/g, function(innerMatch: string) {
+                return innerMatch.replace(/\\(.?)/g, '\\\\$1');
+            });
+        });   
+        this.text = this.text.replace(/`[^`]*` /g, function(match: string) {
+            console.log("detected code block: ", match)
+            return match.replace(/(["'])(?:\\.|[^\1])*?\1/g, function(innerMatch: string) {
+                console.log("detected internal string: ", innerMatch)
+                return innerMatch.replace(/\\(.?)/g, '\\\\$1');
+            });
+        }); 
+
         function updateWebview() {
             webviewPanel.webview.postMessage({
                 type: 'update',
@@ -450,7 +466,7 @@ export class TutorialEditorProvider implements vscode.CustomTextEditorProvider {
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
 
-        var parsedText = this.text.replace(/["]/g, `'`);
+        var parsedText = this.text.replace(/["]/g, `\"`);
 
         const parsedTextEscaped = parsedText.replace(/`/g, '\\`');
 

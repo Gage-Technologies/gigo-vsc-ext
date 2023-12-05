@@ -20,6 +20,13 @@ function activate(context) {
     let debug = vscode.window.createOutputChannel("GIGO Developer Debug");
     logger.error = errors;
     logger.info = debug;
+    // reset view locations
+    vscode.commands.executeCommand('workbench.action.resetViewLocations')
+        .then(() => {
+        vscode.window.showInformationMessage('View locations have been reset to default.');
+    }, (err) => {
+        vscode.window.showErrorMessage(`Failed to reset view locations: ${err}`);
+    });
     let fs = require('fs');
     var cfg = getCfg();
     if (cfg === null) {
@@ -53,6 +60,7 @@ function activate(context) {
     (0, webview_2.activateTutorialWebView)(context, logger);
     logger.info.appendLine("Starting GIGO Streak...");
     (0, webview_3.activateStreakWebView)(context, cfg, logger);
+    // open the tutorials if this is an interactive otherwise open the chat page
     if (cfg.challenge_type === 0) {
         vscode.commands.executeCommand('gigo.tutorialView.focus')
             .then(() => {
@@ -69,8 +77,6 @@ function activate(context) {
             vscode.window.showErrorMessage(`Failed to reveal extension view: ${err}`);
         });
     }
-    // logger.info.appendLine("Starting GIGO Code Teacher...");
-    // activateTeacherWebView(context, cfg, logger);
     (0, webview_4.activateEditor)(context);
     logger.info.appendLine("GIGO Extension Setup...");
 }

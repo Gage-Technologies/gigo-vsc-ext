@@ -260,7 +260,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                             //render page with current page number as main page
                             if (this._view) {
                                 this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-                                await this._getHtmlForWebview(this._view.webview, "");
+                                await this._getHtmlForWebview(this._view.webview, "", true);
 
                             }
                         } catch (err) {
@@ -272,7 +272,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                         try {
                             if (this._view) {
                                 this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-                                await this._getHtmlForWebview(this._view.webview, "next");
+                                await this._getHtmlForWebview(this._view.webview, "next", false);
 
                             }
 
@@ -286,7 +286,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                         try {
                             if (this._view) {
                                 this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-                                await this._getHtmlForWebview(this._view.webview, "last");
+                                await this._getHtmlForWebview(this._view.webview, "last", false);
 
                             }
 
@@ -384,7 +384,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
         if (this._view) {
             this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
             this._getCurrentPage(this._view.webview);
-            await this._getHtmlForWebview(this._view.webview, "");
+            await this._getHtmlForWebview(this._view.webview, "", false);
         }
     }
 
@@ -406,9 +406,9 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
 
 
     //_getHtmlForWebview renders afk enbaled and disabled pages
-    private async _getHtmlForWebview(webview: vscode.Webview, group: string) {
+    private async _getHtmlForWebview(webview: vscode.Webview, group: string, scrollToTop: boolean) {
         {
-            await this._getHtml(webview, group);
+            await this._getHtml(webview, group, scrollToTop);
         }
     }
 
@@ -691,7 +691,7 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
     //_getAfkDisabledHtml renders page for when afk is disabled
     //takes in a group string to determine whether to render the whole page or
     //to just render the next and last group page controls
-    private async _getHtml(webview: vscode.Webview, group: string) {
+    private async _getHtml(webview: vscode.Webview, group: string, scrollToTop: boolean = false) {
         //get markdown files
         let mds = await this.findMDFiles();
         let cts = this.getCodeTours();
@@ -878,6 +878,12 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
                 this.logger.info.appendLine(`Tutorial: No tutorials found in workspace.`);
             }
 
+            const scrollToTopScript = scrollToTop ? `
+            window.addEventListener('load', () => {
+                window.scrollTo(0, 0);
+            });
+            ` : '';
+
             if (this._view) {
                 //render the html for the page by passing it to the view
                 this._view.webview.html = `<!DOCTYPE html>
@@ -909,69 +915,72 @@ export class TutorialWebViewprovider implements vscode.WebviewViewProvider {
             ${markdownData}
             </div>
             <script nonce="${nonce}">
-            
-            function addCopyCodeButtons() {
-                const codeBlocks = document.querySelectorAll('pre code');
-                codeBlocks.forEach((codeBlock) => {
-                    if (!codeBlock.parentElement.querySelector('.copy-button')) {
-                        const button = document.createElement('div');
-                        button.className = 'copy-button';
-                        button.textContent = 'Copy'; // Set initial text content here
-                        button.addEventListener('click', () => {
-                            button.classList.add('copy-button-active'); // Add active class on click
-                            button.textContent = 'Copied!'; // Change button content to 'Copied!'
-                            navigator.clipboard.writeText(codeBlock.textContent)
-                                .then(() => {
-                                    console.log('Copying to clipboard was successful!');
-                                    setTimeout(() => {
-                                        button.classList.remove('copy-button-active'); // Remove active class after a delay
-                                        button.textContent = 'Copy'; // Reset button content back to 'Copy' after a delay
-                                    }, 2000); // Set a delay for removing the class and resetting the content to 3 seconds
-                                })
-                                .catch(err => {
-                                    console.error('Could not copy text: ', err);
-                                });
-                        });
-                        codeBlock.parentElement.appendChild(button);
-                    }
-                });
-            }
-            
-            document.addEventListener('DOMContentLoaded', addCopyCodeButtons);
-        
-            // Initially add "Copy Code" buttons
-            addCopyCodeButtons();
-        
-            window.addEventListener('message', event => {
-                const message = event.data;
-                if (message.type === 'updateMarkdown') {
-                    const markdownData = message.message;
-                    document.getElementById('big').innerHTML = markdownData;
+                (function() {
+                    ${scrollToTopScript}
                     
-                    // Re-add the "Copy Code" buttons after updating the content
+                    function addCopyCodeButtons() {
+                        const codeBlocks = document.querySelectorAll('pre code');
+                        codeBlocks.forEach((codeBlock) => {
+                            if (!codeBlock.parentElement.querySelector('.copy-button')) {
+                                const button = document.createElement('div');
+                                button.className = 'copy-button';
+                                button.textContent = 'Copy'; // Set initial text content here
+                                button.addEventListener('click', () => {
+                                    button.classList.add('copy-button-active'); // Add active class on click
+                                    button.textContent = 'Copied!'; // Change button content to 'Copied!'
+                                    navigator.clipboard.writeText(codeBlock.textContent)
+                                        .then(() => {
+                                            console.log('Copying to clipboard was successful!');
+                                            setTimeout(() => {
+                                                button.classList.remove('copy-button-active'); // Remove active class after a delay
+                                                button.textContent = 'Copy'; // Reset button content back to 'Copy' after a delay
+                                            }, 2000); // Set a delay for removing the class and resetting the content to 3 seconds
+                                        })
+                                        .catch(err => {
+                                            console.error('Could not copy text: ', err);
+                                        });
+                                });
+                                codeBlock.parentElement.appendChild(button);
+                            }
+                        });
+                    }
+                    
+                    document.addEventListener('DOMContentLoaded', addCopyCodeButtons);
+                
+                    // Initially add "Copy Code" buttons
                     addCopyCodeButtons();
-                }
-        
-                if (message.type === 'openPage') {
-                    page(message.message);
-                }
-            });
-        
-            let lastEventTime = 0;
-            const throttleTime = 1000; // 1 second
-        
-            // Functions to handle user activity
-            function handleUserActivity() {
-                const now = Date.now();
-                if (now - lastEventTime > throttleTime) {
-                    vscode.postMessage({ command: 'notAFK' });
-                    lastEventTime = now;
-                }
-            }
-        
-            window.addEventListener('mousemove', handleUserActivity);
-            window.addEventListener('scroll', handleUserActivity);
-        </script>
+                
+                    window.addEventListener('message', event => {
+                        const message = event.data;
+                        if (message.type === 'updateMarkdown') {
+                            const markdownData = message.message;
+                            document.getElementById('big').innerHTML = markdownData;
+                            
+                            // Re-add the "Copy Code" buttons after updating the content
+                            addCopyCodeButtons();
+                        }
+                
+                        if (message.type === 'openPage') {
+                            page(message.message);
+                        }
+                    });
+                
+                    let lastEventTime = 0;
+                    const throttleTime = 1000; // 1 second
+                
+                    // Functions to handle user activity
+                    function handleUserActivity() {
+                        const now = Date.now();
+                        if (now - lastEventTime > throttleTime) {
+                            vscode.postMessage({ command: 'notAFK' });
+                            lastEventTime = now;
+                        }
+                    }
+                
+                    window.addEventListener('mousemove', handleUserActivity);
+                    window.addEventListener('scroll', handleUserActivity);
+                })();
+            </script>
                 <br/>
                 <br/>
                 <div id="nextButton">
